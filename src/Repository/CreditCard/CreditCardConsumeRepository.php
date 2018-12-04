@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\CreditCard;
 
-use App\Entity\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardConsume;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 

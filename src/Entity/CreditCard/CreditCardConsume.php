@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\CreditCardConsumeRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardConsumeRepository")
  */
 class CreditCardConsume
 {
