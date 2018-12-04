@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: JLEON
+ * Security: JLEON
  * Date: 12/3/2018
  * Time: 4:57 PM
  */
@@ -9,7 +9,7 @@
 namespace App\Controller;
 
 use App\Form\UserType;
-use App\Entity\User;
+use App\Entity\Security\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -35,10 +35,10 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             // 3) Encode the password (you could also do this via Doctrine listener)
-            $password = $passwordEncoder->encodePassword($user, $user->getPlainPassword());
+            $password = $passwordEncoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
 
-            // 4) save the User!
+            // 4) save the Security!
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
