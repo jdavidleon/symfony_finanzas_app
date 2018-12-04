@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity(fields="email", message="Email already taken")
  * @UniqueEntity(fields="username", message="Username already taken")
+ * @method getPlainPassword()
  */
 class User implements UserInterface
 {
@@ -24,6 +25,9 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\NotBlank
+     * @Assert\Email(
+     *     message = "the email '{{ value }}' is nor a valid email."
+     * )
      */
     private $email;
 
