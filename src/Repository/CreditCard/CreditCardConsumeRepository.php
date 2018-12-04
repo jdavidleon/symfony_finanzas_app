@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCardConsume;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

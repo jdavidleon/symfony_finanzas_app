@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
 use Doctrine\ORM\Mapping as ORM;
