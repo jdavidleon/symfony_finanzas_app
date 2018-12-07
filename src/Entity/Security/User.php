@@ -2,7 +2,7 @@
 
 namespace App\Entity\Security;
 
-use App\Entity\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardConsume;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -47,7 +47,7 @@ class User implements UserInterface
     private $roles = [];
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\CreditCardConsume", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
      */
     private $creditCardConsumes;
 

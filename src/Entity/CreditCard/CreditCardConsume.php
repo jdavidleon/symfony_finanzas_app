@@ -24,7 +24,7 @@ class CreditCardConsume
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="creditCardConsumes")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $user;
 
@@ -69,7 +69,7 @@ class CreditCardConsume
     private $delete_at;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private $consume_at;
 
@@ -80,6 +80,7 @@ class CreditCardConsume
     public function __construct()
     {
         $this->created_at = new \DateTime('now');
+        $this->status = self::STATUS_CREATED;
     }
 
     public function getId(): ?int
