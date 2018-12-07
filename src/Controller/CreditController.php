@@ -33,6 +33,8 @@ class CreditController extends Controller
     public function createCreditConsume(Request $request)
     {
         $creditConsume = new CreditCardConsume();
+        $creditConsume->setUser( $this->getUser() );
+
         $form = $this->createForm(CreditConsumeType::class, $creditConsume);
 
         $form->handleRequest($request);

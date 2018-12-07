@@ -24,7 +24,7 @@ class CreditCardConsume
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="creditCardConsumes")
-     * @ORM\JoinColumn(nullable=true)
+     * @ORM\JoinColumn(nullable=false)
      */
     private $user;
 
