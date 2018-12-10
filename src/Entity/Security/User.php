@@ -2,6 +2,7 @@
 
 namespace App\Entity\Security;
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -51,10 +52,16 @@ class User implements UserInterface
      */
     private $creditCardConsumes;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCard", mappedBy="owner")
+     */
+    private $creditCards;
+
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
         $this->creditCardConsumes = new ArrayCollection();
+        $this->creditCards = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -160,6 +167,37 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($creditCardConsume->getUser() === $this) {
                 $creditCardConsume->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CreditCard[]
+     */
+    public function getCreditCards(): Collection
+    {
+        return $this->creditCards;
+    }
+
+    public function addFranchise(CreditCard $franchise): self
+    {
+        if (!$this->creditCards->contains($franchise)) {
+            $this->creditCards[] = $franchise;
+            $franchise->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCards(CreditCard $franchise): self
+    {
+        if ($this->creditCards->contains($franchise)) {
+            $this->creditCards->removeElement($franchise);
+            // set the owning side to null (unless already changed)
+            if ($franchise->getOwner() === $this) {
+                $franchise->setOwner(null);
             }
         }
 
