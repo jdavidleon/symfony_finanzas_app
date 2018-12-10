@@ -2,6 +2,9 @@
 
 namespace App\Entity\Security;
 
+use App\Entity\CreditCard\CreditCardConsume;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -43,9 +46,15 @@ class User implements UserInterface
      */
     private $roles = [];
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
+     */
+    private $creditCardConsumes;
+
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
+        $this->creditCardConsumes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -124,5 +133,36 @@ class User implements UserInterface
     public function getUsername()
     {
        return (string) $this->email;
+    }
+
+    /**
+     * @return Collection|CreditCardConsume[]
+     */
+    public function getCreditCardConsumes(): Collection
+    {
+        return $this->creditCardConsumes;
+    }
+
+    public function addCreditCardConsume(CreditCardConsume $creditCardConsume): self
+    {
+        if (!$this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes[] = $creditCardConsume;
+            $creditCardConsume->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCardConsume(CreditCardConsume $creditCardConsume): self
+    {
+        if ($this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes->removeElement($creditCardConsume);
+            // set the owning side to null (unless already changed)
+            if ($creditCardConsume->getUser() === $this) {
+                $creditCardConsume->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
