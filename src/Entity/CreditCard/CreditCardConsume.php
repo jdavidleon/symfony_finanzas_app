@@ -2,6 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Entity\Creditcard\creditRelation;
 use App\Entity\Security\User;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -72,6 +73,11 @@ class CreditCardConsume
      * @ORM\Column(type="date")
      */
     private $consume_at;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="consume", cascade={"persist", "remove"})
+     */
+    private $creditRelation;
 
     /**
      * CreditCardConsume constructor.
@@ -204,6 +210,23 @@ class CreditCardConsume
     public function setConsumeAt(\DateTimeInterface $consume_at): self
     {
         $this->consume_at = $consume_at;
+
+        return $this;
+    }
+
+    public function getCreditRelation(): ?creditRelation
+    {
+        return $this->creditRelation;
+    }
+
+    public function setCreditRelation(creditRelation $creditRelation): self
+    {
+        $this->creditRelation = $creditRelation;
+
+        // set the owning side of the relation if necessary
+        if ($this !== $creditRelation->getConsume()) {
+            $creditRelation->setConsume($this);
+        }
 
         return $this;
     }

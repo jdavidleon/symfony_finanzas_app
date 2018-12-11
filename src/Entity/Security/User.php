@@ -3,6 +3,7 @@
 namespace App\Entity\Security;
 
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\Creditcard\creditRelation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -51,10 +52,28 @@ class User implements UserInterface
      */
     private $creditCardConsumes;
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCard", mappedBy="owner")
+     */
+    private $creditCards;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="user")
+     */
+    private $consume;
+
+>>>>>>> Stashed changes
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
         $this->creditCardConsumes = new ArrayCollection();
+<<<<<<< Updated upstream
+=======
+        $this->creditCards = new ArrayCollection();
+        $this->consume = new ArrayCollection();
+>>>>>>> Stashed changes
     }
 
     public function getId(): ?int
@@ -165,4 +184,69 @@ class User implements UserInterface
 
         return $this;
     }
+<<<<<<< Updated upstream
+=======
+
+    /**
+     * @return Collection|CreditCard[]
+     */
+    public function getCreditCards(): Collection
+    {
+        return $this->creditCards;
+    }
+
+    public function addFranchise(CreditCard $franchise): self
+    {
+        if (!$this->creditCards->contains($franchise)) {
+            $this->creditCards[] = $franchise;
+            $franchise->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCards(CreditCard $franchise): self
+    {
+        if ($this->creditCards->contains($franchise)) {
+            $this->creditCards->removeElement($franchise);
+            // set the owning side to null (unless already changed)
+            if ($franchise->getOwner() === $this) {
+                $franchise->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|creditRelation[]
+     */
+    public function getConsume(): Collection
+    {
+        return $this->consume;
+    }
+
+    public function addConsume(creditRelation $consume): self
+    {
+        if (!$this->consume->contains($consume)) {
+            $this->consume[] = $consume;
+            $consume->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsume(creditRelation $consume): self
+    {
+        if ($this->consume->contains($consume)) {
+            $this->consume->removeElement($consume);
+            // set the owning side to null (unless already changed)
+            if ($consume->getUser() === $this) {
+                $consume->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+>>>>>>> Stashed changes
 }
