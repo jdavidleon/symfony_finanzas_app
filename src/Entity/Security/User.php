@@ -3,7 +3,7 @@
 namespace App\Entity\Security;
 
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\Creditcard\creditRelation;
+use App\Entity\Creditcard\CreditRelation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -57,7 +57,7 @@ class User implements UserInterface
     private $creditCards;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="CreditRelation.php", mappedBy="user")
      */
     private $consume;
 
@@ -210,14 +210,14 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|creditRelation[]
+     * @return Collection|CreditRelation[]
      */
     public function getConsume(): Collection
     {
         return $this->consume;
     }
 
-    public function addConsume(creditRelation $consume): self
+    public function addConsume(CreditRelation $consume): self
     {
         if (!$this->consume->contains($consume)) {
             $this->consume[] = $consume;
@@ -227,7 +227,7 @@ class User implements UserInterface
         return $this;
     }
 
-    public function removeConsume(creditRelation $consume): self
+    public function removeConsume(CreditRelation $consume): self
     {
         if ($this->consume->contains($consume)) {
             $this->consume->removeElement($consume);

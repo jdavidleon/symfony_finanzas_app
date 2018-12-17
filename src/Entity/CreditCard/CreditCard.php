@@ -2,7 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
-use App\Entity\Creditcard\creditRelation;
+use App\Entity\Creditcard\CreditRelation;
 use App\Entity\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -42,7 +42,7 @@ class CreditCard
     private $description;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="creditCard")
+     * @ORM\ManyToMany(targetEntity="CreditRelation.php", mappedBy="creditCard")
      */
     private $creditRelations;
 
@@ -105,14 +105,14 @@ class CreditCard
     }
 
     /**
-     * @return Collection|creditRelation[]
+     * @return Collection|CreditRelation[]
      */
     public function getCreditRelations(): Collection
     {
         return $this->creditRelations;
     }
 
-    public function addCreditRelation(creditRelation $creditRelation): self
+    public function addCreditRelation(CreditRelation $creditRelation): self
     {
         if (!$this->creditRelations->contains($creditRelation)) {
             $this->creditRelations[] = $creditRelation;
@@ -122,7 +122,7 @@ class CreditCard
         return $this;
     }
 
-    public function removeCreditRelation(creditRelation $creditRelation): self
+    public function removeCreditRelation(CreditRelation $creditRelation): self
     {
         if ($this->creditRelations->contains($creditRelation)) {
             $this->creditRelations->removeElement($creditRelation);

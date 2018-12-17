@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\Creditcard\creditRelationRepository")
  */
-class creditRelation
+class CreditRelation
 {
     /**
      * @ORM\Id()
@@ -37,9 +37,15 @@ class creditRelation
      */
     private $creditCard;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\Payments", mappedBy="CreditRelation")
+     */
+    private $payments;
+
     public function __construct()
     {
         $this->creditCard = new ArrayCollection();
+        $this->payments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,6 +98,37 @@ class creditRelation
     {
         if ($this->creditCard->contains($creditCard)) {
             $this->creditCard->removeElement($creditCard);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Payments[]
+     */
+    public function getPayments(): Collection
+    {
+        return $this->payments;
+    }
+
+    public function addPayment(Payments $payment): self
+    {
+        if (!$this->payments->contains($payment)) {
+            $this->payments[] = $payment;
+            $payment->setCreditRelation($this);
+        }
+
+        return $this;
+    }
+
+    public function removePayment(Payments $payment): self
+    {
+        if ($this->payments->contains($payment)) {
+            $this->payments->removeElement($payment);
+            // set the owning side to null (unless already changed)
+            if ($payment->getCreditRelation() === $this) {
+                $payment->setCreditRelation(null);
+            }
         }
 
         return $this;

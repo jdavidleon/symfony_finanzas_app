@@ -2,7 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
-use App\Entity\Creditcard\creditRelation;
+use App\Entity\Creditcard\CreditRelation;
 use App\Entity\Security\User;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -75,7 +75,7 @@ class CreditCardConsume
     private $consume_at;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="consume", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="CreditRelation.php", mappedBy="consume", cascade={"persist", "remove"})
      */
     private $creditRelation;
 
@@ -214,12 +214,12 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getCreditRelation(): ?creditRelation
+    public function getCreditRelation(): ?CreditRelation
     {
         return $this->creditRelation;
     }
 
-    public function setCreditRelation(creditRelation $creditRelation): self
+    public function setCreditRelation(CreditRelation $creditRelation): self
     {
         $this->creditRelation = $creditRelation;
 
