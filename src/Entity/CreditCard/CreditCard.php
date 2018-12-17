@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardRepository")
+ * @ORM\Entity(repositoryClass="")
  */
 class CreditCard
 {

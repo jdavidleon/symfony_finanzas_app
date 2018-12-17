@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Creditcard;
+namespace App\Entity\CreditCard;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\Security\User;
