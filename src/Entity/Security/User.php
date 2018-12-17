@@ -51,9 +51,6 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
      */
     private $creditCardConsumes;
-
-<<<<<<< Updated upstream
-=======
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCard", mappedBy="owner")
      */
@@ -64,16 +61,12 @@ class User implements UserInterface
      */
     private $consume;
 
->>>>>>> Stashed changes
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
         $this->creditCardConsumes = new ArrayCollection();
-<<<<<<< Updated upstream
-=======
         $this->creditCards = new ArrayCollection();
         $this->consume = new ArrayCollection();
->>>>>>> Stashed changes
     }
 
     public function getId(): ?int
@@ -184,8 +177,6 @@ class User implements UserInterface
 
         return $this;
     }
-<<<<<<< Updated upstream
-=======
 
     /**
      * @return Collection|CreditCard[]
@@ -248,5 +239,4 @@ class User implements UserInterface
 
         return $this;
     }
->>>>>>> Stashed changes
 }
