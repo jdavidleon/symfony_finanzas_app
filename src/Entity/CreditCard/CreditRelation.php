@@ -2,6 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Entity\Balance;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -41,6 +42,11 @@ class CreditRelation
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\Payments", mappedBy="CreditRelation")
      */
     private $payments;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Balance", mappedBy="CreditRelation", cascade={"persist", "remove"})
+     */
+    private $balance;
 
     public function __construct()
     {
@@ -129,6 +135,23 @@ class CreditRelation
             if ($payment->getCreditRelation() === $this) {
                 $payment->setCreditRelation(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getBalance(): ?Balance
+    {
+        return $this->balance;
+    }
+
+    public function setBalance(Balance $balance): self
+    {
+        $this->balance = $balance;
+
+        // set the owning side of the relation if necessary
+        if ($this !== $balance->getCreditRelation()) {
+            $balance->setCreditRelation($this);
         }
 
         return $this;
