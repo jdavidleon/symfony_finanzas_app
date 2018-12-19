@@ -42,7 +42,7 @@ class CreditCard
     private $description;
 
     /**
-     * @ORM\ManyToMany(targetEntity="CreditRelation.php", mappedBy="creditCard")
+     * @ORM\ManyToMany(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="creditCard")
      */
     private $creditRelations;
 

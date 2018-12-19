@@ -57,7 +57,7 @@ class User implements UserInterface
     private $creditCards;
 
     /**
-     * @ORM\OneToMany(targetEntity="CreditRelation.php", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="user")
      */
     private $consume;
 

@@ -75,7 +75,7 @@ class CreditCardConsume
     private $consume_at;
 
     /**
-     * @ORM\OneToOne(targetEntity="CreditRelation.php", mappedBy="consume", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="consume", cascade={"persist", "remove"})
      */
     private $creditRelation;
 

@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Creditcard\creditRelationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\CreditCard\creditRelationRepository")
  */
 class CreditRelation
 {
@@ -34,7 +34,7 @@ class CreditRelation
     private $consume;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Creditcard\CreditCard", inversedBy="creditRelations")
+     * @ORM\ManyToMany(targetEntity="App\Entity\CreditCard\CreditCard", inversedBy="creditRelations")
      */
     private $creditCard;
 
@@ -44,7 +44,7 @@ class CreditRelation
     private $payments;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Balance", mappedBy="CreditRelation", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="App\Entity\CreditCard\Balance", mappedBy="CreditRelation", cascade={"persist", "remove"})
      */
     private $balance;
 
