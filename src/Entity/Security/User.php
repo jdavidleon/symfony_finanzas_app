@@ -57,6 +57,24 @@ class User implements UserInterface
      */
     private $creditCards;
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="user")
+     */
+    private $consume;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $name;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $lastname;
+
+>>>>>>> Stashed changes
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
@@ -203,4 +221,62 @@ class User implements UserInterface
 
         return $this;
     }
+<<<<<<< Updated upstream
+=======
+
+    /**
+     * @return Collection|CreditRelation[]
+     */
+    public function getConsume(): Collection
+    {
+        return $this->consume;
+    }
+
+    public function addConsume(CreditRelation $consume): self
+    {
+        if (!$this->consume->contains($consume)) {
+            $this->consume[] = $consume;
+            $consume->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsume(CreditRelation $consume): self
+    {
+        if ($this->consume->contains($consume)) {
+            $this->consume->removeElement($consume);
+            // set the owning side to null (unless already changed)
+            if ($consume->getUser() === $this) {
+                $consume->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(?string $lastname): self
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+>>>>>>> Stashed changes
 }
