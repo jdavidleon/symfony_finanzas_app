@@ -2,6 +2,7 @@
 
 namespace App\Entity\Security;
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\Creditcard\CreditRelation;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -60,6 +61,16 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="user")
      */
     private $consume;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $name;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $lastName;
 
     public function __construct()
     {
@@ -238,5 +249,37 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param mixed $name
+     */
+    public function setName($name): void
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+
+    /**
+     * @param mixed $lastName
+     */
+    public function setLastName($lastName): void
+    {
+        $this->lastName = $lastName;
     }
 }
