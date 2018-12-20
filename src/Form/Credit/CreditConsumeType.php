@@ -6,7 +6,7 @@
  * Time: 5:03 PM
  */
 
-namespace App\Form;
+namespace App\Form\Credit;
 
 
 use App\Entity\CreditCard\CreditCardConsume;
@@ -25,6 +25,12 @@ class CreditConsumeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('user', EntityType::class, [
+                'class' => 'App\Entity\Security\User',
+                'choice_label' => function (User $owner){
+                    return $owner->getName() . ' ' .$owner->getLastName();
+                }
+            ])
             ->add('code')
             ->add('amount', MoneyType::class, array(
                 'currency' => 'COP'
