@@ -2,14 +2,13 @@
 
 namespace App\Entity\CreditCard;
 
-use App\Entity\Creditcard\CreditRelation;
 use App\Entity\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardRepository")
  */
 class CreditCard
 {
@@ -42,13 +41,13 @@ class CreditCard
     private $description;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="creditCard")
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="creditCard")
      */
-    private $creditRelations;
+    private $creditCardConsumes;
 
     public function __construct()
     {
-        $this->creditRelations = new ArrayCollection();
+        $this->creditCardConsumes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -105,28 +104,31 @@ class CreditCard
     }
 
     /**
-     * @return Collection|CreditRelation[]
+     * @return Collection|CreditCardConsume[]
      */
-    public function getCreditRelations(): Collection
+    public function getCreditCardConsumes(): Collection
     {
-        return $this->creditRelations;
+        return $this->creditCardConsumes;
     }
 
-    public function addCreditRelation(CreditRelation $creditRelation): self
+    public function addCreditCardConsume(CreditCardConsume $creditCardConsume): self
     {
-        if (!$this->creditRelations->contains($creditRelation)) {
-            $this->creditRelations[] = $creditRelation;
-            $creditRelation->addCreditCard($this);
+        if (!$this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes[] = $creditCardConsume;
+            $creditCardConsume->setCreditCard($this);
         }
 
         return $this;
     }
 
-    public function removeCreditRelation(CreditRelation $creditRelation): self
+    public function removeCreditCardConsume(CreditCardConsume $creditCardConsume): self
     {
-        if ($this->creditRelations->contains($creditRelation)) {
-            $this->creditRelations->removeElement($creditRelation);
-            $creditRelation->removeCreditCard($this);
+        if ($this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes->removeElement($creditCardConsume);
+            // set the owning side to null (unless already changed)
+            if ($creditCardConsume->getCreditCard() === $this) {
+                $creditCardConsume->setCreditCard(null);
+            }
         }
 
         return $this;

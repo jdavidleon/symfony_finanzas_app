@@ -2,7 +2,6 @@
 
 namespace App\Entity\CreditCard;
 
-use App\Entity\CreditCard\CreditRelation;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -18,12 +17,6 @@ class Balance
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\CreditCard\CreditRelation", inversedBy="balance", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $CreditRelation;
-
-    /**
      * @ORM\Column(type="float")
      */
     private $debt;
@@ -36,18 +29,6 @@ class Balance
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getCreditRelation(): ?CreditRelation
-    {
-        return $this->CreditRelation;
-    }
-
-    public function setCreditRelation(CreditRelation $CreditRelation): self
-    {
-        $this->CreditRelation = $CreditRelation;
-
-        return $this;
     }
 
     public function getDebt(): ?float

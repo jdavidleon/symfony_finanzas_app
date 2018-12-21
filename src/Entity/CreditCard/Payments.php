@@ -17,12 +17,6 @@ class Payments
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditRelation", inversedBy="payments")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $CreditRelation;
-
-    /**
      * @ORM\Column(type="float")
      */
     private $capital_amount;
@@ -45,18 +39,6 @@ class Payments
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getCreditRelation(): ?CreditRelation
-    {
-        return $this->CreditRelation;
-    }
-
-    public function setCreditRelation(?CreditRelation $CreditRelation): self
-    {
-        $this->CreditRelation = $CreditRelation;
-
-        return $this;
     }
 
     public function getCapitalAmount(): ?float

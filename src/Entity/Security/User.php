@@ -4,7 +4,6 @@ namespace App\Entity\Security;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\Creditcard\CreditRelation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -58,11 +57,6 @@ class User implements UserInterface
     private $creditCards;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditRelation", mappedBy="user")
-     */
-    private $consume;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $name;
@@ -77,7 +71,6 @@ class User implements UserInterface
         $this->roles = array('ROLE_USER');
         $this->creditCardConsumes = new ArrayCollection();
         $this->creditCards = new ArrayCollection();
-        $this->consume = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -214,37 +207,6 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($franchise->getOwner() === $this) {
                 $franchise->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|CreditRelation[]
-     */
-    public function getConsume(): Collection
-    {
-        return $this->consume;
-    }
-
-    public function addConsume(CreditRelation $consume): self
-    {
-        if (!$this->consume->contains($consume)) {
-            $this->consume[] = $consume;
-            $consume->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeConsume(CreditRelation $consume): self
-    {
-        if ($this->consume->contains($consume)) {
-            $this->consume->removeElement($consume);
-            // set the owning side to null (unless already changed)
-            if ($consume->getUser() === $this) {
-                $consume->setUser(null);
             }
         }
 
