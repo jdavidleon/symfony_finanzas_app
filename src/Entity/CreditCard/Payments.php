@@ -17,6 +17,12 @@ class Payments
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCardConsume", inversedBy="payments")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $creditConsume;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $capital_amount;
@@ -85,6 +91,18 @@ class Payments
     public function setPayedAt(\DateTimeInterface $payed_at): self
     {
         $this->payed_at = $payed_at;
+
+        return $this;
+    }
+
+    public function getCreditConsume(): ?CreditCardConsume
+    {
+        return $this->creditConsume;
+    }
+
+    public function setCreditConsume(?CreditCardConsume $creditConsume): self
+    {
+        $this->creditConsume = $creditConsume;
 
         return $this;
     }

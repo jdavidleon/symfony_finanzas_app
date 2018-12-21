@@ -19,6 +19,14 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditCardConsume::class);
     }
 
+//    public function getDebtPaymentsByConsume($consume)
+//    {
+//        return $this->createQueryBuilder('c')
+//            ->join('c.payments', 'cp')
+//            ->where('c.id = :consume')
+//            ->set
+//    }
+
     // /**
     //  * @return CreditCardConsume[] Returns an array of CreditCardConsume objects
     //  */

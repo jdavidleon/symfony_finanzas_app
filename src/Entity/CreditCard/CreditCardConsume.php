@@ -81,6 +81,11 @@ class CreditCardConsume
     private $creditCard;
 
     /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\Payments", mappedBy="creditConsume")
+     */
+    private $payments;
+
+    /**
      * CreditCardConsume constructor.
      * @throws \Exception
      */
@@ -88,6 +93,7 @@ class CreditCardConsume
     {
         $this->created_at = new \DateTime('now');
         $this->status = self::STATUS_CREATED;
+        $this->payments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -223,6 +229,37 @@ class CreditCardConsume
     public function setCreditCard(?CreditCard $creditCard): self
     {
         $this->creditCard = $creditCard;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Payments[]
+     */
+    public function getPayments(): Collection
+    {
+        return $this->payments;
+    }
+
+    public function addPayment(Payments $payment): self
+    {
+        if (!$this->payments->contains($payment)) {
+            $this->payments[] = $payment;
+            $payment->setCreditConsume($this);
+        }
+
+        return $this;
+    }
+
+    public function removePayment(Payments $payment): self
+    {
+        if ($this->payments->contains($payment)) {
+            $this->payments->removeElement($payment);
+            // set the owning side to null (unless already changed)
+            if ($payment->getCreditConsume() === $this) {
+                $payment->setCreditConsume(null);
+            }
+        }
 
         return $this;
     }
