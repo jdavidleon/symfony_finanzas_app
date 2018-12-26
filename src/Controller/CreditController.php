@@ -6,6 +6,8 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Form\Credit\CreditCardType;
 use App\Form\Credit\CreditConsumeType;
+use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Service\CreditCard\CreditCalculations;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,13 +18,33 @@ use Symfony\Component\Routing\Annotation\Route;
  * */
 class CreditController extends Controller
 {
+
+    /**
+     * @var CreditCardConsumeRepository
+     */
+    private $creditCardConsumeRepository;
+
+    public function __construct(
+        CreditCardConsumeRepository $creditCardConsumeRepository
+    )
+    {
+        $this->creditCardConsumeRepository = $creditCardConsumeRepository;
+    }
+
     /**
      * @Route("/list", name="credit")
+     * @param CreditCalculations $creditCalculations
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function index()
+    public function index(CreditCalculations $creditCalculations)
     {
+        $creditConsume =  $this->creditCardConsumeRepository->find( 1 );
+//        dump($creditConsume instanceof CreditCardConsume); die;
+        $creditCardConsume = $creditCalculations->getDuesToPay( $creditConsume );
+        dump($creditCardConsume); die;
         return $this->render('credit/index.html.twig', [
             'controller_name' => 'CreditController',
+            'credit_consume' => $creditCardConsume
         ]);
     }
 
