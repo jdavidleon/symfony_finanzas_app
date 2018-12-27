@@ -42,6 +42,11 @@ class Payments
      */
     private $payed_at;
 
+    /**
+     * @ORM\Column(type="boolean")
+     * */
+    private $legalDue = true;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -105,5 +110,21 @@ class Payments
         $this->creditConsume = $creditConsume;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLegalDue()
+    {
+        return $this->legalDue;
+    }
+
+    /**
+     * @param mixed $legalDue
+     */
+    public function setLegalDue($legalDue): void
+    {
+        $this->legalDue = $legalDue;
     }
 }

@@ -38,13 +38,19 @@ class CreditController extends Controller
      */
     public function index(CreditCalculations $creditCalculations)
     {
-        $creditConsume =  $this->creditCardConsumeRepository->find( 1 );
-//        dump($creditConsume instanceof CreditCardConsume); die;
-        $creditCardConsume = $creditCalculations->getDuesToPay( $creditConsume );
-        dump($creditCardConsume); die;
+        $creditConsume =  $this->creditCardConsumeRepository->findByUser(  $this->getUser() );
+
+        $creditCardConsume = [];
+        $actualPay = [];
+        foreach ($creditConsume as $item){
+            $creditCardConsume[] = $creditCalculations->getDuesToPay( $item );
+            $actualPay[] = $creditCalculations->getNextPaymentAmount( $item ) ;
+        }
+        dump(  $creditCardConsume  , $actualPay); die;
         return $this->render('credit/index.html.twig', [
             'controller_name' => 'CreditController',
-            'credit_consume' => $creditCardConsume
+            'credit_consume' => $creditCardConsume,
+            'actual_pay' => $actualPay
         ]);
     }
 
@@ -73,11 +79,25 @@ class CreditController extends Controller
             $this->redirectToRoute('credit');
         }
 
-
         return $this->render('credit/new.html.twig', [
             'form' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/credit-card-debt/{creditCard}", name="credit_card_debt")
+     * @param $creditCard
+     */
+//    public function creditCardDetail($creditCard)
+//    {
+//        $creditCardDebts = $this->creditCardConsumeRepository->findByCreditCard( $creditCard );
+//
+//        foreach ($creditCardDebts as $creditDebts){
+//
+//        }
+//
+//        dump($creditCardDebts); die;
+//    }
 
     /**
      * @Route("/credit-card-new", name="credit_card_new")

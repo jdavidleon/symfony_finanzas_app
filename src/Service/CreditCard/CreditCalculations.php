@@ -11,6 +11,7 @@ namespace App\Service\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\Payments;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class CreditCalculations
 {
@@ -44,10 +45,10 @@ class CreditCalculations
 
     public function getPendingDues(CreditCardConsume $creditCardConsume)
     {
-        return $creditCardConsume->getDues() - count( $creditCardConsume->getPayments() );
+        return $creditCardConsume->getDues() - count( $this->cardConsumeRepository->getDuesPayments( $creditCardConsume->getUser() ) );
     }
 
-    public function getActualDebt(Payments $payments, $amount)
+    public function getActualDebt($payments, $amount)
     {
         $payed = 0;
         /* @var Payments $pay */
@@ -60,11 +61,13 @@ class CreditCalculations
 
     public function getNextInterestAmount(CreditCardConsume $creditCardConsume)
     {
-        return $this->getNextCapitalAmount($creditCardConsume) * $creditCardConsume->getInterest();
+        return ( $this->getActualDebt($creditCardConsume->getPayments(), $creditCardConsume->getAmount()) * $creditCardConsume->getInterest() ) / 100;
     }
 
     public function getNextPaymentAmount(CreditCardConsume $creditCardConsume)
     {
+        dump( $this->getNextCapitalAmount($creditCardConsume),
+            $this->getNextInterestAmount($creditCardConsume) );
         return $this->getNextCapitalAmount($creditCardConsume) + $this->getNextInterestAmount($creditCardConsume);
     }
 
@@ -72,19 +75,16 @@ class CreditCalculations
     {
         $payments = $creditCardConsume->getPayments();
 
-//        dump($payments instanceof Payments); die;
-//        dump( $payments-> )
         /** @var Payments $payments */
         $actualDebt = $this->getActualDebt( $payments, $creditCardConsume->getAmount());
         $interest = $creditCardConsume->getInterest();
         $dues = $this->getPendingDues( $creditCardConsume );
-        $dueNumber = $creditCardConsume->getDues() - $dues;
-
+        $dueNumber = $creditCardConsume->getDues() - $dues + 1;
         $capitalMonthlyAmount = $actualDebt / $dues;
 
         for ( $i = $dueNumber; $i <= $dues;  $i++ ){
-            $interestToPay = $actualDebt * $interest;
-            $this->duesToPay[$dueNumber] = array(
+            $interestToPay = ( ( $actualDebt * $interest ) / 100 );
+            $this->duesToPay[ $i ] = array(
                 'capital_amount' => $capitalMonthlyAmount,
                 'interest' => $interestToPay,
                 'total_to_pay' =>  $capitalMonthlyAmount + $interestToPay
@@ -94,6 +94,8 @@ class CreditCalculations
 
         return $this->duesToPay;
     }
+
+
 
 }
 
