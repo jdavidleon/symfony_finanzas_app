@@ -66,8 +66,6 @@ class CreditCalculations
 
     public function getNextPaymentAmount(CreditCardConsume $creditCardConsume)
     {
-        dump( $this->getNextCapitalAmount($creditCardConsume),
-            $this->getNextInterestAmount($creditCardConsume) );
         return $this->getNextCapitalAmount($creditCardConsume) + $this->getNextInterestAmount($creditCardConsume);
     }
 
