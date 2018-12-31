@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Security\UserRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Security\UserRepository")php
  * @UniqueEntity(fields="email", message="Email already taken")
  * @method getPlainPassword()
  */
