@@ -12,6 +12,7 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\Payments;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use phpDocumentor\Reflection\Types\Array_;
 
 class CreditCalculations
 {
@@ -93,7 +94,52 @@ class CreditCalculations
         return $this->duesToPay;
     }
 
+    /**
+     * @param array $creditCardConsume
+     * @return array
+     */
+    public function getCreditCardDebtsByUser(Array $creditCardConsume)
+    {
+        $debtsByUser = [];
+        /** @var CreditCardConsume $creditDebts */
+        foreach ($creditCardConsume as $creditDebts ){
+            $user = $creditDebts->getUser()->getName().' '.$creditDebts->getUser()->getLastName();
+            $debtsByUser[ $creditDebts->getUser()->getId() ][] = array(
+                'user' => $user,
+                'Deuda' => $creditDebts->getId(),
+                'abono_capital' => $this->getNextCapitalAmount( $creditDebts ),
+                'intereses' => $this->getNextInterestAmount( $creditDebts ),
+                'total' => $this->getNextPaymentAmount( $creditDebts )
+            );
+        }
 
+        return $debtsByUser;
+    }
 
+    /**
+     * @param array $debtsByUser
+     * @return array
+     */
+    public function getDebtsByUserInCreditCard(Array $debtsByUser)
+    {
+        $userDebt = [];
+        foreach ($debtsByUser as $key => $userDebts ){
+            $total = $capital = $interest = 0;
+            foreach ( $userDebts as $debt ){
+                $capital += $debt['abono_capital'];
+                $interest += $debt['intereses'];
+                $total += $debt['total'];
+            }
+            $userDebt[$key] = array(
+                'usuario' => $userDebts[0]['user'],
+                'capital_total' => $capital,
+                'interes_total' => $interest,
+                'pago_total' => $total
+            );
+        }
+
+        return $userDebt;
+    }
+    
 }
 

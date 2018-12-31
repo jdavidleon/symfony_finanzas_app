@@ -93,31 +93,18 @@ class CreditController extends Controller
     {
         $creditCardDebts = $this->creditCardConsumeRepository->findByCreditCard( $creditCard );
 
-        $debtsByUser = [];
+        $debtsByUser = $creditCalculations->getCreditCardDebtsByUser( $creditCardDebts );
+        $resumeByUsers = $creditCalculations->getDebtsByUserInCreditCard( $debtsByUser );
 
-        /** @var CreditCardConsume $creditDebts */
-        foreach ($creditCardDebts as $creditDebts ){
-            $debtsByUser[ $creditDebts->getUser()->getId() ][] = array(
-                'Deuda' => $creditDebts->getId(),
-                'abono_capital' => $creditCalculations->getNextCapitalAmount( $creditDebts ),
-                'intereses' => $creditCalculations->getNextInterestAmount( $creditDebts ),
-                'total' => $creditCalculations->getNextPaymentAmount( $creditDebts )
-            );
-        }
-
-        $userDebt = [];
-        foreach ($debtsByUser as $key => $userDebts ){
-            $total = 0;
-            foreach ( $userDebts as $debt ){
-               $total += $debt['total'];
-            }
-            $userDebt[$key] = $total;
-        }
-
-        dump($userDebt);
-
+        dump($resumeByUsers);
         dump($debtsByUser); die;
+
     }
+
+//    public function userCreditCardResume()
+//    {
+//
+//    }
 
     /**
      * @Route("/credit-card-new", name="credit_card_new")
