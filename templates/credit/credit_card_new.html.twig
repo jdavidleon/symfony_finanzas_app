@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+ {% block body %}
+     {{ form_start(form) }}
+     {{ form_row(form.owner) }}
+     {{ form_row(form.number) }}
+     {{ form_row(form.franchise) }}
+     {{ form_row(form.description) }}
+     <button type="submit">New Credit Card!</button>
+     {{ form_end(form) }}
+ {% endblock %}

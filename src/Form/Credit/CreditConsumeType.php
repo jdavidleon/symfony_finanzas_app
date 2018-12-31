@@ -6,9 +6,10 @@
  * Time: 5:03 PM
  */
 
-namespace App\Form;
+namespace App\Form\Credit;
 
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\Security\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -25,6 +26,21 @@ class CreditConsumeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('user', EntityType::class, [
+                'class' => 'App\Entity\Security\User',
+                'choice_label' => function (User $owner){
+                    return $owner->getName() . ' ' .$owner->getLastName();
+                }
+            ])
+            ->add('creditCard', EntityType::class, [
+                'class' => 'App\Entity\CreditCard\CreditCard',
+                'choice_label' => function (CreditCard $creditCard){
+                    return  $creditCard->getNumber() . ' - ' .
+                            $creditCard->getOwner()->getName() . ' ' .
+                            $creditCard->getOwner()->getLastName() . ' ( '.
+                            $creditCard->getFranchise() . ' )';
+                }
+            ])
             ->add('code')
             ->add('amount', MoneyType::class, array(
                 'currency' => 'COP'

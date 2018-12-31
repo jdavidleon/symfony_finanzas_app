@@ -3,6 +3,8 @@
 namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -24,7 +26,6 @@ class CreditCardConsume
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="creditCardConsumes")
-     * @ORM\JoinColumn(nullable=false)
      */
     private $user;
 
@@ -74,6 +75,17 @@ class CreditCardConsume
     private $consume_at;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCard", inversedBy="creditCardConsumes")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $creditCard;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\Payments", mappedBy="creditConsume")
+     */
+    private $payments;
+
+    /**
      * CreditCardConsume constructor.
      * @throws \Exception
      */
@@ -81,6 +93,7 @@ class CreditCardConsume
     {
         $this->created_at = new \DateTime('now');
         $this->status = self::STATUS_CREATED;
+        $this->payments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -204,6 +217,49 @@ class CreditCardConsume
     public function setConsumeAt(\DateTimeInterface $consume_at): self
     {
         $this->consume_at = $consume_at;
+
+        return $this;
+    }
+
+    public function getCreditCard(): ?CreditCard
+    {
+        return $this->creditCard;
+    }
+
+    public function setCreditCard(?CreditCard $creditCard): self
+    {
+        $this->creditCard = $creditCard;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Payments[]
+     */
+    public function getPayments(): Collection
+    {
+        return $this->payments;
+    }
+
+    public function addPayment(Payments $payment): self
+    {
+        if (!$this->payments->contains($payment)) {
+            $this->payments[] = $payment;
+            $payment->setCreditConsume($this);
+        }
+
+        return $this;
+    }
+
+    public function removePayment(Payments $payment): self
+    {
+        if ($this->payments->contains($payment)) {
+            $this->payments->removeElement($payment);
+            // set the owning side to null (unless already changed)
+            if ($payment->getCreditConsume() === $this) {
+                $payment->setCreditConsume(null);
+            }
+        }
 
         return $this;
     }

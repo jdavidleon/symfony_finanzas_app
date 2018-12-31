@@ -3,6 +3,8 @@
 namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -37,6 +39,16 @@ class CreditCard
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $description;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="creditCard")
+     */
+    private $creditCardConsumes;
+
+    public function __construct()
+    {
+        $this->creditCardConsumes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -87,6 +99,37 @@ class CreditCard
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CreditCardConsume[]
+     */
+    public function getCreditCardConsumes(): Collection
+    {
+        return $this->creditCardConsumes;
+    }
+
+    public function addCreditCardConsume(CreditCardConsume $creditCardConsume): self
+    {
+        if (!$this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes[] = $creditCardConsume;
+            $creditCardConsume->setCreditCard($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCardConsume(CreditCardConsume $creditCardConsume): self
+    {
+        if ($this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes->removeElement($creditCardConsume);
+            // set the owning side to null (unless already changed)
+            if ($creditCardConsume->getCreditCard() === $this) {
+                $creditCardConsume->setCreditCard(null);
+            }
+        }
 
         return $this;
     }
