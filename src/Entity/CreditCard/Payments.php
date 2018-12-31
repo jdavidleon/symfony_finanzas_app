@@ -17,6 +17,12 @@ class Payments
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCardConsume", inversedBy="payments")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $creditConsume;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $capital_amount;
@@ -35,6 +41,11 @@ class Payments
      * @ORM\Column(type="datetime")
      */
     private $payed_at;
+
+    /**
+     * @ORM\Column(type="boolean")
+     * */
+    private $legalDue = true;
 
     public function getId(): ?int
     {
@@ -87,5 +98,33 @@ class Payments
         $this->payed_at = $payed_at;
 
         return $this;
+    }
+
+    public function getCreditConsume(): ?CreditCardConsume
+    {
+        return $this->creditConsume;
+    }
+
+    public function setCreditConsume(?CreditCardConsume $creditConsume): self
+    {
+        $this->creditConsume = $creditConsume;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLegalDue()
+    {
+        return $this->legalDue;
+    }
+
+    /**
+     * @param mixed $legalDue
+     */
+    public function setLegalDue($legalDue): void
+    {
+        $this->legalDue = $legalDue;
     }
 }

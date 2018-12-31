@@ -6,6 +6,8 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Form\Credit\CreditCardType;
 use App\Form\Credit\CreditConsumeType;
+use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Service\CreditCard\CreditCalculations;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,13 +18,39 @@ use Symfony\Component\Routing\Annotation\Route;
  * */
 class CreditController extends Controller
 {
+
+    /**
+     * @var CreditCardConsumeRepository
+     */
+    private $creditCardConsumeRepository;
+
+    public function __construct(
+        CreditCardConsumeRepository $creditCardConsumeRepository
+    )
+    {
+        $this->creditCardConsumeRepository = $creditCardConsumeRepository;
+    }
+
     /**
      * @Route("/list", name="credit")
+     * @param CreditCalculations $creditCalculations
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function index()
+    public function index(CreditCalculations $creditCalculations)
     {
+        $creditConsume =  $this->creditCardConsumeRepository->findByUser(  $this->getUser() );
+
+        $creditCardConsume = [];
+        $actualPay = [];
+        foreach ($creditConsume as $item){
+            $creditCardConsume[] = $creditCalculations->getDuesToPay( $item );
+            $actualPay[] = $creditCalculations->getNextPaymentAmount( $item ) ;
+        }
+        dump(  $creditCardConsume  , $actualPay); die;
         return $this->render('credit/index.html.twig', [
             'controller_name' => 'CreditController',
+            'credit_consume' => $creditCardConsume,
+            'actual_pay' => $actualPay
         ]);
     }
 
@@ -51,11 +79,32 @@ class CreditController extends Controller
             $this->redirectToRoute('credit');
         }
 
-
         return $this->render('credit/new.html.twig', [
             'form' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/credit-card-debt/{creditCard}", name="credit_card_debt")
+     * @param CreditCalculations $creditCalculations
+     * @param $creditCard
+     */
+    public function creditCardDetail(CreditCalculations $creditCalculations, $creditCard)
+    {
+        $creditCardDebts = $this->creditCardConsumeRepository->findByCreditCard( $creditCard );
+
+        $debtsByUser = $creditCalculations->getCreditCardDebtsByUser( $creditCardDebts );
+        $resumeByUsers = $creditCalculations->getDebtsByUserInCreditCard( $debtsByUser );
+
+        dump($resumeByUsers);
+        dump($debtsByUser); die;
+
+    }
+
+//    public function userCreditCardResume()
+//    {
+//
+//    }
 
     /**
      * @Route("/credit-card-new", name="credit_card_new")

@@ -3,6 +3,7 @@
 namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\Payments;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -11,6 +12,8 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method CreditCardConsume|null findOneBy(array $criteria, array $orderBy = null)
  * @method CreditCardConsume[]    findAll()
  * @method CreditCardConsume[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method findByUser(int $int)
+ * @method findByCreditCard($creditCard)
  */
 class CreditCardConsumeRepository extends ServiceEntityRepository
 {
@@ -18,6 +21,26 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, CreditCardConsume::class);
     }
+
+    public function getDuesPayments( $user )
+    {
+        return $this->createQueryBuilder('ccc')
+            ->select('p.id')
+            ->leftJoin('ccc.payments', 'p')
+            ->where('ccc.user = :user')
+            ->andWhere('p.legalDue = true')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
+
+//    public function getDebtPaymentsByConsume($consume)
+//    {
+//        return $this->createQueryBuilder('c')
+//            ->join('c.payments', 'cp')
+//            ->where('c.id = :consume')
+//            ->set
+//    }
 
     // /**
     //  * @return CreditCardConsume[] Returns an array of CreditCardConsume objects
