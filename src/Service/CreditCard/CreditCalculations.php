@@ -140,6 +140,6 @@ class CreditCalculations
 
         return $userDebt;
     }
-    
+
 }
 
