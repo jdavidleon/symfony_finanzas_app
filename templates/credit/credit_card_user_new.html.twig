@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+ {% block body %}
+     {{ form_start(form) }}
+     {{ form_row(form.alias) }}
+     <button type="submit">New Credit Card User!</button>
+     {{ form_end(form) }}
+ {% endblock %}

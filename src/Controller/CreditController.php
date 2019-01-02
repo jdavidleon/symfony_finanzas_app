@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Form\Credit\CreditCardType;
+use App\Form\Credit\CreditCardUserType;
 use App\Form\Credit\CreditConsumeType;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
 use App\Service\CreditCard\CreditCalculations;
@@ -101,10 +103,33 @@ class CreditController extends Controller
 
     }
 
-//    public function userCreditCardResume()
-//    {
-//
-//    }
+    /**
+     * @Route("/alias", name="create_credit_card_user")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function createCreditCardUser(Request $request)
+    {
+        $creditCardUser = new CreditCardUser();
+        $form = $this->createForm(CreditCardUserType::class, $creditCardUser);
+
+        $form->handleRequest($request);
+
+        if ( $form->isSubmitted() && $form->isValid() ){
+            $creditCardUser->setParent( $this->getUser() );
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($creditCardUser);
+            $em->flush();
+
+            $this->addFlash('success', 'Alias Creado');
+            $this->redirectToRoute('credit_new');
+        }
+
+        return $this->render('credit/credit_card_user_new.html.twig', [
+            'form' => $form->createView()
+        ]);
+
+    }
 
     /**
      * @Route("/credit-card-new", name="credit_card_new")

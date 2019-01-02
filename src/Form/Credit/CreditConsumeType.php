@@ -8,10 +8,9 @@
 
 namespace App\Form\Credit;
 
-
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\Security\User;
+use App\Entity\CreditCard\CreditCardUser;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -27,9 +26,9 @@ class CreditConsumeType extends AbstractType
     {
         $builder
             ->add('user', EntityType::class, [
-                'class' => 'App\Entity\Security\User',
-                'choice_label' => function (User $owner){
-                    return $owner->getName() . ' ' .$owner->getLastName();
+                'class' => 'App\Entity\CreditCard\CreditCardUser',
+                'choice_label' => function (CreditCardUser $owner){
+                    return $owner->getAlias();
                 }
             ])
             ->add('creditCard', EntityType::class, [

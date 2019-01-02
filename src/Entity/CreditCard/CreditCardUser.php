@@ -42,6 +42,12 @@ class CreditCardUser
      */
     private $deleted_at;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $parent;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -103,6 +109,18 @@ class CreditCardUser
     public function setDeletedAt(?\DateTimeInterface $deleted_at): self
     {
         $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    public function getParent(): ?User
+    {
+        return $this->parent;
+    }
+
+    public function setParent(?User $parent): self
+    {
+        $this->parent = $parent;
 
         return $this;
     }
