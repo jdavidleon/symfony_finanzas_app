@@ -107,6 +107,7 @@ class CreditController extends Controller
      * @Route("/alias", name="create_credit_card_user")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function createCreditCardUser(Request $request)
     {

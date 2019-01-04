@@ -4,9 +4,17 @@ namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\UniqueConstraint;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
+/*TODO: validar el unique constraint*/
 /**
+ * @ORM\Table(uniqueConstraints={@UniqueConstraint(name="parent_unique", columns={"parent_id", "alias"})})
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardUserRepository")
+ * @UniqueEntity(
+ *     fields={"parent", "alias"},
+ *     message="Error"
+ * )
  */
 class CreditCardUser
 {
@@ -47,6 +55,15 @@ class CreditCardUser
      * @ORM\JoinColumn(nullable=false)
      */
     private $parent;
+
+    /**
+     * CreditCardUser constructor.
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        $this->created_at = new \DateTime();
+    }
 
     public function getId(): ?int
     {

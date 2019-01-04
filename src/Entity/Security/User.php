@@ -66,6 +66,11 @@ class User implements UserInterface
      */
     private $lastName;
 
+    /**
+     * @ORM\Column(type="string", unique=true)
+     * */
+    private $apiKey;
+
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
@@ -243,5 +248,21 @@ class User implements UserInterface
     public function setLastName($lastName): void
     {
         $this->lastName = $lastName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getApiKey()
+    {
+        return $this->apiKey;
+    }
+
+    /**
+     * @param mixed $apiKey
+     */
+    public function setApiKey($apiKey): void
+    {
+        $this->apiKey = $apiKey;
     }
 }
