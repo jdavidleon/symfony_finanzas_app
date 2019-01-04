@@ -2,6 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Entity\Creditcard\creditRelation;
 use App\Entity\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -73,6 +74,11 @@ class CreditCardConsume
      * @ORM\Column(type="date")
      */
     private $consume_at;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="consume", cascade={"persist", "remove"})
+     */
+    private $creditRelation;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCard", inversedBy="creditCardConsumes")
@@ -259,6 +265,23 @@ class CreditCardConsume
             if ($payment->getCreditConsume() === $this) {
                 $payment->setCreditConsume(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getCreditRelation(): ?creditRelation
+    {
+        return $this->creditRelation;
+    }
+
+    public function setCreditRelation(creditRelation $creditRelation): self
+    {
+        $this->creditRelation = $creditRelation;
+
+        // set the owning side of the relation if necessary
+        if ($this !== $creditRelation->getConsume()) {
+            $creditRelation->setConsume($this);
         }
 
         return $this;
