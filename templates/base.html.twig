@@ -6,7 +6,21 @@
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        {% block menu %}
+            <ul>
+                <li><a href="{{ path('credit') }}">Lista</a></li>
+                <li><a href="{{ path('app_login') }}">Login</a></li>
+                <li><a href="{{ path('user_registration') }}">Registro</a></li>
+                <li><a href="{{ path('credit_new') }}">Nuevo credito</a></li>
+                <li><a href="{{ path('credit_card_new') }}">Nueva tarjeta de credito</a></li>
+                <li><a href="{{ path('create_credit_card_user') }}">Crear Alias</a></li>
+            </ul>
+        {% endblock %}
+        {% block body %}
+
+
+
+        {% endblock %}
         {% block javascripts %}{% endblock %}
     </body>
 </html>
