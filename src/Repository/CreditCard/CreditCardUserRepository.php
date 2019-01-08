@@ -18,6 +18,19 @@ class CreditCardUserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, CreditCardUser::class);
     }
+/*TODO: revisar consulta*/
+//    public function getAliasIfExist($alias, $user){
+//        $qb = $this->createQueryBuilder('ccu' )
+//        ->where('ccu.alias = :alias')
+//        ->andWhere('ccu.parent = :user')
+//        ->setParameters(array(
+//            'alias' => $alias,
+//            'user' => $user,
+//        ))
+//        ->getQuery()
+//        ->getResult();
+//        return $qb;
+//    }
 
     // /**
     //  * @return CreditCardUser[] Returns an array of CreditCardUser objects
