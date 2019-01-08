@@ -31,6 +31,11 @@ class CreditCardConsume
     private $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCardUser", inversedBy="creditCardConsumes")
+     * */
+    private $userConsume;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $amount;
@@ -74,11 +79,6 @@ class CreditCardConsume
      * @ORM\Column(type="date")
      */
     private $consume_at;
-
-    /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="consume", cascade={"persist", "remove"})
-     */
-    private $creditRelation;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCard", inversedBy="creditCardConsumes")
@@ -270,20 +270,20 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getCreditRelation(): ?creditRelation
+    /**
+     * @return mixed
+     */
+    public function getUserConsume()
     {
-        return $this->creditRelation;
+        return $this->userConsume;
     }
 
-    public function setCreditRelation(creditRelation $creditRelation): self
+    /**
+     * @param mixed $userConsume
+     */
+    public function setUserConsume($userConsume): void
     {
-        $this->creditRelation = $creditRelation;
-
-        // set the owning side of the relation if necessary
-        if ($this !== $creditRelation->getConsume()) {
-            $creditRelation->setConsume($this);
-        }
-
-        return $this;
+        $this->userConsume = $userConsume;
     }
+
 }

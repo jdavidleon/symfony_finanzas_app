@@ -10,7 +10,7 @@ namespace App\Form\Credit;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardUser;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -27,8 +27,12 @@ class CreditConsumeType extends AbstractType
         $builder
             ->add('user', EntityType::class, [
                 'class' => 'App\Entity\CreditCard\CreditCardUser',
-                'choice_label' => function (CreditCardUser $owner){
-                    return $owner->getAlias();
+                'choice_label' => 'alias',
+                'query_builder' => function (EntityRepository $er) use ( $options ){
+                    return $er->createQueryBuilder('ccu')
+                        ->where('ccu.parent = :user')
+                        ->andWhere('ccu.deleted_at IS NULL')
+                        ->setParameter('user', $options['user'] );
                 }
             ])
             ->add('creditCard', EntityType::class, [
@@ -55,6 +59,7 @@ class CreditConsumeType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => CreditCardConsume::class,
+            'user' => null
         ));
     }
 

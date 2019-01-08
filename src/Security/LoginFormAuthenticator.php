@@ -61,22 +61,22 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     public function getCredentials(Request $request)
     {
         $user = $this->security->getToken() ? $this->security->getToken()->getUser() : null;
-        if (is_object($user)) {
-            return null;
-        }
-
-        if (!$request->isMethod('post')){
-            return;
-        }
-
-        if(empty($request->request->get('email'))){
-            throw new AuthenticationException('label.enter_your_email');
-        }
-
-        if(empty($request->request->get('password'))){
-            throw new AuthenticationException('label.enter_your_password');
-        }
-
+//        if (is_object($user)) {
+//            return null;
+//        }
+//
+//        if (!$request->isMethod('post')){
+//            return;
+//        }
+//
+//        if(empty($request->request->get('email'))){
+//            throw new AuthenticationException('label.enter_your_email');
+//        }
+//
+//        if(empty($request->request->get('password'))){
+//            throw new AuthenticationException('label.enter_your_password');
+//        }
+//
 
         $credentials = [
             'email' => $request->request->get('email'),
