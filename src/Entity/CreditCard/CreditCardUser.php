@@ -3,18 +3,21 @@
 namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /*TODO: validar el unique constraint*/
 /**
- * @ORM\Table(uniqueConstraints={@UniqueConstraint(name="parent_unique", columns={"parent_id", "alias"})})
+ * @ORM\Table(uniqueConstraints={
+ *     @UniqueConstraint(
+ *          name="parent_unique",
+ *          columns={"parent_id", "alias"}
+ *     )
+ * })
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardUserRepository")
- * @UniqueEntity(
- *     fields={"parent", "alias"},
- *     message="Error"
- * )
+ * @UniqueEntity( fields={"parent","alias"}, message="Ya existe" )
  */
 class CreditCardUser
 {
@@ -26,9 +29,9 @@ class CreditCardUser
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User" )
      */
-    private $User;
+    private $user;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -57,12 +60,18 @@ class CreditCardUser
     private $parent;
 
     /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="userConsume")
+     */
+    private $creditCardConsumes;
+
+    /**
      * CreditCardUser constructor.
      * @throws \Exception
      */
     public function __construct()
     {
         $this->created_at = new \DateTime();
+        $this->creditCardConsumes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,12 +81,12 @@ class CreditCardUser
 
     public function getUser(): ?User
     {
-        return $this->User;
+        return $this->user;
     }
 
     public function setUser(?User $User): self
     {
-        $this->User = $User;
+        $this->user = $User;
 
         return $this;
     }
@@ -138,6 +147,37 @@ class CreditCardUser
     public function setParent(?User $parent): self
     {
         $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getCreditCardConsumes(): ArrayCollection
+    {
+        return $this->creditCardConsumes;
+    }
+
+    public function addCreditCardConsume(CreditCardConsume $creditCardConsume): self
+    {
+        if (!$this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes[] = $creditCardConsume;
+            $creditCardConsume->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCardConsume(CreditCardConsume $creditCardConsume): self
+    {
+        if ($this->creditCardConsumes->contains($creditCardConsume)) {
+            $this->creditCardConsumes->removeElement($creditCardConsume);
+            // set the owning side to null (unless already changed)
+            if ($creditCardConsume->getUser() === $this) {
+                $creditCardConsume->setUser(null);
+            }
+        }
 
         return $this;
     }

@@ -25,7 +25,7 @@ class CreditCard
     private $number;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="franchise")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="creditCards")
      * @ORM\JoinColumn(nullable=false)
      */
     private $owner;
@@ -45,15 +45,10 @@ class CreditCard
      */
     private $creditCardConsumes;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="creditCard")
-     */
-    private $creditRelations;
 
     public function __construct()
     {
         $this->creditCardConsumes = new ArrayCollection();
-        $this->creditRelations = new ArrayCollection();
     }
 
     public function getId(): ?int

@@ -48,10 +48,6 @@ class User implements UserInterface
     private $roles = [];
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
-     */
-    private $creditCardConsumes;
-    /**
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCard", mappedBy="owner")
      */
     private $creditCards;
@@ -67,21 +63,19 @@ class User implements UserInterface
     private $lastName;
 
     /**
-     * @ORM\Column(type="string", unique=true)
+     * @ORM\Column(type="string", unique=true, nullable=true)
      * */
     private $apiKey;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Creditcard\creditRelation", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
      */
-    private $consume;
+    private $creditCardConsumes;
 
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
-        $this->creditCardConsumes = new ArrayCollection();
         $this->creditCards = new ArrayCollection();
-        $this->consume = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -160,37 +154,6 @@ class User implements UserInterface
     public function getUsername()
     {
        return (string) $this->email;
-    }
-
-    /**
-     * @return Collection|CreditCardConsume[]
-     */
-    public function getCreditCardConsumes(): Collection
-    {
-        return $this->creditCardConsumes;
-    }
-
-    public function addCreditCardConsume(CreditCardConsume $creditCardConsume): self
-    {
-        if (!$this->creditCardConsumes->contains($creditCardConsume)) {
-            $this->creditCardConsumes[] = $creditCardConsume;
-            $creditCardConsume->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCreditCardConsume(CreditCardConsume $creditCardConsume): self
-    {
-        if ($this->creditCardConsumes->contains($creditCardConsume)) {
-            $this->creditCardConsumes->removeElement($creditCardConsume);
-            // set the owning side to null (unless already changed)
-            if ($creditCardConsume->getUser() === $this) {
-                $creditCardConsume->setUser(null);
-            }
-        }
-
-        return $this;
     }
 
     /**

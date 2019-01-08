@@ -9,6 +9,7 @@ use App\Form\Credit\CreditCardType;
 use App\Form\Credit\CreditCardUserType;
 use App\Form\Credit\CreditConsumeType;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Repository\CreditCard\CreditCardUserRepository;
 use App\Service\CreditCard\CreditCalculations;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -25,12 +26,18 @@ class CreditController extends Controller
      * @var CreditCardConsumeRepository
      */
     private $creditCardConsumeRepository;
+    /**
+     * @var CreditCardUser
+     */
+    private $creditCardUserRepository;
 
     public function __construct(
-        CreditCardConsumeRepository $creditCardConsumeRepository
+        CreditCardConsumeRepository $creditCardConsumeRepository,
+        CreditCardUserRepository $creditCardUserRepository
     )
     {
         $this->creditCardConsumeRepository = $creditCardConsumeRepository;
+        $this->creditCardUserRepository = $creditCardUserRepository;
     }
 
     /**
@@ -48,7 +55,7 @@ class CreditController extends Controller
             $creditCardConsume[] = $creditCalculations->getDuesToPay( $item );
             $actualPay[] = $creditCalculations->getNextPaymentAmount( $item ) ;
         }
-        dump(  $creditCardConsume  , $actualPay); die;
+        dump(  $creditCardConsume  , $actualPay ); die;
         return $this->render('credit/index.html.twig', [
             'controller_name' => 'CreditController',
             'credit_consume' => $creditCardConsume,
@@ -67,7 +74,9 @@ class CreditController extends Controller
         $creditConsume = new CreditCardConsume();
         $creditConsume->setUser( $this->getUser() );
 
-        $form = $this->createForm(CreditConsumeType::class, $creditConsume);
+        $form = $this->createForm(CreditConsumeType::class, $creditConsume, array(
+            'user' => $this->getUser(),
+        ));
 
         $form->handleRequest($request);
 
@@ -116,14 +125,25 @@ class CreditController extends Controller
 
         $form->handleRequest($request);
 
-        if ( $form->isSubmitted() && $form->isValid() ){
-            $creditCardUser->setParent( $this->getUser() );
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($creditCardUser);
-            $em->flush();
+        if ( $form->isSubmitted() && $form->isValid() ) {
+            $alias = $form->getData()->getAlias();
+            $validate = $this->creditCardUserRepository->findOneBy(array(
+                'alias' => $alias,
+                'parent' => $this->getUser()
+                )
+            );
 
-            $this->addFlash('success', 'Alias Creado');
-            $this->redirectToRoute('credit_new');
+            if (null === $validate) {
+                $creditCardUser->setParent($this->getUser());
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($creditCardUser);
+                $em->flush();
+
+                $this->addFlash('success', 'Alias Creado');
+                $this->redirectToRoute('credit_new');
+            }else{
+                $this->addFlash('success', 'Alias '.$alias.' ya existe!');
+            }
         }
 
         return $this->render('credit/credit_card_user_new.html.twig', [
