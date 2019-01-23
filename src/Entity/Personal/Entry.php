@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Personal;
 
 use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Ingresos
+ * Entry
  *
  * @ORM\Table(name="ingresos")
  * @ORM\Entity
  */
-class Ingresos
+class Entry
 {
     /**
      * @ORM\Id()
@@ -64,18 +64,4 @@ class Ingresos
 
         return $this;
     }
-
-    public function getTmDelete(): ?\DateTimeInterface
-    {
-        return $this->tmDelete;
-    }
-
-    public function setTmDelete(?\DateTimeInterface $tmDelete): self
-    {
-        $this->tmDelete = $tmDelete;
-
-        return $this;
-    }
-
-
 }
