@@ -1,39 +1,46 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Personal;
 
+use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Balance
  *
- * @ORM\Table(name="balance")
+ * @ORM\Table()
  * @ORM\Entity
  */
-class Balance
+class PersonalBalance
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="debt", type="float", precision=10, scale=0, nullable=false)
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=false)
      */
     private $debt;
 
     /**
      * @var float|null
      *
-     * @ORM\Column(name="payed", type="float", precision=10, scale=0, nullable=true)
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
      */
     private $payed;
+
+    /**
+     *
+     * @ORM\Column(type="float")
+     * */
+    private $balance;
+
+    use TimestampableEntity;
 
     public function getId(): ?int
     {
@@ -62,6 +69,22 @@ class Balance
         $this->payed = $payed;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBalance()
+    {
+        return $this->balance;
+    }
+
+    /**
+     * @param mixed $balance
+     */
+    public function setBalance($balance): void
+    {
+        $this->balance = $balance;
     }
 
 

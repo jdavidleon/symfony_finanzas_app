@@ -13,26 +13,19 @@ trait TimestampableEntity
 {
     /**
      * @var \DateTime
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(type="datetime", nullable=false)
      */
     protected $createdAt;
 
     /**
      * @var \DateTime
-     * @ORM\Column(
-     *      name="updated_at",
-     *      type="datetime"
-     * )
+     * @ORM\Column(type="datetime", nullable=true)
      */
     protected $updatedAt;
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(
-     *      name="deleted_at",
-     *      type="datetime"
-     * )
+     * @ORM\Column(type="datetime", nullable=true)
      */
     protected $deletedAt;
 
@@ -75,7 +68,7 @@ trait TimestampableEntity
      */
     private function setUpdatedAt()
     {
-        throw new \InvalidArgumentException("Esté valor no puede ser establecido manualmente");
+        throw new \InvalidArgumentException("Este valor no puede ser establecido manualmente");
     }
 
     /**
