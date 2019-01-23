@@ -244,4 +244,27 @@ class User implements UserInterface
     {
         $this->lastName = $lastName;
     }
+
+    public function addCreditCard(CreditCard $creditCard): self
+    {
+        if (!$this->creditCards->contains($creditCard)) {
+            $this->creditCards[] = $creditCard;
+            $creditCard->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCard(CreditCard $creditCard): self
+    {
+        if ($this->creditCards->contains($creditCard)) {
+            $this->creditCards->removeElement($creditCard);
+            // set the owning side to null (unless already changed)
+            if ($creditCard->getOwner() === $this) {
+                $creditCard->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
 }
