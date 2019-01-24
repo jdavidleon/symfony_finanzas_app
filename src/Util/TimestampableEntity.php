@@ -80,4 +80,20 @@ trait TimestampableEntity
     {
         return $this->updatedAt;
     }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDeletedAt(): \DateTime
+    {
+        return $this->deletedAt;
+    }
+
+    /**
+     * @param \DateTime $deletedAt
+     */
+    public function setDeletedAt(\DateTime $deletedAt): void
+    {
+        $this->deletedAt = $deletedAt;
+    }
 }
