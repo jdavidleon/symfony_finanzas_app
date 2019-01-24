@@ -9,6 +9,8 @@
 namespace App\Service\Personal;
 
 
+use App\Entity\CreditCard\Balance;
+use App\Entity\Personal\PersonalBalance;
 use App\Repository\Personal\PersonalBalanceRepository;
 
 class BalanceCalculations
@@ -30,9 +32,10 @@ class BalanceCalculations
     public function balanceSheet()
     {
         $lastMonth = $this->getLastMonth();
+        $lastMonthBalance = $this->balanceExist($lastMonth);
 
-        if ($this->balanceExist($lastMonth)){
-
+        if ( $lastMonthBalance ){
+            $lastMonthBalance->getEndMoney();
         }
 
     }
@@ -54,15 +57,16 @@ class BalanceCalculations
 
     /**
      * @param string $lastMonth
-     * @return bool
+     * @return PersonalBalance
      */
-    protected function balanceExist(string $lastMonth): bool
+    protected function balanceExist(string $lastMonth): ?PersonalBalance
     {
-        $balanceExist = $this->personalBalanceRepository->findBy([
+        $balance = $this->personalBalanceRepository->findOneBy([
             'month' => $lastMonth
         ]);
 
-        return count($balanceExist) > 0;
+        /** @var PersonalBalance $balance */
+        return $balance;
     }
 
 }
