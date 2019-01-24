@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Debts;
 
+use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -13,18 +14,16 @@ use Doctrine\ORM\Mapping as ORM;
 class Payments
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="capital_amount", type="float", precision=10, scale=0, nullable=false)
+     * @ORM\Column(precision=10, scale=0, nullable=false)
      */
     private $capitalAmount;
 
@@ -38,9 +37,9 @@ class Payments
     /**
      * @var float
      *
-     * @ORM\Column(name="amount", type="float", precision=10, scale=0, nullable=false)
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=false)
      */
-    private $amount;
+    private $totalAmount;
 
     /**
      * @var \DateTime
@@ -50,14 +49,14 @@ class Payments
     private $payedAt;
 
     /**
-     * @var bool
+     * @var int
      *
-     * @ORM\Column(name="legal_due", type="boolean", nullable=false)
+     * @ORM\Column(type="boolean", nullable=false)
      */
     private $legalDue;
 
     /**
-     * @var \CreditCardConsume
+     * @var CreditCardConsume
      *
      * @ORM\ManyToOne(targetEntity="CreditCardConsume")
      * @ORM\JoinColumns({
@@ -65,6 +64,8 @@ class Payments
      * })
      */
     private $creditConsume;
+
+    use TimestampableEntity;
 
     public function getId(): ?int
     {
@@ -95,14 +96,14 @@ class Payments
         return $this;
     }
 
-    public function getAmount(): ?float
+    public function getTotalAmount(): ?float
     {
-        return $this->amount;
+        return $this->totalAmount;
     }
 
-    public function setAmount(float $amount): self
+    public function setTotalAmount(float $totalAmount): self
     {
-        $this->amount = $amount;
+        $this->totalAmount = $totalAmount;
 
         return $this;
     }

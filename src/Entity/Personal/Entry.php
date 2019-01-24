@@ -2,6 +2,7 @@
 
 namespace App\Entity\Personal;
 
+use App\Entity\Security\User;
 use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,6 +20,12 @@ class Entry
      * @ORM\Column(type="integer")
      */
     private $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\JoinColumn(nullable=false)
+     * */
+    private $user;
 
     /**
      * @var string
@@ -63,5 +70,22 @@ class Entry
         $this->value = $value;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User $user
+     * @return Entry
+     */
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
     }
 }

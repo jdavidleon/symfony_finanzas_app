@@ -1,32 +1,30 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Debts;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * CargosFijos
+ * FixedCharges
  *
- * @ORM\Table(name="cargos_fijos", indexes={@ORM\Index(name="id_estado_deuda", columns={"id_estado_deuda"})})
+ * @ORM\Table()
  * @ORM\Entity
  */
-class CargosFijos
+class FixedCharges
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id_cargo_fijo", type="integer", nullable=false, options={"unsigned"=true})
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
-    private $idCargoFijo;
+    private $id;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="concepto", type="string", length=100, nullable=false)
+     * @ORM\Column(type="string", length=100, nullable=false)
      */
-    private $concepto;
+    private $concept;
 
     /**
      * @var int
@@ -70,19 +68,19 @@ class CargosFijos
      */
     private $tmDelete;
 
-    public function getIdCargoFijo(): ?int
+    public function getId(): ?int
     {
-        return $this->idCargoFijo;
+        return $this->id;
     }
 
-    public function getConcepto(): ?string
+    public function getConcept(): ?string
     {
-        return $this->concepto;
+        return $this->concept;
     }
 
-    public function setConcepto(string $concepto): self
+    public function setConcept(string $concept): self
     {
-        $this->concepto = $concepto;
+        $this->concept = $concept;
 
         return $this;
     }
@@ -158,6 +156,4 @@ class CargosFijos
 
         return $this;
     }
-
-
 }

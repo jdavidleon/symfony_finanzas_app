@@ -6,9 +6,9 @@ use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Balance
+ * BalanceGeneral
  *
- * @ORM\Table()
+ * @ORM\Table(name="balance_general")
  * @ORM\Entity
  */
 class PersonalBalance
@@ -21,71 +21,86 @@ class PersonalBalance
     private $id;
 
     /**
-     * @var float
+     * @var \DateTime|null
      *
-     * @ORM\Column(type="float", precision=10, scale=0, nullable=false)
+     * @ORM\Column(name="mes", type="date", nullable=true)
      */
-    private $debt;
+    private $month;
 
     /**
-     * @var float|null
+     * @var int
      *
-     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
+     * @ORM\Column(name="ingresos", type="integer", nullable=false)
      */
-    private $payed;
+    private $entries;
 
     /**
+     * @var int
      *
-     * @ORM\Column(type="float")
-     * */
-    private $balance;
+     * @ORM\Column(name="egresos", type="integer", nullable=false, options={"unsigned"=true})
+     */
+    private $egresses;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="dinero_actual", type="integer", nullable=false, options={"unsigned"=true})
+     */
+    private $endMoney;
 
     use TimestampableEntity;
 
-    public function getId(): ?int
+    public function getId(): ?bool
     {
         return $this->id;
     }
 
-    public function getDebt(): ?float
+    public function getMonth(): ?\DateTimeInterface
     {
-        return $this->debt;
+        return $this->month;
     }
 
-    public function setDebt(float $debt): self
+    public function setMonth(?\DateTimeInterface $month): self
     {
-        $this->debt = $debt;
+        $this->month = $month;
 
         return $this;
     }
 
-    public function getPayed(): ?float
+    public function getEntries(): ?int
     {
-        return $this->payed;
+        return $this->entries;
     }
 
-    public function setPayed(?float $payed): self
+    public function setEntries(int $entries): self
     {
-        $this->payed = $payed;
+        $this->entries = $entries;
 
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getBalance()
+    public function getEgresses(): ?int
     {
-        return $this->balance;
+        return $this->egresses;
     }
 
-    /**
-     * @param mixed $balance
-     */
-    public function setBalance($balance): void
+    public function setEgresses(int $egresses): self
     {
-        $this->balance = $balance;
+        $this->egresses = $egresses;
+
+        return $this;
     }
 
+    public function getEndMoney(): ?int
+    {
+        return $this->endMoney;
+    }
+
+    public function setEndMoney(int $endMoney): self
+    {
+        $this->endMoney = $endMoney;
+
+        return $this;
+    }
 
 }

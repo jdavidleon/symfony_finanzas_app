@@ -32,7 +32,7 @@ class Creditors
      * @ORM\Column(type="string", length=100, nullable=false)
      */
     private $owner;
-    
+
     public function getId(): ?int
     {
         return $this->id;

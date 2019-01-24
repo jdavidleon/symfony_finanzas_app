@@ -51,6 +51,7 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
      */
     private $creditCardConsumes;
+
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCard", mappedBy="owner")
      */
