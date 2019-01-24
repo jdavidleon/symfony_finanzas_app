@@ -21,9 +21,9 @@ class PersonalBalance
     private $id;
 
     /**
-     * @var \DateTime|null
+     * @var string
      *
-     * @ORM\Column(name="mes", type="date", nullable=true)
+     * @ORM\Column(type="string", nullable=false)
      */
     private $month;
 
