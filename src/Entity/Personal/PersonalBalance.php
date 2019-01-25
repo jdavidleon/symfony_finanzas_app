@@ -21,6 +21,12 @@ class PersonalBalance
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\JoinColumn(nullable=false)
+     * */
+    private $user;
+
+    /**
      * @var string
      *
      * @ORM\Column(type="string", nullable=false)
@@ -55,12 +61,15 @@ class PersonalBalance
         return $this->id;
     }
 
-    public function getMonth(): ?\DateTimeInterface
+    /**
+     * @return string|null
+     */
+    public function getMonth(): ?string
     {
         return $this->month;
     }
 
-    public function setMonth(?\DateTimeInterface $month): self
+    public function setMonth(string $month): self
     {
         $this->month = $month;
 
@@ -101,6 +110,22 @@ class PersonalBalance
         $this->endMoney = $endMoney;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user): void
+    {
+        $this->user = $user;
     }
 
 }

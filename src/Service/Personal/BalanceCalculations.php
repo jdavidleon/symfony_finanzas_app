@@ -1,17 +1,17 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: IT OPTIME
+ * User: jleon
  * Date: 24/01/2019
  * Time: 4:51 PM
  */
 
 namespace App\Service\Personal;
 
-
-use App\Entity\CreditCard\Balance;
 use App\Entity\Personal\PersonalBalance;
+use App\Entity\Security\User;
 use App\Repository\Personal\PersonalBalanceRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 class BalanceCalculations
 {
@@ -21,26 +21,79 @@ class BalanceCalculations
      */
     private $personalBalanceRepository;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
     public function __construct(
-        PersonalBalanceRepository $personalBalanceRepository
+        PersonalBalanceRepository $personalBalanceRepository,
+        EntityManagerInterface $entityManager
     )
     {
         $this->personalBalanceRepository = $personalBalanceRepository;
+        $this->entityManager = $entityManager;
     }
 
-
-    public function balanceSheet()
+    /**
+     * @param User $user
+     * @param array $balanceSetters
+     * @throws \Exception
+     */
+    public function handleBalance(User $user, array $balanceSetters)
     {
-        $lastMonth = $this->getLastMonth();
-        $lastMonthBalance = $this->balanceExist($lastMonth);
-
-        if ( $lastMonthBalance ){
-            $lastMonthBalance->getEndMoney();
+        $balance = $this->getThisMonthBalance($user);
+        if ( $balance ){
+            $this->updateBalanceMonth($balance, $balanceSetters);
+        }else{
+            $this->setNewBalanceMonth($user,$balanceSetters);
         }
-
     }
 
+    public function getBalanceByUser(User $user)
+    {
+        return $this->personalBalanceRepository->findOneBy([
+            'user' => $user,
+            'month' => $this->getActualMonth()
+        ]);
+    }
 
+    /**
+     * @param User $user
+     * @param array $balanceSetters
+     * @throws \Exception
+     */
+    private function setNewBalanceMonth(User $user, array $balanceSetters)
+    {
+        $lastMonthBalance = $this->getLastMonthBalance($user);
+
+        $entries = $balanceSetters['entry'] ?? 0 + $lastMonthBalance->getEndMoney() ?? 0;
+        $egresses = $balanceSetters['egress'] ?? 0;
+
+        $balance = new PersonalBalance();
+        $balance->setEntries( $entries );
+        $balance->setEgresses( $egresses );
+        $balance->setEndMoney( $entries - $egresses );
+        $balance->setUser($user);
+        $balance->setMonth($this->getActualMonth());
+
+        $this->entityManager->persist($balance);
+        $this->entityManager->flush();
+    }
+
+    private function updateBalanceMonth(PersonalBalance $balance, array $balanceSetters)
+    {
+        $entries = $balance->getEntries() + $balanceSetters['entry'] ?? 0;
+        $egresses = $balance->getEgresses() + $balanceSetters['egress'] ?? 0;
+        $endMoney = $balance->getEndMoney() + $entries + $egresses;
+
+        $balance->setEntries($entries);
+        $balance->setEgresses($egresses);
+        $balance->setEndMoney($endMoney);
+
+        $this->entityManager->persist($balance);
+        $this->entityManager->flush();
+    }
 
     protected function getLastMonth(): string
     {
@@ -56,17 +109,35 @@ class BalanceCalculations
     }
 
     /**
-     * @param string $lastMonth
-     * @return PersonalBalance
+     * @param User $user
+     * @return PersonalBalance|object|null
      */
-    protected function balanceExist(string $lastMonth): ?PersonalBalance
+    private function getLastMonthBalance(User $user)
     {
-        $balance = $this->personalBalanceRepository->findOneBy([
-            'month' => $lastMonth
+        return $this->personalBalanceRepository->findOneBy([
+            'user' => $user,
+            'month' => $this->getLastMonth()
         ]);
+    }
 
-        /** @var PersonalBalance $balance */
-        return $balance;
+    /**
+     * @param User $user
+     * @return PersonalBalance|object|null
+     */
+    private function getThisMonthBalance(User $user)
+    {
+        return $this->personalBalanceRepository->findOneBy([
+            'user' => $user,
+            'month' => $this->getActualMonth()
+        ]);
+    }
+
+    /**
+     * @return false|string
+     */
+    private function getActualMonth()
+    {
+        return date('Y-m');
     }
 
 }

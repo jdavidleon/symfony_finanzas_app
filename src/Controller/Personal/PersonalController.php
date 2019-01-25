@@ -13,6 +13,7 @@ use App\Entity\Personal\Egress;
 use App\Entity\Personal\Entry;
 use App\Form\Personal\EgressType;
 use App\Form\Personal\EntryType;
+use App\Service\Personal\BalanceCalculations;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
@@ -47,11 +48,12 @@ class PersonalController extends Controller
 
     /**
      * @param Request $request
+     * @param BalanceCalculations $balanceCalculations
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      * @Route("/new", name="new-entry")
      */
-    public function newEntry(Request $request)
+    public function newEntry(Request $request, BalanceCalculations $balanceCalculations)
     {
         $entry = new Entry();
         $entry->setUser($this->getUser());
@@ -65,6 +67,10 @@ class PersonalController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($entry);
             $em->flush();
+
+            $balanceCalculations->handleBalance($this->getUser(), [
+               'entry' => $entry->getValue()
+            ]);
 
             $this->addFlash('success', 'Nueva Entrada Ingresada');
         }
@@ -98,20 +104,24 @@ class PersonalController extends Controller
      * @throws \Exception
      * @Route("/new", name="new-entry")
      */
-    public function egressDebt(Request $request)
+    public function egressDebt(Request $request, BalanceCalculations $balanceCalculations)
     {
-        $entry = new Entry();
-        $entry->setUser($this->getUser());
+        $egress = new Egress();
+        $egress->setUser($this->getUser());
 
-        $form = $this->createForm(EgressType::class, $entry);
+        $form = $this->createForm(EgressType::class, $egress);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($entry);
+            $em->persist($egress);
             $em->flush();
+
+            $balanceCalculations->handleBalance($this->getUser(),[
+                'egress' => $this->getUser()
+            ]);
 
             $this->addFlash('success', 'Nueva Entrada Ingresada');
         }

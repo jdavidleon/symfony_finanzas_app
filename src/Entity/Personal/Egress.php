@@ -21,6 +21,12 @@ class Egress
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\JoinColumn(nullable=false)
+     * */
+    private $user;
+
+    /**
      * @var int
      *
      * @ORM\Column(type="integer", nullable=false, options={"unsigned"=true})
@@ -63,5 +69,21 @@ class Egress
         $this->value = $value;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user): void
+    {
+        $this->user = $user;
     }
 }
