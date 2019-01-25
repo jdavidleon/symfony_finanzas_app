@@ -23,6 +23,12 @@ class EgressConcepts
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\JoinColumn(nullable=false)
+     * */
+    private $user;
+
+    /**
      * @var string
      *
      * @ORM\Column(type="text", nullable=false)

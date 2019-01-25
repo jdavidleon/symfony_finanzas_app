@@ -102,9 +102,43 @@ class PersonalController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
-     * @Route("/new", name="new-entry")
+     * @Route("/new", name="new-egress")
      */
-    public function egressDebt(Request $request, BalanceCalculations $balanceCalculations)
+    public function newEgress(Request $request, BalanceCalculations $balanceCalculations)
+    {
+        $egress = new Egress();
+        $egress->setUser($this->getUser());
+
+        $form = $this->createForm(EgressType::class, $egress);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($egress);
+            $em->flush();
+
+            $balanceCalculations->handleBalance($this->getUser(),[
+                'egress' => $this->getUser()
+            ]);
+
+            $this->addFlash('success', 'Nueva Entrada Ingresada');
+        }
+
+        return $this->render('credit/credit_card_new.html.twig',[
+            'form' => $form
+        ]);
+    }
+
+
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     * @Route("/new", name="new-egress")
+     */
+    public function newEgressConcept(Request $request, BalanceCalculations $balanceCalculations)
     {
         $egress = new Egress();
         $egress->setUser($this->getUser());

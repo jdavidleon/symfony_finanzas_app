@@ -85,7 +85,7 @@ class BalanceCalculations
     {
         $entries = $balance->getEntries() + $balanceSetters['entry'] ?? 0;
         $egresses = $balance->getEgresses() + $balanceSetters['egress'] ?? 0;
-        $endMoney = $balance->getEndMoney() + $entries + $egresses;
+        $endMoney = $balance->getEndMoney() + $entries - $egresses;
 
         $balance->setEntries($entries);
         $balance->setEgresses($egresses);
