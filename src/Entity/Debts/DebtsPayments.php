@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="payments", indexes={@ORM\Index(name="IDX_65D29B321EAC6E6C", columns={"credit_consume_id"})})
  * @ORM\Entity
  */
-class Payments
+class DebtsPayments
 {
     /**
      * @ORM\Id()
@@ -54,16 +54,6 @@ class Payments
      * @ORM\Column(type="boolean", nullable=false)
      */
     private $legalDue;
-
-    /**
-     * @var CreditCardConsume
-     *
-     * @ORM\ManyToOne(targetEntity="CreditCardConsume")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="credit_consume_id", referencedColumnName="id")
-     * })
-     */
-    private $creditConsume;
 
     use TimestampableEntity;
 
@@ -131,18 +121,5 @@ class Payments
 
         return $this;
     }
-
-    public function getCreditConsume(): ?CreditCardConsume
-    {
-        return $this->creditConsume;
-    }
-
-    public function setCreditConsume(?CreditCardConsume $creditConsume): self
-    {
-        $this->creditConsume = $creditConsume;
-
-        return $this;
-    }
-
 
 }

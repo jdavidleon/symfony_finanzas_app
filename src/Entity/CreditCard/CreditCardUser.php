@@ -2,6 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Entity\Security\User;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -50,9 +51,9 @@ class CreditCardUser
     private $deletedAt;
 
     /**
-     * @var \User
+     * @var User
      *
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
      * })
@@ -60,9 +61,9 @@ class CreditCardUser
     private $parent;
 
     /**
-     * @var \User
+     * @var User
      *
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      * })

@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table()
  * @ORM\Entity
  */
-class Debts
+class Debt
 {
     /**
      * @ORM\Id()
@@ -27,19 +27,19 @@ class Debts
      */
     private $creditor;
         /* TODO: Definir Concepto de deudas y gastos*/
+
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id_concepto", type="smallint", nullable=false, options={"unsigned"=true})
+     * @ORM\ManyToOne(targetEntity="App\Entity\Debts\DebtsTypes")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $idConcepto;
+    private $debtType;
 
     /**
      * @var string|null
      *
      * @ORM\Column(name="concepto", type="string", length=150, nullable=true)
      */
-    private $concepto;
+    private $concept;
 
     /**
      * @var int
@@ -51,7 +51,7 @@ class Debts
     /**
      * @var float|null
      *
-     * @ORM\Column(name="tasa", type="float", precision=10, scale=0, nullable=true)
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
      */
     private $rate;
 
@@ -102,26 +102,14 @@ class Debts
         return $this;
     }
 
-    public function getIdConcepto(): ?int
+    public function getConcept(): ?string
     {
-        return $this->idConcepto;
+        return $this->concept;
     }
 
-    public function setIdConcepto(int $idConcepto): self
+    public function setConcept(?string $concept): self
     {
-        $this->idConcepto = $idConcepto;
-
-        return $this;
-    }
-
-    public function getConcepto(): ?string
-    {
-        return $this->concepto;
-    }
-
-    public function setConcepto(?string $concepto): self
-    {
-        $this->concepto = $concepto;
+        $this->concept = $concept;
 
         return $this;
     }
@@ -138,14 +126,14 @@ class Debts
         return $this;
     }
 
-    public function getTasa(): ?float
+    public function getRate(): ?float
     {
         return $this->rate;
     }
 
-    public function setTasa(?float $tasa): self
+    public function setRate(?float $rate): self
     {
-        $this->rate = $tasa;
+        $this->rate = $rate;
 
         return $this;
     }
@@ -162,7 +150,7 @@ class Debts
         return $this;
     }
 
-    public function getPaymentDay(): ?bool
+    public function getPaymentDay(): ?string
     {
         return $this->paymentDay;
     }
@@ -194,6 +182,18 @@ class Debts
     public function setDebtStatus(bool $debtStatus): self
     {
         $this->debtStatus = $debtStatus;
+
+        return $this;
+    }
+
+    public function getDebtType(): ?DebtsTypes
+    {
+        return $this->debtType;
+    }
+
+    public function setDebtType(?DebtsTypes $debtType): self
+    {
+        $this->debtType = $debtType;
 
         return $this;
     }

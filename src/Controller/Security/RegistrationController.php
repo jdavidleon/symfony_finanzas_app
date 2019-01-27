@@ -6,7 +6,7 @@
  * Time: 4:57 PM
  */
 
-namespace App\Controller;
+namespace App\Controller\Security;
 
 use App\Form\UserType;
 use App\Entity\Security\User;

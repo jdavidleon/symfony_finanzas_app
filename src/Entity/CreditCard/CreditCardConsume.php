@@ -25,7 +25,7 @@ class CreditCardConsume
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="creditCardConsumes")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
      */
     private $user;
 
