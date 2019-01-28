@@ -2,6 +2,7 @@
 
 namespace App\Entity\Debts;
 
+use App\Entity\Security\User;
 use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,6 +20,11 @@ class Debt
      * @ORM\Column(type="integer")
      */
     private $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User")
+     * */
+    private $user;
 
     /**
      * @var int
@@ -194,6 +200,18 @@ class Debt
     public function setDebtType(?DebtsTypes $debtType): self
     {
         $this->debtType = $debtType;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

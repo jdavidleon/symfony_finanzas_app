@@ -25,6 +25,9 @@ class DebtsController extends Controller
     public function newDebt()
     {
         $debt = new Debt();
-        $this->createForm(DebtType::class);
+        $form = $this->createForm(DebtType::class, $debt);
+
+
+
     }
 }

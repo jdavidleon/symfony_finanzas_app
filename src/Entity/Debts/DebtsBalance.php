@@ -116,5 +116,53 @@ class DebtsBalance
         $this->balance = $balance;
     }
 
+    public function getInterestPayed(): ?float
+    {
+        return $this->interestPayed;
+    }
+
+    public function setInterestPayed(?float $interestPayed): self
+    {
+        $this->interestPayed = $interestPayed;
+
+        return $this;
+    }
+
+    public function getInitialDues(): ?int
+    {
+        return $this->initialDues;
+    }
+
+    public function setInitialDues(int $initialDues): self
+    {
+        $this->initialDues = $initialDues;
+
+        return $this;
+    }
+
+    public function getPendingDues(): ?int
+    {
+        return $this->pendingDues;
+    }
+
+    public function setPendingDues(int $pendingDues): self
+    {
+        $this->pendingDues = $pendingDues;
+
+        return $this;
+    }
+
+    public function getLastPayedMonth(): ?string
+    {
+        return $this->lastPayedMonth;
+    }
+
+    public function setLastPayedMonth(?string $lastPayedMonth): self
+    {
+        $this->lastPayedMonth = $lastPayedMonth;
+
+        return $this;
+    }
+
 
 }

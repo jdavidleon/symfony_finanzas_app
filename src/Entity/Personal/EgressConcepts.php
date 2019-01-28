@@ -2,6 +2,7 @@
 
 namespace App\Entity\Personal;
 
+use App\Entity\Security\User;
 use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -50,6 +51,18 @@ class EgressConcepts
     public function setConcept(string $concept): self
     {
         $this->concept = $concept;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
