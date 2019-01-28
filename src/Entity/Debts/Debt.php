@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Debts
  *
  * @ORM\Table()
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\Debts\DebtRepository")
  */
 class Debt
 {
@@ -28,8 +28,7 @@ class Debt
 
     /**
      * @var int
-     * @ORM\ManyToOne(targetEntity="App\Entity\Acreedores", inversedBy="")
-     * @ORM\Column(name="id_acreedor", type="integer", nullable=false, options={"unsigned"=true})
+     * @ORM\ManyToOne(targetEntity="App\Entity\Debts\Creditor", inversedBy="id")
      */
     private $creditor;
         /* TODO: Definir Concepto de deudas y gastos*/
@@ -83,11 +82,9 @@ class Debt
     private $firstPaymentDay;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="id_estado_deuda", type="boolean", nullable=false, options={"default"="1"})
-     */
-    private $debtStatus = '1';
+     * @ORM\OneToOne(targetEntity="App\Entity\Debts\DebtsBalance", mappedBy="balance")
+     * */
+    private $balance;
 
     use TimestampableEntity;
 
@@ -176,18 +173,6 @@ class Debt
     public function setFirstPaymentDay(?\DateTimeInterface $firstPaymentDay): self
     {
         $this->firstPaymentDay = $firstPaymentDay;
-
-        return $this;
-    }
-
-    public function getDebtStatus(): ?bool
-    {
-        return $this->debtStatus;
-    }
-
-    public function setDebtStatus(bool $debtStatus): self
-    {
-        $this->debtStatus = $debtStatus;
 
         return $this;
     }

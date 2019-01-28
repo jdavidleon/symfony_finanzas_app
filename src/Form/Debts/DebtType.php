@@ -9,6 +9,7 @@
 namespace App\Form\Debts;
 
 
+use App\Entity\Debts\Creditor;
 use App\Entity\Debts\Debt;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -23,11 +24,10 @@ class DebtType extends AbstractType
         $builder
             ->add('debtType', EntityType::class, [
                 'class' => 'App\Entity\Debts\DebtsTypes',
-                'query_builder' => function(EntityRepository $er){
+                'query_builder' => function(EntityRepository $er) use ($options){
                     $qb =$er->createQueryBuilder('dt')
                         ->where('dt.active = true')
-                        ->andWhere('dt.user = :user');
-
+                        ->setParameter('user', $options['user']);
                     $qb->andWhere(
                         $qb->expr()->orX('dt.user = :user', 'dt.applyToAll = true')
                     );
@@ -36,10 +36,15 @@ class DebtType extends AbstractType
             ])
             ->add('value')
             ->add('dues')
-            ->add('concepto')
+            ->add('concept')
             ->add('firstPaymentDay')
-            ->add('creditor')
-            ->add('tasa')
+            ->add('creditor', EntityType::class, [
+                'class' => Creditor::class,
+                'choice_label' => function(Creditor $creditor){
+                    return $creditor->getOwner().' ( '.$creditor->getBank().' )';
+                }
+            ])
+            ->add('rate')
             ;
     }
 

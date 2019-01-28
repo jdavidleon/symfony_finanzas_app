@@ -7,7 +7,7 @@ use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\Debts\DebtsTypesRepository")
+ * @ORM\Entity(repositoryClass="DebtRepository")
  */
 class DebtsTypes
 {

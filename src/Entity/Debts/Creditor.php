@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table()
  * @ORM\Entity
  */
-class Creditors
+class Creditor
 {
     /**
      * @ORM\Id()

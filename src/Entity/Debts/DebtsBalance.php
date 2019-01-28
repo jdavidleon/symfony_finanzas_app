@@ -13,6 +13,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class DebtsBalance
 {
+    const INVALID = 0;
+    const OPEN = 1;
+    const PAYING = 2;
+    const MORA = 3;
+    const PAYED = 4;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -23,7 +29,7 @@ class DebtsBalance
     /**
      * @var float
      *
-     * @ORM\Column(type="float", precision=10, scale=0, nullable=false)
+     * @ORM\OneToOne(targetEntity="App\Entity\Debts\Debt", inversedBy="id")
      */
     private $debt;
 
@@ -68,6 +74,11 @@ class DebtsBalance
      * @ORM\Column(type="float", nullable=false)
      * */
     private $balance;
+
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     * */
+    private $status;
 
     use TimestampableEntity;
 
@@ -160,6 +171,18 @@ class DebtsBalance
     public function setLastPayedMonth(?string $lastPayedMonth): self
     {
         $this->lastPayedMonth = $lastPayedMonth;
+
+        return $this;
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
