@@ -34,18 +34,23 @@ class DebtsBalance
     private $debt;
 
     /**
+     * @ORM\Column(type="float")
+     * */
+    private $value;
+
+    /**
      * @var float|null
      *
      * @ORM\Column(nullable=true)
      */
-    private $payed;
+    private $payed = 0;
 
     /**
      * @var float|null
      *
      * @ORM\Column(type="float", nullable=true)
      */
-    private $interestPayed;
+    private $interestPayed = 0;
 
     /**
      * @var integer
@@ -78,7 +83,7 @@ class DebtsBalance
     /**
      * @ORM\Column(type="integer", nullable=false)
      * */
-    private $status;
+    private $status = self::OPEN;
 
     use TimestampableEntity;
 
@@ -185,6 +190,22 @@ class DebtsBalance
         $this->status = $status;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public function setValue($value): void
+    {
+        $this->value = $value;
     }
 
 

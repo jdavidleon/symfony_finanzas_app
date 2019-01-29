@@ -2,7 +2,9 @@
 
 namespace App\Entity\Debts;
 
+use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Self_;
 
 /**
  * FixedCharges
@@ -12,12 +14,24 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class FixedCharges
 {
+    const INVALID = 0;
+    const OPEN = 1;
+    const PAYING = 2;
+    const MORA = 3;
+    const PAYED = 4;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\JoinColumn(nullable=false)
+     * */
+    private $user;
 
     /**
      * @var string
@@ -27,46 +41,32 @@ class FixedCharges
     private $concept;
 
     /**
-     * @var int
+     * @var float
      *
-     * @ORM\Column(name="valor", type="integer", nullable=false, options={"unsigned"=true})
+     * @ORM\Column(type="float", nullable=false, options={"unsigned"=true})
      */
-    private $valor;
+    private $value;
 
     /**
-     * @var int|null
      *
-     * @ORM\Column(name="mora", type="integer", nullable=true)
+     * @ORM\Column(type="string", length=10, nullable=true)
      */
-    private $mora = '0';
-
-    /**
-     * @var bool|null
-     *
-     * @ORM\Column(name="dia_pago", type="boolean", nullable=true)
-     */
-    private $diaPago;
+    private $payDay;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="id_estado_deuda", type="boolean", nullable=false, options={"default"="1"})
+     * @ORM\Column(ntype="boolean", nullable=false, options={"default"="1"})
      */
-    private $idEstadoDeuda = '1';
+    private $status = self::OPEN;
 
     /**
-     * @var string|null
      *
-     * @ORM\Column(name="ultimo_mes_pagado", type="string", length=10, nullable=true, options={"fixed"=true})
+     * @ORM\Column(type="date", nullable=true)
      */
-    private $ultimoMesPagado;
+    private $lastPayedMonth;
 
-    /**
-     * @var \DateTime|null
-     *
-     * @ORM\Column(name="tm_delete", type="datetime", nullable=true)
-     */
-    private $tmDelete;
+    use TimestampableEntity;
 
     public function getId(): ?int
     {
@@ -85,75 +85,68 @@ class FixedCharges
         return $this;
     }
 
-    public function getValor(): ?int
+    public function getValue(): ?int
     {
-        return $this->valor;
+        return $this->value;
     }
 
-    public function setValor(int $valor): self
+    public function setValue(int $value): self
     {
-        $this->valor = $valor;
+        $this->value = $value;
 
         return $this;
     }
 
-    public function getMora(): ?int
+    public function getPayDay(): ?bool
     {
-        return $this->mora;
+        return $this->payDay;
     }
 
-    public function setMora(?int $mora): self
+    public function setPayDay(?bool $payDay): self
     {
-        $this->mora = $mora;
+        $this->payDay = $payDay;
 
         return $this;
     }
 
-    public function getDiaPago(): ?bool
+    public function getStatus(): ?bool
     {
-        return $this->diaPago;
+        return $this->status;
     }
 
-    public function setDiaPago(?bool $diaPago): self
+    public function setStatus(bool $status): self
     {
-        $this->diaPago = $diaPago;
+        $this->status = $status;
 
         return $this;
     }
 
-    public function getIdEstadoDeuda(): ?bool
+    public function getLastPayedMonth(): ?string
     {
-        return $this->idEstadoDeuda;
+        return $this->lastPayedMonth;
     }
 
-    public function setIdEstadoDeuda(bool $idEstadoDeuda): self
+    public function setLastPayedMonth(?string $lastPayedMonth): self
     {
-        $this->idEstadoDeuda = $idEstadoDeuda;
+        $this->lastPayedMonth = $lastPayedMonth;
 
         return $this;
     }
 
-    public function getUltimoMesPagado(): ?string
+    /**
+     * @return mixed
+     */
+    public function getUser()
     {
-        return $this->ultimoMesPagado;
+        return $this->user;
     }
 
-    public function setUltimoMesPagado(?string $ultimoMesPagado): self
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user): void
     {
-        $this->ultimoMesPagado = $ultimoMesPagado;
-
-        return $this;
+        $this->user = $user;
     }
 
-    public function getTmDelete(): ?\DateTimeInterface
-    {
-        return $this->tmDelete;
-    }
-
-    public function setTmDelete(?\DateTimeInterface $tmDelete): self
-    {
-        $this->tmDelete = $tmDelete;
-
-        return $this;
-    }
 }
