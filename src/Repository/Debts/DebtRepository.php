@@ -57,4 +57,17 @@ class DebtRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function getNextDebtsByUserAndComingDays(User $user,?int $comingDays = null)
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->where('d.user = :user')
+            ->andWhere('d.balance > :balance')
+            ->andWhere('d.paymentDay')
+            ->setParameters([
+                'user' => $user,
+                'balance' => 0
+            ])
+        ;
+    }
 }

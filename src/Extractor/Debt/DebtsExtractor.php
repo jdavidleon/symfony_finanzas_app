@@ -51,9 +51,8 @@ class DebtsExtractor
     {
         $nextDebts = [];
         $credits = $this->getActiveCreditsByUser($user);
-
-        /** @var Credits $credit */
         foreach ($credits as $credit){
+            /** @var Credits $credit */
             $nextDebts[] = [
                 'type' => 'credit',
                 'id' => $credit->getId(),
@@ -62,9 +61,8 @@ class DebtsExtractor
         }
 
         $fixedCharges = $this->getActiveFixedChargesByUser($user);
-
-        /** @var FixedCharges $fixed */
         foreach ($fixedCharges as $fixed){
+            /** @var FixedCharges $fixed */
             $nextDebts[] = [
                 'type' => 'credit',
                 'id' => $fixed->getId(),
@@ -73,9 +71,8 @@ class DebtsExtractor
         }
 
         $debts = $this->getActiveDebtsByUser($user);
-
-        /** @var Debt $debt */
         foreach ($debts as $debt){
+            /** @var Debt $debt */
             $nextDebts[] = [
                 'type' => 'debt',
                 'id' => $debt->getId(),

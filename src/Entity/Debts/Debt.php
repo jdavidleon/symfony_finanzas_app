@@ -30,6 +30,11 @@ class Debt
     private $value;
 
     /**
+     * @ORM\Column(type="float")
+     * */
+    private $balance;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Debts\Creditor")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -93,5 +98,21 @@ class Debt
         $this->paymentDay = $paymentDay;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBalance()
+    {
+        return $this->balance;
+    }
+
+    /**
+     * @param mixed $balance
+     */
+    public function setBalance($balance): void
+    {
+        $this->balance = $balance;
     }
 }
