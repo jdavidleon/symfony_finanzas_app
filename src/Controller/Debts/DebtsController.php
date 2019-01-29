@@ -3,8 +3,8 @@
 namespace App\Controller\Debts;
 
 use App\Entity\Debts\Creditor;
-use App\Entity\Debts\Debt;
-use App\Entity\Debts\DebtsBalance;
+use App\Entity\Debts\Credits;
+use App\Entity\Debts\CreditsBalance;
 use App\Entity\Debts\FixedCharges;
 use App\Form\Debts\CreditorType;
 use App\Form\Debts\DebtType;
@@ -34,9 +34,9 @@ class DebtsController extends Controller
      */
     public function debtsLists()
     {
-        $repo = $this->getDoctrine()->getRepository(Debt::class);
+        $repo = $this->getDoctrine()->getRepository(Credits::class);
 
-        $debts = $repo->getActualDebtsByUser($this->getUser());
+        $debts = $repo->getActualCreditsByUser($this->getUser());
 
         return $this->render('::base.html.twig', [
             'debts' => $debts
@@ -51,7 +51,7 @@ class DebtsController extends Controller
      */
     public function newDebt(DebtsHandlers $debtsHandlers)
     {
-        $debt = new Debt();
+        $debt = new Credits();
         $debt->setUser($this->getUser());
         $form = $this->createForm(DebtType::class, $debt);
 
@@ -87,6 +87,11 @@ class DebtsController extends Controller
         return $this->render('debts/debts_contrtoller/index.html.twig', [
             'controller_name' => 'DebtsController',
         ]);
+    }
+
+    public function newDebtPayment()
+    {
+
     }
 
     /**

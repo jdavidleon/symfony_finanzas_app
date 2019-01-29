@@ -9,7 +9,7 @@
 namespace App\Form\Debts;
 
 use App\Entity\Debts\Creditor;
-use App\Entity\Debts\Debt;
+use App\Entity\Debts\Credits;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;

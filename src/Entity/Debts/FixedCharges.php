@@ -56,7 +56,7 @@ class FixedCharges
     /**
      * @var bool
      *
-     * @ORM\Column(ntype="boolean", nullable=false, options={"default"="1"})
+     * @ORM\Column(type="boolean", nullable=false)
      */
     private $status = self::OPEN;
 

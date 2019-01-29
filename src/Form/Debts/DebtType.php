@@ -10,7 +10,7 @@ namespace App\Form\Debts;
 
 
 use App\Entity\Debts\Creditor;
-use App\Entity\Debts\Debt;
+use App\Entity\Debts\Credits;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -23,7 +23,7 @@ class DebtType extends AbstractType
     {
         $builder
             ->add('debtType', EntityType::class, [
-                'class' => 'App\Entity\Debts\DebtsTypes',
+                'class' => 'FixedCharges',
                 'query_builder' => function(EntityRepository $er) use ($options){
                     $qb =$er->createQueryBuilder('dt')
                         ->where('dt.active = true')
@@ -52,7 +52,7 @@ class DebtType extends AbstractType
     {
         $optionsResolver
             ->setDefaults([
-                'data_class' => Debt::class
+                'data_class' => Credits::class
             ]);
     }
 }

@@ -8,10 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Payments
  *
- * @ORM\Table(name="payments", indexes={@ORM\Index(name="IDX_65D29B321EAC6E6C", columns={"credit_consume_id"})})
+ * @ORM\Table()
  * @ORM\Entity
  */
-class DebtsPayments
+class CreditPayments
 {
     /**
      * @ORM\Id()

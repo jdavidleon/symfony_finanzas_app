@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table()
  * @ORM\Entity
  */
-class DebtsBalance
+class CreditsBalance
 {
     const INVALID = 0;
     const OPEN = 1;
@@ -29,7 +29,7 @@ class DebtsBalance
     /**
      * @var float
      *
-     * @ORM\OneToOne(targetEntity="App\Entity\Debts\Debt", inversedBy="id")
+     * @ORM\OneToOne(targetEntity="Credits", inversedBy="id")
      */
     private $debt;
 
