@@ -20,35 +20,6 @@ class DebtRepository extends ServiceEntityRepository
         parent::__construct($registry, Debt::class);
     }
 
-    // /**
-    //  * @return Debt[] Returns an array of Debt objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('d.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Debt
-    {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
-
     public function getActualDebtsByUser(User $user)
     {
         return $this->createQueryBuilder('d')
@@ -58,12 +29,11 @@ class DebtRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getNextDebtsByUserAndComingDays(User $user,?int $comingDays = null)
+    public function getNextDebtsByUser(User $user)
     {
         return $this->createQueryBuilder('d')
             ->where('d.user = :user')
             ->andWhere('d.balance > :balance')
-            ->andWhere('d.paymentDay')
             ->setParameters([
                 'user' => $user,
                 'balance' => 0
