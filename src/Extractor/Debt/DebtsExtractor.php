@@ -60,7 +60,7 @@ class DebtsExtractor
             ];
         }
 
-        $fixedCharges = $this->getActiveFixedChargesByUser($user);
+        $fixedCharges = $this->getActualMonthFixedChargesByUser($user);
         foreach ($fixedCharges as $fixed){
             /** @var FixedCharges $fixed */
             $nextDebts[] = [
@@ -97,9 +97,9 @@ class DebtsExtractor
         return $this->creditRepository->getActualCreditsByUser($user);
     }
 
-    public function getActiveFixedChargesByUser(User $user)
+    public function getActualMonthFixedChargesByUser(User $user)
     {
-        return $this->fixedChargesRepository->getActualFixedChargesByUser($user);
+        return $this->fixedChargesRepository->getActualMonthFixedChargesByUser($user);
     }
 
     public function getActiveDebtsByUser(User $user)
