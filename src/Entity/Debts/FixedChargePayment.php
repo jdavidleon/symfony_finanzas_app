@@ -2,6 +2,7 @@
 
 namespace App\Entity\Debts;
 
+use App\Util\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -26,6 +27,8 @@ class FixedChargePayment
      * @ORM\Column(type="float")
      */
     private $value;
+
+    use TimestampableEntity;
 
     public function getId(): ?int
     {
