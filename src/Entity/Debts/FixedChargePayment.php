@@ -28,6 +28,11 @@ class FixedChargePayment
      */
     private $value;
 
+    /**
+     * @ORM\Column(type="string", length=10, )
+     * */
+    private $payedMonth;
+
     use TimestampableEntity;
 
     public function getId(): ?int
@@ -57,5 +62,21 @@ class FixedChargePayment
         $this->value = $value;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPayedMonth()
+    {
+        return $this->payedMonth;
+    }
+
+    /**
+     * @param mixed $payedMonth
+     */
+    public function setPayedMonth($payedMonth): void
+    {
+        $this->payedMonth = $payedMonth;
     }
 }

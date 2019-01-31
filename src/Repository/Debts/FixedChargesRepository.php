@@ -23,7 +23,11 @@ class FixedChargesRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('fc')
             ->where('fc.user = :user')
-            ->setParameter('user', $user)
+            ->andWhere('fc.lastPayedMonth <> :actual_month')
+            ->setParameters([
+                'user' => $user,
+                'actual_month' => $this->getActualMonth()
+            ])
             ->getQuery()
             ->getResult();
     }
@@ -40,5 +44,10 @@ class FixedChargesRepository extends ServiceEntityRepository
             ])
             ->getQuery()
             ->getResult();
+    }
+
+    public function getActualMonth()
+    {
+        return date('Y-m');
     }
 }
