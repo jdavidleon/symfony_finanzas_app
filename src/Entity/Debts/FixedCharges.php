@@ -3,6 +3,8 @@
 namespace App\Entity\Debts;
 
 use App\Util\TimestampableEntity;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use phpDocumentor\Reflection\Types\Self_;
 
@@ -65,6 +67,16 @@ class FixedCharges
      * @ORM\Column(type="date", nullable=true)
      */
     private $lastPayedMonth;
+
+    /**
+     * @ORM\OneToMany(targetEntity="FixedChargePayment", mappedBy="fixedCharge")
+     */
+    private $fixedChargesPayment;
+
+    public function __construct()
+    {
+        $this->fixedChargesPayment = new ArrayCollection();
+    }
 
     use TimestampableEntity;
 
@@ -147,6 +159,37 @@ class FixedCharges
     public function setUser($user): void
     {
         $this->user = $user;
+    }
+
+    /**
+     * @return Collection|FixedChargePayment[]
+     */
+    public function getFixedChargesPayment(): Collection
+    {
+        return $this->fixedChargesPayment;
+    }
+
+    public function addFixedChargesBalance(FixedChargePayment $fixedChargesBalance): self
+    {
+        if (!$this->fixedChargesPayment->contains($fixedChargesBalance)) {
+            $this->fixedChargesPayment[] = $fixedChargesBalance;
+            $fixedChargesBalance->setFixedCharge($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFixedChargesBalance(FixedChargePayment $fixedChargesBalance): self
+    {
+        if ($this->fixedChargesPayment->contains($fixedChargesBalance)) {
+            $this->fixedChargesPayment->removeElement($fixedChargesBalance);
+            // set the owning side to null (unless already changed)
+            if ($fixedChargesBalance->getFixedCharge() === $this) {
+                $fixedChargesBalance->setFixedCharge(null);
+            }
+        }
+
+        return $this;
     }
 
 }
