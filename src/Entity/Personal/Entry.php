@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Entry
  *
  * @ORM\Table(name="ingresos")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\Personal\EntryRepository")
  */
 class Entry
 {

@@ -19,7 +19,7 @@ class FixedChargesRepository extends ServiceEntityRepository
      * @param User $user
      * @return mixed
      */
-    public function getActualFixedChargesByUser(User $user)
+    public function getActualMonthFixedChargesByUser(User $user)
     {
         return $this->createQueryBuilder('fc')
             ->where('fc.user = :user')
@@ -28,4 +28,17 @@ class FixedChargesRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function getFixedChargesListByUser(User $user)
+    {
+        return $this->createQueryBuilder('fc')
+            ->where('fc.user = :user')
+            ->andWhere('fc.status <> :status_invalid')
+            ->andWhere('fc.deletedAt IS NOT NULL')
+            ->setParameters([
+                'user' => $user,
+                'status_invalid' => FixedCharges::INVALID
+            ])
+            ->getQuery()
+            ->getResult();
+    }
 }

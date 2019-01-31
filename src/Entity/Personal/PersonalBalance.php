@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * BalanceGeneral
  *
  * @ORM\Table(name="balance_general")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\Personal\PersonalBalanceRepository")
  */
 class PersonalBalance
 {

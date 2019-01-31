@@ -10,7 +10,7 @@ use phpDocumentor\Reflection\Types\Self_;
  * FixedCharges
  *
  * @ORM\Table()
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\Debts\FixedChargesRepository")
  */
 class FixedCharges
 {
@@ -18,7 +18,7 @@ class FixedCharges
     const OPEN = 1;
     const PAYING = 2;
     const MORA = 3;
-    const PAYED = 4;
+
 
     /**
      * @ORM\Id()

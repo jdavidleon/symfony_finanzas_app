@@ -10,14 +10,14 @@ namespace App\Service\Personal;
 
 use App\Entity\Personal\PersonalBalance;
 use App\Entity\Security\User;
-use App\Repository\Personal\PersonalBalanceRepository;
+use App\Repository\Personal\EntryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class BalanceCalculations
 {
 
     /**
-     * @var PersonalBalanceRepository
+     * @var EntryRepository
      */
     private $personalBalanceRepository;
 
@@ -27,7 +27,7 @@ class BalanceCalculations
     private $entityManager;
 
     public function __construct(
-        PersonalBalanceRepository $personalBalanceRepository,
+        EntryRepository $personalBalanceRepository,
         EntityManagerInterface $entityManager
     )
     {
@@ -50,20 +50,12 @@ class BalanceCalculations
         }
     }
 
-    public function getBalanceByUser(User $user)
-    {
-        return $this->personalBalanceRepository->findOneBy([
-            'user' => $user,
-            'month' => $this->getActualMonth()
-        ]);
-    }
-
     /**
      * @param User $user
      * @param array $balanceSetters
      * @throws \Exception
      */
-    private function setNewBalanceMonth(User $user, array $balanceSetters)
+    public function setNewBalanceMonth(User $user, array $balanceSetters=[])
     {
         $lastMonthBalance = $this->getLastMonthBalance($user);
 
