@@ -9,7 +9,7 @@
 namespace App\Service\CreditCard;
 
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\Payments;
+use App\Entity\CreditCard\CreditCardPayments;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
@@ -40,7 +40,7 @@ class CreditCalculations
         $amount = $creditCardConsume->getAmount();
         $payments = $creditCardConsume->getPayments();
 
-        /** @var Payments $payments */
+        /** @var CreditCardPayments $payments */
         return $this->getActualDebt($payments, $amount) / $this->getPendingDues($creditCardConsume);
     }
 
@@ -52,7 +52,7 @@ class CreditCalculations
     public function getActualDebt($payments, $amount)
     {
         $payed = 0;
-        /* @var Payments $pay */
+        /* @var CreditCardPayments $pay */
         foreach ( $payments as $pay ){
             $payed += $pay->getCapitalAmount();
         }
@@ -74,7 +74,7 @@ class CreditCalculations
     {
         $payments = $creditCardConsume->getPayments();
 
-        /** @var Payments $payments */
+        /** @var CreditCardPayments $payments */
         $actualDebt = $this->getActualDebt( $payments, $creditCardConsume->getAmount());
         $interest = $creditCardConsume->getInterest();
         $dues = $this->getPendingDues( $creditCardConsume );

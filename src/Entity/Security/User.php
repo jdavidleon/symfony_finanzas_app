@@ -4,6 +4,7 @@ namespace App\Entity\Security;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Util\TimestampableEntity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -48,10 +49,6 @@ class User implements UserInterface
     private $roles = [];
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="user")
-     */
-    private $creditCardConsumes;
-    /**
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCard", mappedBy="owner")
      */
     private $creditCards;
@@ -65,6 +62,8 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $lastName;
+
+    use TimestampableEntity;
 
     public function __construct()
     {
@@ -152,37 +151,6 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|CreditCardConsume[]
-     */
-    public function getCreditCardConsumes(): Collection
-    {
-        return $this->creditCardConsumes;
-    }
-
-    public function addCreditCardConsume(CreditCardConsume $creditCardConsume): self
-    {
-        if (!$this->creditCardConsumes->contains($creditCardConsume)) {
-            $this->creditCardConsumes[] = $creditCardConsume;
-            $creditCardConsume->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCreditCardConsume(CreditCardConsume $creditCardConsume): self
-    {
-        if ($this->creditCardConsumes->contains($creditCardConsume)) {
-            $this->creditCardConsumes->removeElement($creditCardConsume);
-            // set the owning side to null (unless already changed)
-            if ($creditCardConsume->getUser() === $this) {
-                $creditCardConsume->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection|CreditCard[]
      */
     public function getCreditCards(): Collection
@@ -243,5 +211,28 @@ class User implements UserInterface
     public function setLastName($lastName): void
     {
         $this->lastName = $lastName;
+    }
+
+    public function addCreditCard(CreditCard $creditCard): self
+    {
+        if (!$this->creditCards->contains($creditCard)) {
+            $this->creditCards[] = $creditCard;
+            $creditCard->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreditCard(CreditCard $creditCard): self
+    {
+        if ($this->creditCards->contains($creditCard)) {
+            $this->creditCards->removeElement($creditCard);
+            // set the owning side to null (unless already changed)
+            if ($creditCard->getOwner() === $this) {
+                $creditCard->setOwner(null);
+            }
+        }
+
+        return $this;
     }
 }
