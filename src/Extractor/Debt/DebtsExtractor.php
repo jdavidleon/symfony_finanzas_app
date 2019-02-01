@@ -45,12 +45,13 @@ class DebtsExtractor
 
     /**
      * @param User $user
-     * @return array
+     * @return array|null
+     * @throws \Exception
      */
     public function getNextDebtsByUser(User $user): ?array
     {
         $nextDebts = [];
-        $credits = $this->getActiveCreditsByUser($user);
+        $credits = $this->getNextCreditsByUser($user);
         foreach ($credits as $credit){
             /** @var Credits $credit */
             $nextDebts[] = [
@@ -87,7 +88,7 @@ class DebtsExtractor
      * @param User $user
      * @throws \Exception
      */
-    public function getNextCreditsByUserAndComingDays(User $user)
+    public function getNextCreditsByUser(User $user)
     {
         $this->creditRepository->getNextCreditsByUser($user);
     }

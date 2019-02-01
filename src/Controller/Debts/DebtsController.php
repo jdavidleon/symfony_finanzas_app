@@ -4,8 +4,8 @@ namespace App\Controller\Debts;
 
 use App\Entity\Debts\Creditor;
 use App\Entity\Debts\Credits;
-use App\Entity\Debts\CreditsBalance;
 use App\Entity\Debts\FixedCharges;
+use App\Extractor\Debt\DebtsExtractor;
 use App\Form\Debts\CreditorType;
 use App\Form\Debts\DebtType;
 use App\Form\Debts\FixedChargesType;
@@ -31,12 +31,12 @@ class DebtsController extends Controller
 
     /**
      * @Route("/list", name="debts_debts_contrtoller")
+     * @param DebtsExtractor $debtsExtractor
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function debtsLists()
+    public function debtsLists(DebtsExtractor $debtsExtractor)
     {
-        $repo = $this->getDoctrine()->getRepository(Credits::class);
-
-        $debts = $repo->getActualCreditsByUser($this->getUser());
+        $debts = $debtsExtractor->getNextDebtsByUser($this->getUser());
 
         return $this->render('::base.html.twig', [
             'debts' => $debts

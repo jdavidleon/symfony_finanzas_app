@@ -28,9 +28,7 @@ class CreditRepository extends ServiceEntityRepository
 
     /**
      * @param User $user
-     * @param int $comingDays
      * @return mixed
-     * @throws \Exception
      */
     public function getNextCreditsByUser(User $user)
     {
@@ -39,11 +37,13 @@ class CreditRepository extends ServiceEntityRepository
             ->where('c.user = :user')
             ->andWhere('b.lastPayedMonth <> :actual_month')
             ->andWhere('b.status NOT IN (:status_invalid, :status_payed)')
+            ->andWhere('b.balance > :zero')
             ->setParameters([
                 'user' => $user,
                 'actual_month' => $this->getActualMonth(),
                 'status_invalid' => CreditsBalance::INVALID,
-                'status_payed' => CreditsBalance::PAYED
+                'status_payed' => CreditsBalance::PAYED,
+                'zero' => 0
             ])
         ;
 
