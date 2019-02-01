@@ -33,6 +33,7 @@ class DebtsController extends Controller
      * @Route("/list", name="debts_debts_contrtoller")
      * @param DebtsExtractor $debtsExtractor
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function debtsLists(DebtsExtractor $debtsExtractor)
     {

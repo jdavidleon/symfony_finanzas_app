@@ -2,27 +2,26 @@
 /**
  * Created by PhpStorm.
  * User: IT OPTIME
- * Date: 24/01/2019
- * Time: 4:53 PM
+ * Date: 1/02/2019
+ * Time: 3:13 PM
  */
 
 namespace App\Repository\Personal;
 
 
-use App\Entity\Personal\PersonalBalance;
+use App\Entity\Personal\Egress;
 use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
-class EntryRepository extends ServiceEntityRepository
+class EgressRepository extends ServiceEntityRepository
 {
-
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, PersonalBalance::class);
+        parent::__construct($registry, Egress::class);
     }
 
-    public function getIncomesByUserWithLimit(User $user, $limit)
+    public function getEgressesByUser(User $user, $limit)
     {
         return $this->createQueryBuilder('e')
             ->where('e.user = :user')
@@ -34,5 +33,4 @@ class EntryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
 }

@@ -86,11 +86,12 @@ class DebtsExtractor
 
     /**
      * @param User $user
+     * @return mixed
      * @throws \Exception
      */
     public function getNextCreditsByUser(User $user)
     {
-        $this->creditRepository->getNextCreditsByUser($user);
+        return $this->creditRepository->getNextCreditsByUser($user);
     }
 
     public function getActiveCreditsByUser(User $user)

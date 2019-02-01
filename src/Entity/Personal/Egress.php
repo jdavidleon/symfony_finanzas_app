@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Egress
  *
  * @ORM\Table(name="Egress")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\Personal\EgressRepository")
  */
 class Egress
 {

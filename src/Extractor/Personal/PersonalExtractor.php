@@ -11,6 +11,7 @@ namespace App\Extractor\Personal;
 
 use App\Entity\Personal\PersonalBalance;
 use App\Entity\Security\User;
+use App\Repository\Personal\EgressRepository;
 use App\Repository\Personal\EntryRepository;
 use App\Service\Personal\BalanceCalculations;
 
@@ -29,16 +30,22 @@ class PersonalExtractor
      * @var EntryRepository
      */
     private $entryRepository;
+    /**
+     * @var EgressRepository
+     */
+    private $egressRepository;
 
     public function __construct(
         EntryRepository $personalBalanceRepository,
         BalanceCalculations $balanceCalculations,
-        EntryRepository $entryRepository
+        EntryRepository $entryRepository,
+        EgressRepository $egressRepository
     )
     {
         $this->personalBalanceRepository = $personalBalanceRepository;
         $this->balanceCalculations = $balanceCalculations;
         $this->entryRepository = $entryRepository;
+        $this->egressRepository = $egressRepository;
     }
 
 
@@ -70,9 +77,14 @@ class PersonalExtractor
         ]);
     }
 
-    public function getIncomesByUser(User $user)
+    public function getIncomesByUserWithLimit(User $user, int $limit = 10)
     {
-        return $this->entryRepository->find($user->getId());
+        return $this->entryRepository->getIncomesByUserWithLimit($user, $limit);
+    }
+
+    public function getEgressesByUser(User $user,int $limit = 10)
+    {
+        return $this->egressRepository->getEgressesByUser($user, $limit);
     }
 
     protected function getActualMonth(): string
