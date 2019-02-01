@@ -3,7 +3,7 @@
 namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\Payments;
+use App\Entity\CreditCard\CreditCardPayments;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 

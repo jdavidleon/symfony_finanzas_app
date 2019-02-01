@@ -81,7 +81,7 @@ class CreditCardConsume
     private $creditCard;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\Payments", mappedBy="creditConsume")
+     * @ORM\OneToMany(targetEntity="CreditCardPayments", mappedBy="creditConsume")
      */
     private $payments;
 
@@ -234,14 +234,14 @@ class CreditCardConsume
     }
 
     /**
-     * @return Collection|Payments[]
+     * @return Collection|CreditCardPayments[]
      */
     public function getPayments(): Collection
     {
         return $this->payments;
     }
 
-    public function addPayment(Payments $payment): self
+    public function addPayment(CreditCardPayments $payment): self
     {
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
@@ -251,7 +251,7 @@ class CreditCardConsume
         return $this;
     }
 
-    public function removePayment(Payments $payment): self
+    public function removePayment(CreditCardPayments $payment): self
     {
         if ($this->payments->contains($payment)) {
             $this->payments->removeElement($payment);

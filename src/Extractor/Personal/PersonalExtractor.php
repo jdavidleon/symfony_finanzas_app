@@ -79,7 +79,7 @@ class PersonalExtractor
 
     public function getIncomesByUserWithLimit(User $user, int $limit = 10)
     {
-        return $this->entryRepository->getIncomesByUserWithLimit($user, $limit);
+        return $this->entryRepository->getEntriesByUser($user, $limit);
     }
 
     public function getEgressesByUser(User $user,int $limit = 10)

@@ -22,7 +22,7 @@ class EntryRepository extends ServiceEntityRepository
         parent::__construct($registry, PersonalBalance::class);
     }
 
-    public function getIncomesByUserWithLimit(User $user, $limit)
+    public function getEntriesByUser(User $user, $limit)
     {
         return $this->createQueryBuilder('e')
             ->where('e.user = :user')

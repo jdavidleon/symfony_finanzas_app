@@ -4,6 +4,7 @@ namespace App\Entity\Security;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Util\TimestampableEntity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -61,6 +62,8 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $lastName;
+
+    use TimestampableEntity;
 
     public function __construct()
     {
