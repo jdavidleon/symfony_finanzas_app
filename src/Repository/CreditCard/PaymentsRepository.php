@@ -2,21 +2,21 @@
 
 namespace App\Repository\CreditCard;
 
-use App\Entity\CreditCard\Payments;
+use App\Entity\CreditCard\CreditCardPayments;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
- * @method Payments|null find($id, $lockMode = null, $lockVersion = null)
- * @method Payments|null findOneBy(array $criteria, array $orderBy = null)
- * @method Payments[]    findAll()
- * @method Payments[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method CreditCardPayments|null find($id, $lockMode = null, $lockVersion = null)
+ * @method CreditCardPayments|null findOneBy(array $criteria, array $orderBy = null)
+ * @method CreditCardPayments[]    findAll()
+ * @method CreditCardPayments[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class PaymentsRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, Payments::class);
+        parent::__construct($registry, CreditCardPayments::class);
     }
 
     // /**
