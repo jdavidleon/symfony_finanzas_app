@@ -32,29 +32,35 @@ class CreditRepository extends ServiceEntityRepository
      * @return mixed
      * @throws \Exception
      */
-    public function getNextCreditsByUserByComingDays(User $user, int $comingDays = 15)
+    public function getNextCreditsByUser(User $user)
     {
-        $today = new \DateTime();
-        $comingDate = new \DateTime('+'.$comingDays.' Days');
-
         $qb = $this->createQueryBuilder('c')
             ->join('c.balance', 'b')
-            ->where('c.user = :user');
-        $qb->andWhere($qb->expr()->orX(
-            'c.paymentDay BETWEEN :today AND :coming',
-                'b.'
-        ))
+            ->where('c.user = :user')
+            ->andWhere('b.lastPayedMonth <> :actual_month')
             ->andWhere('b.status NOT IN (:status_invalid, :status_payed)')
             ->setParameters([
                 'user' => $user,
-                'today' => $today,
-                'coming' => $comingDate,
+                'actual_month' => $this->getActualMonth(),
                 'status_invalid' => CreditsBalance::INVALID,
                 'status_payed' => CreditsBalance::PAYED
             ])
         ;
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function getNextPaymentDay()
+    {
+
+    }
+
+    /**
+     * @return false|string
+     */
+    protected function getActualMonth()
+    {
+        return date('Y-m');
     }
 
 }

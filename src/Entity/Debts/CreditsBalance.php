@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * DebtsBalance
  *
  * @ORM\Table()
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="")
  */
 class CreditsBalance
 {

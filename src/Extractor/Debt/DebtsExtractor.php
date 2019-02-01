@@ -64,7 +64,7 @@ class DebtsExtractor
         foreach ($fixedCharges as $fixed){
             /** @var FixedCharges $fixed */
             $nextDebts[] = [
-                'type' => 'credit',
+                'type' => 'fixed_charges',
                 'id' => $fixed->getId(),
                 'pay_day' => $fixed->getPayDay()
             ];
@@ -89,7 +89,7 @@ class DebtsExtractor
      */
     public function getNextCreditsByUserAndComingDays(User $user)
     {
-        $this->creditRepository->getNextCreditsByUserByComingDays($user, 20);
+        $this->creditRepository->getNextCreditsByUser($user);
     }
 
     public function getActiveCreditsByUser(User $user)
