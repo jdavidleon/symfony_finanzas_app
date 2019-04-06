@@ -25,7 +25,7 @@ class CreditCard
     private $number;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="creditCards")
      * @ORM\JoinColumn(nullable=false)
      */
     private $owner;
