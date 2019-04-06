@@ -26,7 +26,6 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     /**
      * @param $user
      * @return mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getDuesPayments(User $user)
     {
@@ -37,7 +36,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->andWhere('p.legalDue = true')
             ->setParameter('user', $user)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
     }
 
 //    public function getDebtPaymentsByConsume($consume)

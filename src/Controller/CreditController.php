@@ -32,7 +32,7 @@ class CreditController extends Controller
     }
 
     /**
-     * @Route("/list", name="credit")
+     * @Route("/list", name="credit_list")
      * @param CreditCalculations $creditCalculations
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
