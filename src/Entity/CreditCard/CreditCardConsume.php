@@ -25,9 +25,9 @@ class CreditCardConsume
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User")
+     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCardUser", inversedBy="creditCardConsume")
      */
-    private $user;
+    private $creditCardUser;
 
     /**
      * @ORM\Column(type="float")
@@ -101,14 +101,14 @@ class CreditCardConsume
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getCreditCardUser(): ?CreditCardUser
     {
-        return $this->user;
+        return $this->creditCardUser;
     }
 
-    public function setUser(?User $user): self
+    public function setCreditCardUser(?CreditCardUser $creditCardUser): self
     {
-        $this->user = $user;
+        $this->creditCardUser = $creditCardUser;
 
         return $this;
     }

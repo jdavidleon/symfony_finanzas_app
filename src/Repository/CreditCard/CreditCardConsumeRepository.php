@@ -4,6 +4,7 @@ namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -23,18 +24,30 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditCardConsume::class);
     }
 
+    public function getCreditsCardConsumesByOwner(User $owner)
+    {
+        return $this->createQueryBuilder('ccc')
+            ->join('ccc.creditCard', 'creditCard')
+            ->join('creditCard.owner', 'owner')
+            ->where('owner = :owner')
+            ->setParameter('owner', $owner)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
     /**
-     * @param $user
+     * @param CreditCardUser $creditCardUser
      * @return mixed
      */
-    public function getDuesPayments(User $user)
+    public function getDuesPayments(CreditCardUser $creditCardUser)
     {
         return $this->createQueryBuilder('ccc')
             ->select('p.id')
             ->leftJoin('ccc.payments', 'p')
-            ->where('ccc.user = :user')
+            ->where('ccc.creditCardUser = :credit_card_user')
             ->andWhere('p.legalDue = true')
-            ->setParameter('user', $user)
+            ->setParameter('credit_card_user', $creditCardUser)
             ->getQuery()
             ->getResult();
     }

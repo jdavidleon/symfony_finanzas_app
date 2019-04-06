@@ -52,7 +52,7 @@ class CreditCalculations
      */
     public function getPendingDues(CreditCardConsume $creditCardConsume)
     {
-        return $creditCardConsume->getDues() - count( $this->cardConsumeRepository->getDuesPayments( $creditCardConsume->getUser() ) );
+        return $creditCardConsume->getDues() - count( $this->cardConsumeRepository->getDuesPayments( $creditCardConsume->getCreditCardUser() ) );
     }
 
     public function getActualDebt($payments, $amount)
@@ -123,8 +123,8 @@ class CreditCalculations
         $debtsByUser = [];
         /** @var CreditCardConsume $creditDebts */
         foreach ($creditCardConsume as $creditDebts ){
-            $debtsByUser[ $creditDebts->getUser()->getId() ][] = array(
-                'user' => $creditDebts->getUser()->getFullName(),
+            $debtsByUser[ $creditDebts->getCreditCardUser()->getId() ][] = array(
+                'user' => $creditDebts->getCreditCardUser()->getFullName(),
                 'Deuda' => $creditDebts->getId(),
                 'abono_capital' => $this->getNextCapitalAmount( $creditDebts ),
                 'intereses' => $this->getNextInterestAmount( $creditDebts ),

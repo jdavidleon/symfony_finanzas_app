@@ -11,12 +11,14 @@ namespace App\Form\Credit;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\Security\User;
+use App\Entity\CreditCard\CreditCardUser;
+use App\Repository\CreditCard\CreditCardUserRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -26,13 +28,18 @@ class CreditConsumeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('user', EntityType::class, [
-                'class' => 'App\Entity\Security\User',
-                'choice_label' => function (User $owner){
-                    return $owner->getName() . ' ' .$owner->getLastName();
+            ->add('creditCardUser', EntityType::class, [
+                'label' => 'label.credit_card.user',
+                'class' => CreditCardUser::class,
+                'query_builder' => function(CreditCardUserRepository $creditCardUserRepository) use ($options){
+                    return $creditCardUserRepository->getCreditCardUsersByOwner($options['credit_card_user']);
+                },
+                'choice_label' => function (CreditCardUser $owner){
+                    return $owner->getAlias();
                 }
             ])
             ->add('creditCard', EntityType::class, [
+                'label' => 'label.credit_card.card',
                 'class' => 'App\Entity\CreditCard\CreditCard',
                 'choice_label' => function (CreditCard $creditCard){
                     return  $creditCard->getNumber() . ' - ' .
@@ -41,21 +48,26 @@ class CreditConsumeType extends AbstractType
                             $creditCard->getFranchise() . ' )';
                 }
             ])
-            ->add('code')
+            ->add('code', TextType::class, [
+                'label' => 'label.credit_card.code'
+            ])
             ->add('amount', MoneyType::class, array(
+                'label' => 'label.credit_card.amount',
                 'currency' => 'COP'
             ))
             ->add('dues', NumberType::class)
             ->add('interest', NumberType::class, [
                 'scale' => 2
             ])
-            ->add('consume_at', DateType::class);
+            ->add('consume_at', DateType::class)
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
             'data_class' => CreditCardConsume::class,
+            'credit_card_user' => null
         ));
     }
 

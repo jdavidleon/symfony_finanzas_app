@@ -30,15 +30,6 @@ trait TimestampableEntity
     protected $deletedAt;
 
     /**
-     * TimestampableEntity constructor.
-     * @throws \Exception
-     */
-    public function __construct()
-    {
-        $this->createdAt = new \DateTime();
-    }
-
-    /**
      * Sets createdAt.
      *
      * @param  \DateTime $createdAt

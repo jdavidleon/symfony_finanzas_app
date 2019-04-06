@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
@@ -39,7 +39,9 @@ class CreditController extends Controller
      */
     public function index(CreditCalculations $creditCalculations)
     {
-        $creditConsume =  $this->creditCardConsumeRepository->findByUser(  $this->getUser() );
+        $creditConsume =  $this->creditCardConsumeRepository->getCreditsCardConsumesByOwner(
+            $this->getUser()
+        );
 
         $creditCardConsume = [];
         $actualPay = [];
@@ -64,9 +66,10 @@ class CreditController extends Controller
     public function createCreditConsume(Request $request)
     {
         $creditConsume = new CreditCardConsume();
-        $creditConsume->setUser( $this->getUser() );
 
-        $form = $this->createForm(CreditConsumeType::class, $creditConsume);
+        $form = $this->createForm(CreditConsumeType::class, $creditConsume, [
+            'credit_card_user' => $this->getUser()
+        ]);
 
         $form->handleRequest($request);
 
