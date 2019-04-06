@@ -35,6 +35,7 @@ class CreditController extends Controller
      * @Route("/list", name="credit")
      * @param CreditCalculations $creditCalculations
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function index(CreditCalculations $creditCalculations)
     {
@@ -88,6 +89,7 @@ class CreditController extends Controller
      * @Route("/credit-card-debt/{creditCard}", name="credit_card_debt")
      * @param CreditCalculations $creditCalculations
      * @param $creditCard
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function creditCardDetail(CreditCalculations $creditCalculations, $creditCard)
     {

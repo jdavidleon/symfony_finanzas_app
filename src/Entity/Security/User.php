@@ -68,7 +68,6 @@ class User implements UserInterface
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
-        $this->creditCardConsumes = new ArrayCollection();
         $this->creditCards = new ArrayCollection();
     }
 
@@ -234,5 +233,15 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    public function getFullName()
+    {
+        return $this->getName().' '.$this->getLastName();
+    }
+
+    public function __toString()
+    {
+        return $this->getFullName();
     }
 }

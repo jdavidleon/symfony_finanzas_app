@@ -4,6 +4,7 @@ namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
+use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -22,7 +23,12 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditCardConsume::class);
     }
 
-    public function getDuesPayments( $user )
+    /**
+     * @param $user
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getDuesPayments(User $user)
     {
         return $this->createQueryBuilder('ccc')
             ->select('p.id')
@@ -31,7 +37,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->andWhere('p.legalDue = true')
             ->setParameter('user', $user)
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
     }
 
 //    public function getDebtPaymentsByConsume($consume)

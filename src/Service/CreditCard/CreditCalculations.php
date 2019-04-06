@@ -34,6 +34,7 @@ class CreditCalculations
     /**
      * @param CreditCardConsume $creditCardConsume
      * @return float|int|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getNextCapitalAmount(CreditCardConsume $creditCardConsume)
     {
@@ -44,6 +45,11 @@ class CreditCalculations
         return $this->getActualDebt($payments, $amount) / $this->getPendingDues($creditCardConsume);
     }
 
+    /**
+     * @param CreditCardConsume $creditCardConsume
+     * @return int|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getPendingDues(CreditCardConsume $creditCardConsume)
     {
         return $creditCardConsume->getDues() - count( $this->cardConsumeRepository->getDuesPayments( $creditCardConsume->getUser() ) );
@@ -62,14 +68,27 @@ class CreditCalculations
 
     public function getNextInterestAmount(CreditCardConsume $creditCardConsume)
     {
-        return ( $this->getActualDebt($creditCardConsume->getPayments(), $creditCardConsume->getAmount()) * $creditCardConsume->getInterest() ) / 100;
+        return (
+            $this->getActualDebt($creditCardConsume->getPayments(), $creditCardConsume->getAmount()
+            ) * $creditCardConsume->getInterest() ) / 100;
     }
 
+    /**
+     * Retorna lo que va  apagar= Capital + Interes
+     * @param CreditCardConsume $creditCardConsume
+     * @return float|int|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getNextPaymentAmount(CreditCardConsume $creditCardConsume)
     {
         return $this->getNextCapitalAmount($creditCardConsume) + $this->getNextInterestAmount($creditCardConsume);
     }
 
+    /**
+     * @param CreditCardConsume $creditCardConsume
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function getDuesToPay(CreditCardConsume $creditCardConsume)
     {
         $payments = $creditCardConsume->getPayments();
@@ -97,15 +116,15 @@ class CreditCalculations
     /**
      * @param array $creditCardConsume
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getCreditCardDebtsByUser(Array $creditCardConsume)
     {
         $debtsByUser = [];
         /** @var CreditCardConsume $creditDebts */
         foreach ($creditCardConsume as $creditDebts ){
-            $user = $creditDebts->getUser()->getName().' '.$creditDebts->getUser()->getLastName();
             $debtsByUser[ $creditDebts->getUser()->getId() ][] = array(
-                'user' => $user,
+                'user' => $creditDebts->getUser()->getFullName(),
                 'Deuda' => $creditDebts->getId(),
                 'abono_capital' => $this->getNextCapitalAmount( $creditDebts ),
                 'intereses' => $this->getNextInterestAmount( $creditDebts ),
