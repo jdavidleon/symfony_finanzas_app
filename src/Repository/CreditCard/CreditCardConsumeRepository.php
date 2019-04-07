@@ -30,6 +30,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->join('ccc.creditCard', 'creditCard')
             ->join('creditCard.owner', 'owner')
             ->where('owner = :owner')
+            ->andWhere('ccc.delete_at IS  NULL')
             ->setParameter('owner', $owner)
             ->getQuery()
             ->getResult()

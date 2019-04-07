@@ -4,6 +4,7 @@ namespace App\Controller\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditCardType;
 use App\Form\Credit\CreditConsumeType;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
@@ -33,11 +34,10 @@ class CreditController extends Controller
 
     /**
      * @Route("/list", name="credit_list")
-     * @param CreditCalculations $creditCalculations
+     * @param CreditCardConsumeExtractor $creditCardConsumeExtractor
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function index(CreditCalculations $creditCalculations)
+    public function index(CreditCardConsumeExtractor $creditCardConsumeExtractor)
     {
         $creditConsume =  $this->creditCardConsumeRepository->getCreditsCardConsumesByOwner(
             $this->getUser()
@@ -46,10 +46,10 @@ class CreditController extends Controller
         $creditCardConsume = [];
         $actualPay = [];
         foreach ($creditConsume as $item){
-            $creditCardConsume[] = $creditCalculations->getDuesToPay( $item );
-            $actualPay[] = $creditCalculations->getNextPaymentAmount( $item ) ;
+            $creditCardConsume[] = $creditCardConsumeExtractor->getPendingDuesToPay( $item );
+            $actualPay[] = $creditCardConsumeExtractor->getNextPaymentAmount( $item ) ;
         }
-        dump(  $creditCardConsume  , $actualPay); die;
+        dump(  $creditCardConsume  , $actualPay, $creditCardConsumeExtractor->s); die;
         return $this->render('credit/index.html.twig', [
             'controller_name' => 'CreditController',
             'credit_consume' => $creditCardConsume,
