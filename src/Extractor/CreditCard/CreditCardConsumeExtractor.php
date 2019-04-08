@@ -8,9 +8,8 @@
 
 namespace App\Extractor\CreditCard;
 
-use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardUser;
+use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
 use App\Service\CreditCard\CreditCalculations;
 
@@ -132,11 +131,13 @@ class CreditCardConsumeExtractor
     }
 
     /**
-     * @param array $creditCardConsume
+     * @param User $owner
      * @return array
      */
-    public function getCreditCardDebtsByUser(Array $creditCardConsume)
+    public function getCreditCardDebtsForUsersByOwner(User $owner)
     {
+        $creditCardConsume = $this->cardConsumeRepository->getCreditsCardConsumesByOwner($owner);
+
         $debtsByUser = [];
         /** @var CreditCardConsume $creditDebts */
         foreach ($creditCardConsume as $creditDebts ){
@@ -156,25 +157,25 @@ class CreditCardConsumeExtractor
      * @param array $debtsByUser
      * @return array
      */
-    public function getDebtsByUserInCreditCard(Array $debtsByUser)
-    {
-        $userDebt = [];
-        foreach ($debtsByUser as $key => $userDebts ){
-            $total = $capital = $interest = 0;
-            foreach ( $userDebts as $debt ){
-                $capital += $debt['capital_payment'];
-                $interest += $debt['interest'];
-                $total += $debt['total'];
-            }
-            $userDebt[$key] = array(
-                'user' => $userDebts[0]['user'],
-                'total_capital' => $capital,
-                'total_interest' => $interest,
-                'total_payment' => $total
-            );
-        }
-
-        return $userDebt;
-    }
+//    public function getDebtsByUserInCreditCard(Array $debtsByUser)
+//    {
+//        $userDebt = [];
+//        foreach ($debtsByUser as $key => $userDebts ){
+//            $total = $capital = $interest = 0;
+//            foreach ( $userDebts as $debt ){
+//                $capital += $debt['capital_payment'];
+//                $interest += $debt['interest'];
+//                $total += $debt['total'];
+//            }
+//            $userDebt[$key] = array(
+//                'user' => $userDebts[0]['user'],
+//                'total_capital' => $capital,
+//                'total_interest' => $interest,
+//                'total_payment' => $total
+//            );
+//        }
+//
+//        return $userDebt;
+//    }
 
 }

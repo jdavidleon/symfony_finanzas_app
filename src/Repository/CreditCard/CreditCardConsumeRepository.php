@@ -2,6 +2,7 @@
 
 namespace App\Repository\CreditCard;
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
@@ -22,6 +23,18 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, CreditCardConsume::class);
+    }
+
+
+    public function getCreditConsumesByCreditCard(CreditCard $creditCard)
+    {
+        return $this->createQueryBuilder('ccc')
+            ->where('ccc.creditCard = :credit_card')
+            ->andWhere('ccc.delete_at IS NULL')
+            ->setParameter('credit_card', $creditCard)
+            ->getQuery()
+            ->getResult()
+            ;
     }
 
     public function getCreditsCardConsumesByOwner(User $owner)
@@ -51,6 +64,17 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->setParameter('credit_card_user', $creditCardUser)
             ->getQuery()
             ->getResult();
+    }
+
+    public function getCreditCardConsumeByCreditCardUser(CreditCardUser $cardUser)
+    {
+        return $this->createQueryBuilder('ccc')
+            ->where('ccc.creditCardUser = :card_user')
+            ->andWhere('ccc.delete_at IS NULL')
+            ->setParameter('card_user', $cardUser)
+            ->getQuery()
+            ->getResult()
+            ;
     }
 
 //    public function getDebtPaymentsByConsume($consume)

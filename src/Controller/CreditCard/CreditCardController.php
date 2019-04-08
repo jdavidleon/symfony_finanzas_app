@@ -11,15 +11,41 @@ namespace App\Controller\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Form\Credit\CreditCardType;
+use App\Repository\CreditCard\CreditCardRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/credit-card")
+ * @Route("/creditcard")
  * */
 class CreditCardController extends Controller
 {
+
+    /**
+     * @Route("/list", name="credit_card_list")
+     * @param CreditCardRepository $creditCardRepository
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function list(CreditCardRepository $creditCardRepository)
+    {
+        $creditCards = $creditCardRepository->findBy([
+            'owner' => $this->getUser()
+        ]);
+
+        foreach ($creditCards as $card){
+            foreach ($card->getCreditCardConsumes() as $consume){
+                foreach ($consume->getPayments() as $payment){
+                    dump($payment->getAmount());
+                }
+            }
+        }
+
+        dump($creditCards); die;
+        return $this->renderView('base.html.twig', [
+            'credit_cards' => $creditCards
+        ]);
+    }
 
     /**
      * @Route("/new", name="credit_card_new")

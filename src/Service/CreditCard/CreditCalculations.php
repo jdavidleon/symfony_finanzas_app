@@ -91,6 +91,5 @@ class CreditCalculations
         $today = new \DateTime('now');
 
     }
-
 }
 
