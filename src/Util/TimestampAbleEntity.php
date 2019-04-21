@@ -9,7 +9,7 @@
 namespace App\Util;
 
 
-trait TimestampableEntity
+trait TimestampAbleEntity
 {
     /**
      * @var \DateTime

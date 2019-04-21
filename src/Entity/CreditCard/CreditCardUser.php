@@ -3,7 +3,7 @@
 namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -76,7 +76,7 @@ class CreditCardUser
      * */
     private $creditCardConsume;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     /**
      * CreditCardUser constructor.

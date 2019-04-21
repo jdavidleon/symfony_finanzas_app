@@ -2,7 +2,7 @@
 
 namespace App\Entity\Debts;
 
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -85,7 +85,7 @@ class CreditsBalance
      * */
     private $status = self::OPEN;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {
