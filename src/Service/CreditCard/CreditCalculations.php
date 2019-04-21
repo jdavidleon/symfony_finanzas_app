@@ -16,7 +16,7 @@ class CreditCalculations
      * @param int $amount
      * @return int
      */
-    public function calculateActualCreditCardDebt(int $amount,array $payments = []): int
+    public function calculateActualCreditCardConsumeDebt(int $amount, array $payments = []): int
     {
         return $amount - array_sum($payments);
     }
@@ -54,7 +54,7 @@ class CreditCalculations
      * @param int $actualDueNumber
      * @return array
      */
-    public function calculatePendingDuesToPay(
+    public function calculatePendingPayments(
         int $actualDebt,
         int $interest,
         int $pendingDues,
@@ -77,9 +77,9 @@ class CreditCalculations
         return $duesToPay;
     }
 
-    public function sumNextPaymentsAmount(array $actualPayments = [])
+    public function sumArrayValues(array $values = [])
     {
-        return array_sum( $actualPayments );
+        return array_sum( $values );
     }
 
     /**

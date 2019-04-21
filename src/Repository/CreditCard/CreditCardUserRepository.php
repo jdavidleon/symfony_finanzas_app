@@ -2,9 +2,8 @@
 
 namespace App\Repository\CreditCard;
 
-use App\Entity\CreditCard\CreditCardPayments;
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardUser;
-use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -21,13 +20,38 @@ class CreditCardUserRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditCardUser::class);
     }
 
-    public function getCreditCardUsersByOwner($owner)
+    public function getByOwnerQB($owner)
     {
         return $this->createQueryBuilder('ccu')
             ->where('ccu.parent = :parent')
             ->andWhere('ccu.deletedAt IS NULL')
             ->setParameter('parent', $owner)
             ;
+    }
+
+    public function getByOwner($owner)
+    {
+        return $this->getByOwnerQB($owner)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param CreditCard $card
+     * @return CreditCardUser[]
+     */
+    public function getByCreditCard(CreditCard $card)
+    {
+        return $this->createQueryBuilder('ccu')
+            ->join('ccu.creditCardConsume', 'ccc')
+            ->join('ccc.creditCard', 'cc')
+            ->where('cc = :credit_card')
+            ->andWhere('ccc.delete_at IS NULL')
+            ->setParameters([
+                'credit_card' => $card
+            ])
+            ->getQuery()
+            ->getResult();
     }
 
     // /**

@@ -10,10 +10,12 @@ namespace App\Controller\CreditCard;
 
 
 use App\Entity\CreditCard\CreditCard;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Form\Credit\CreditCardType;
 use App\Repository\CreditCard\CreditCardRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -25,7 +27,7 @@ class CreditCardController extends Controller
     /**
      * @Route("/list", name="credit_card_list")
      * @param CreditCardRepository $creditCardRepository
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function list(CreditCardRepository $creditCardRepository)
     {
@@ -50,7 +52,7 @@ class CreditCardController extends Controller
     /**
      * @Route("/new", name="credit_card_new")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function createCreditCard(Request $request)
     {
@@ -70,6 +72,24 @@ class CreditCardController extends Controller
 
         return $this->render('credit/credit_card_new.html.twig', [
             'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/card/{card}", name="credit_card_detail")
+     *
+     * @param CreditCard $card
+     * @return string
+     */
+    public function creditCardDetail(CreditCard $card)
+    {
+        $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
+
+        $cardUsers = $repo->getByCreditCard($card);
+
+        return $this->render('credit/credit_card_detail.html.twig',[
+            'card' => $card,
+            'card_users' => $cardUsers
         ]);
     }
 }

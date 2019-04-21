@@ -32,7 +32,7 @@ class CreditConsumeType extends AbstractType
                 'label' => 'label.credit_card.user',
                 'class' => CreditCardUser::class,
                 'query_builder' => function(CreditCardUserRepository $creditCardUserRepository) use ($options){
-                    return $creditCardUserRepository->getCreditCardUsersByOwner($options['credit_card_user']);
+                    return $creditCardUserRepository->getByOwnerQB($options['credit_card_user']);
                 },
                 'choice_label' => function (CreditCardUser $owner){
                     return $owner->getAlias();

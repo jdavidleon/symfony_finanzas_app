@@ -4,7 +4,6 @@ namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -29,22 +28,32 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     public function getCreditConsumesByCreditCard(CreditCard $creditCard)
     {
         return $this->createQueryBuilder('ccc')
+            ->join('ccc.creditCardUser', 'creditCardUser')
             ->where('ccc.creditCard = :credit_card')
             ->andWhere('ccc.delete_at IS NULL')
-            ->setParameter('credit_card', $creditCard)
+            ->andWhere('ccc.status <> :payed')
+            ->setParameters([
+                'credit_card' => $creditCard,
+                'payed' => CreditCardConsume::STATUS_PAYED
+            ])
             ->getQuery()
             ->getResult()
             ;
     }
 
-    public function getCreditsCardConsumesByOwner(User $owner)
+    public function getByOwner(User $owner)
     {
         return $this->createQueryBuilder('ccc')
             ->join('ccc.creditCard', 'creditCard')
+            ->join('ccc.creditCardUser', 'creditCardUser')
             ->join('creditCard.owner', 'owner')
             ->where('owner = :owner')
             ->andWhere('ccc.delete_at IS  NULL')
-            ->setParameter('owner', $owner)
+            ->andWhere('ccc.status <> :payed_status')
+            ->setParameters([
+                'owner' => $owner,
+                'payed_status' => CreditCardConsume::STATUS_PAYED
+            ])
             ->getQuery()
             ->getResult()
             ;
@@ -66,13 +75,29 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getCreditCardConsumeByCreditCardUser(CreditCardUser $cardUser)
+    /**
+     * @param CreditCard $card
+     * @param CreditCardUser $cardUser
+     * @return CreditCardConsume[]
+     */
+    public function getCreditCardConsumeByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null)
     {
-        return $this->createQueryBuilder('ccc')
-            ->where('ccc.creditCardUser = :card_user')
+        $qb = $this->createQueryBuilder('ccc')
+            ->andWhere('ccc.creditCardUser = :card_user')
             ->andWhere('ccc.delete_at IS NULL')
-            ->setParameter('card_user', $cardUser)
-            ->getQuery()
+            ->andWhere('ccc.status <> :payed_status')
+            ->setParameters([
+                'card_user' => $cardUser,
+                'payed_status' => CreditCardConsume::STATUS_PAYED
+            ]);
+
+        if ( null != $card ){
+            $qb
+                ->andWhere('ccc.creditCard = :card')
+                ->setParameter('card', $card);
+        }
+
+        return $qb->getQuery()
             ->getResult()
             ;
     }

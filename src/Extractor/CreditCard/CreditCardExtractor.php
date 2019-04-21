@@ -26,10 +26,12 @@ class CreditCardExtractor
         $this->cardRepository = $cardRepository;
     }
 
-    public function getCreditCardsByOwner(User $owner)
+    public function extractByOwner(User $owner)
     {
         return $this->cardRepository->findBy([
            'owner' => $owner 
         ]);
     }
+
+
 }

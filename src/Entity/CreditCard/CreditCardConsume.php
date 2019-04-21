@@ -2,7 +2,6 @@
 
 namespace App\Entity\CreditCard;
 
-use App\Entity\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -26,6 +25,7 @@ class CreditCardConsume
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCardUser", inversedBy="creditCardConsume")
+     * @return CreditCardUser
      */
     private $creditCardUser;
 
@@ -77,6 +77,7 @@ class CreditCardConsume
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCard", inversedBy="creditCardConsumes")
      * @ORM\JoinColumn(nullable=false)
+     * @return CreditCard $creditCard
      */
     private $creditCard;
 

@@ -2,15 +2,16 @@
 
 namespace App\Controller\CreditCard;
 
-use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
-use App\Form\Credit\CreditCardType;
+use App\Extractor\CreditCard\CreditCardExtractor;
 use App\Form\Credit\CreditConsumeType;
-use App\Repository\CreditCard\CreditCardConsumeRepository;
-use App\Service\CreditCard\CreditCalculations;
-use Symfony\Component\HttpFoundation\Request;
+use Exception;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -19,49 +20,34 @@ use Symfony\Component\Routing\Annotation\Route;
  * */
 class CreditController extends Controller
 {
-
     /**
-     * @var CreditCardConsumeRepository
-     */
-    private $creditCardConsumeRepository;
-
-    public function __construct(
-        CreditCardConsumeRepository $creditCardConsumeRepository
-    )
-    {
-        $this->creditCardConsumeRepository = $creditCardConsumeRepository;
-    }
-
-    /**
+     * @Security("is_granted('ROLE_USER')")
      * @Route("/list", name="credit_list")
      * @param CreditCardConsumeExtractor $creditCardConsumeExtractor
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param CreditCardExtractor $cardExtractor
+     * @return Response
      */
-    public function index(CreditCardConsumeExtractor $creditCardConsumeExtractor)
+    public function index(CreditCardConsumeExtractor $creditCardConsumeExtractor, CreditCardExtractor $cardExtractor)
     {
-        $creditConsume =  $this->creditCardConsumeRepository->getCreditsCardConsumesByOwner(
-            $this->getUser()
-        );
+        $creditCardConsumes = $creditCardConsumeExtractor->extractByOwner( $this->getUser() );
+        $creditCards = $cardExtractor->extractByOwner( $this->getUser() );
 
-        $creditCardConsume = [];
-        $actualPay = [];
-        foreach ($creditConsume as $item){
-            $creditCardConsume[] = $creditCardConsumeExtractor->getPendingDuesToPay( $item );
-            $actualPay[] = $creditCardConsumeExtractor->getNextPaymentAmount( $item ) ;
-        }
-        dump(  $creditCardConsume  , $actualPay, $creditCardConsumeExtractor->s); die;
+        $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
+        $cardUsers = $repo->getByOwner( $this->getUser() );
+        dump($cardUsers);
+
         return $this->render('credit/index.html.twig', [
-            'controller_name' => 'CreditController',
-            'credit_consume' => $creditCardConsume,
-            'actual_pay' => $actualPay
+            'credit_cards' => $creditCards,
+            'consumes' => $creditCardConsumes,
+            'card_users' => $cardUsers
         ]);
     }
 
     /**
      * @Route("/new", name="credit_new")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function createCreditConsume(Request $request)
     {
@@ -90,18 +76,16 @@ class CreditController extends Controller
 
     /**
      * @Route("/credit-card-debt/{creditCard}", name="credit_card_debt")
-     * @param CreditCalculations $creditCalculations
+     * @param CreditCardConsumeExtractor $creditCardConsumeExtractor
      * @param $creditCard
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function creditCardDetail(CreditCalculations $creditCalculations, $creditCard)
+    public function creditCardDetail(CreditCardConsumeExtractor $creditCardConsumeExtractor, $creditCard)
     {
-        $creditCardDebts = $this->creditCardConsumeRepository->findByCreditCard( $creditCard );
+        $repo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
+        $creditCardDebts = $repo->findByCreditCard( $creditCard );
 
-        $debtsByUser = $creditCalculations->getCreditCardDebtsByUser( $creditCardDebts );
-        $resumeByUsers = $creditCalculations->getDebtsByUserInCreditCard( $debtsByUser );
+        $debtsByUser = $creditCardConsumeExtractor->extractActualDebt( $creditCardDebts );
 
-        dump($resumeByUsers);
         dump($debtsByUser); die;
 
     }

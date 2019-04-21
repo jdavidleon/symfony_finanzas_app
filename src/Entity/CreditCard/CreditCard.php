@@ -42,6 +42,7 @@ class CreditCard
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="creditCard")
+     * @return CreditCardConsume[]
      */
     private $creditCardConsumes;
 

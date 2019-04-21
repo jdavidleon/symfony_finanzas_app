@@ -19,6 +19,18 @@ class CreditCardRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditCard::class);
     }
 
+    public function getDebtsByCreditCard(CreditCard $creditCard)
+    {
+        return $this->createQueryBuilder('cc')
+            ->where('cc = :credit_card')
+            ->andWhere('cc.delete_at IS NULL')
+            ->setParameters([
+                'credit_card' => $creditCard
+            ])
+            ->getQuery()
+            ->getResult();
+    }
+
     // /**
     //  * @return CreditCard[] Returns an array of CreditCard objects
     //  */
