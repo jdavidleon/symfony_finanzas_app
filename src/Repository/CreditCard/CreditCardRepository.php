@@ -3,7 +3,9 @@
 namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
+use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -29,6 +31,21 @@ class CreditCardRepository extends ServiceEntityRepository
             ])
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @param User $owner
+     * @return QueryBuilder
+     */
+    public function getByOwnerQB(User $owner)
+    {
+        return $this->createQueryBuilder('cc')
+            ->where('cc.owner = :owner')
+            ->andWhere('cc.deletedAt IS NULL')
+            ->setParameters([
+                'owner' => $owner
+            ])
+            ;
     }
 
     // /**

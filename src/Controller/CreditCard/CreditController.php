@@ -53,7 +53,7 @@ class CreditController extends Controller
         $creditConsume = new CreditCardConsume();
 
         $form = $this->createForm(CreditConsumeType::class, $creditConsume, [
-            'credit_card_user' => $this->getUser()
+            'owner' => $this->getUser()
         ]);
 
         $form->handleRequest($request);
@@ -65,7 +65,7 @@ class CreditController extends Controller
             $em->flush();
 
             $this->addFlash('success', 'Crédito agregado');
-            $this->redirectToRoute('credit');
+            $this->redirectToRoute('credit_new');
         }
 
         return $this->render('credit/new.html.twig', [

@@ -22,12 +22,6 @@ class CreditCardType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('owner', EntityType::class, [
-                'class' => 'App\Entity\Security\User',
-                'choice_label' => function (User $owner){
-                    return $owner->getName() . ' ' .$owner->getLastName();
-                }
-            ])
             ->add('number')
             ->add('franchise')
             ->add('description');

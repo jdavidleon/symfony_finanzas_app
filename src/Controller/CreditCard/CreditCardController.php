@@ -57,6 +57,7 @@ class CreditCardController extends Controller
     public function createCreditCard(Request $request)
     {
         $creditCard = new CreditCard();
+        $creditCard->setOwner( $this->getUser() );
         $form = $this->createForm(CreditCardType::class, $creditCard);
 
         $form->handleRequest($request);
