@@ -33,8 +33,7 @@ class CreditController extends Controller
         $creditCards = $cardExtractor->extractByOwner( $this->getUser() );
 
         $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
-        $cardUsers = $repo->getByOwner( $this->getUser() );
-        dump($cardUsers);
+        $cardUsers = $repo->getByOwner( $this->getUser(), true );
 
         return $this->render('credit/index.html.twig', [
             'credit_cards' => $creditCards,

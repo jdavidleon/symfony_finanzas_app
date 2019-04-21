@@ -67,7 +67,7 @@ class CreditCardController extends Controller
             $em->flush();
 
             $this->addFlash('success', 'Tarjeta de crédito creada');
-            $this->redirectToRoute('credit');
+            $this->redirectToRoute('credit_list');
         }
 
         return $this->render('credit/credit_card_new.html.twig', [

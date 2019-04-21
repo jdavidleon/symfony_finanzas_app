@@ -3,6 +3,7 @@
 namespace App\Repository\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
+use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -29,9 +30,17 @@ class CreditCardUserRepository extends ServiceEntityRepository
             ;
     }
 
-    public function getByOwner($owner)
+    public function getByOwner($owner, $activeDebts = false)
     {
-        return $this->getByOwnerQB($owner)
+        $qb = $this->getByOwnerQB($owner);
+
+        if ($activeDebts){
+            $qb
+                ->join('ccu.creditCardConsume', 'ccc')
+                ;
+        }
+
+        return $qb
             ->getQuery()
             ->getResult();
     }
@@ -46,9 +55,11 @@ class CreditCardUserRepository extends ServiceEntityRepository
             ->join('ccu.creditCardConsume', 'ccc')
             ->join('ccc.creditCard', 'cc')
             ->where('cc = :credit_card')
+            ->andWhere('ccc.status <> :payed')
             ->andWhere('ccc.delete_at IS NULL')
             ->setParameters([
-                'credit_card' => $card
+                'credit_card' => $card,
+                'payed' => CreditCardConsume::STATUS_PAYED
             ])
             ->getQuery()
             ->getResult();
