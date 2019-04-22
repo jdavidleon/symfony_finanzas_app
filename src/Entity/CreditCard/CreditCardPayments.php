@@ -2,10 +2,11 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="CreditCardUserRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\CreditCard\PaymentsRepository")
  */
 class CreditCardPayments
 {
@@ -21,6 +22,11 @@ class CreditCardPayments
      * @ORM\JoinColumn(nullable=false)
      */
     private $creditConsume;
+
+    /**
+     * @ORM\Column(type="string")
+     * */
+    private $monthPayed;
 
     /**
      * @ORM\Column(type="float")
@@ -46,6 +52,8 @@ class CreditCardPayments
      * @ORM\Column(type="boolean")
      * */
     private $legalDue = true;
+
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {
@@ -126,5 +134,21 @@ class CreditCardPayments
     public function setLegalDue($legalDue): void
     {
         $this->legalDue = $legalDue;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMonthPayed()
+    {
+        return $this->monthPayed;
+    }
+
+    /**
+     * @param mixed $monthPayed
+     */
+    public function setMonthPayed($monthPayed): void
+    {
+        $this->monthPayed = $monthPayed;
     }
 }

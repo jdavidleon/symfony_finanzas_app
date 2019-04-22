@@ -13,6 +13,7 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Repository\CreditCard\PaymentsRepository;
 use App\Service\CreditCard\CreditCalculations;
 
 
@@ -26,14 +27,20 @@ class CreditCardConsumeExtractor
      * @var CreditCalculations
      */
     private $calculations;
+    /**
+     * @var PaymentsRepository
+     */
+    private $paymentsRepository;
 
     public function __construct(
         CreditCardConsumeRepository $cardConsumeRepository,
+        PaymentsRepository $paymentsRepository,
         CreditCalculations $calculations
     )
     {
         $this->cardConsumeRepository = $cardConsumeRepository;
         $this->calculations = $calculations;
+        $this->paymentsRepository = $paymentsRepository;
     }
 
     /**
@@ -42,7 +49,7 @@ class CreditCardConsumeExtractor
      */
     public function extractActualDebt(CreditCardConsume $creditCardConsume): int
     {
-        $pays = $creditCardConsume->getPayments();
+        $pays = $this->paymentsRepository->getByConsume($creditCardConsume);
 
         $payments = [];
         foreach ($pays as $pay) {
@@ -92,9 +99,16 @@ class CreditCardConsumeExtractor
      */
     public function getPendingDues(CreditCardConsume $creditCardConsume)
     {
+        $dues = $creditCardConsume->getDues();
+        $payedDues = count( $this->paymentsRepository->getByConsume($creditCardConsume, true) );
+
+        if ($payedDues >= $dues ){
+            $payedDues = 0;
+        }
+
         return $this->calculations->calculateNumberOfPendingDues(
-            $creditCardConsume->getDues(),
-            count( $this->cardConsumeRepository->getDuesPayments( $creditCardConsume->getCreditCardUser() ) )
+            $dues,
+            $payedDues
         );
     }
 

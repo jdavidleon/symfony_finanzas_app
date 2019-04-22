@@ -30,6 +30,11 @@ class CreditCardConsume
     private $creditCardUser;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     * */
+    private $description;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $amount;
@@ -263,5 +268,21 @@ class CreditCardConsume
         }
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param mixed $description
+     */
+    public function setDescription($description): void
+    {
+        $this->description = $description;
     }
 }

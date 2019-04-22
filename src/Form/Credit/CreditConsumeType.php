@@ -54,6 +54,9 @@ class CreditConsumeType extends AbstractType
                 },
                 'placeholder' => '-- Select --'
             ])
+            ->add('description', TextType::class, [
+                'label' => 'label.credit_consume.description'
+            ])
             ->add('code', TextType::class, [
                 'label' => 'label.credit_card.code'
             ])

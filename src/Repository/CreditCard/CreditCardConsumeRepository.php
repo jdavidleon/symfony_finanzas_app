@@ -25,24 +25,55 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     }
 
 
-    public function getCreditConsumesByCreditCard(CreditCard $creditCard)
+    public function getCreditConsumesByCreditCard(CreditCard $creditCard, $month = '')
     {
-        return $this->createQueryBuilder('ccc')
-            ->join('ccc.creditCardUser', 'creditCardUser')
-            ->where('ccc.creditCard = :credit_card')
-            ->andWhere('ccc.delete_at IS NULL')
-            ->andWhere('ccc.status <> :payed')
-            ->setParameters([
-                'credit_card' => $creditCard,
-                'payed' => CreditCardConsume::STATUS_PAYED
-            ])
-            ->getQuery()
+        $query = $this->getEntityManager()
+            ->createQuery(
+                "
+SELECT
+	ccc
+FROM
+	\App\Entity\CreditCard\CreditCardConsume ccc
+WHERE
+	ccc.creditCard = :credit_card
+	AND ccc.delete_at IS NULL 
+	AND ccc.status IN ( :paying )
+	AND 
+	NOT EXISTS (
+		SELECT ccp
+		FROM \App\Entity\CreditCard\CreditCardPayments ccp
+        WHERE
+		ccp.creditConsume = ccc.id
+		AND
+		ccp.monthPayed = :month
+		AND 
+		ccp.deletedAt IS NULL
+	)
+"
+            );
+
+        $query->setParameters([
+            'credit_card' => $creditCard,
+            'paying' => [
+                CreditCardConsume::STATUS_PAYING,
+                CreditCardConsume::STATUS_MORA
+            ],
+            'month' => $month
+        ]);
+
+        return $query
             ->getResult()
             ;
     }
 
     public function getByOwner(User $owner)
     {
+        $query = $this->getEntityManager()
+            ->createQuery('
+            
+            ');
+
+
         return $this->createQueryBuilder('ccc')
             ->join('ccc.creditCard', 'creditCard')
             ->join('ccc.creditCardUser', 'creditCardUser')
@@ -57,22 +88,6 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
             ;
-    }
-
-    /**
-     * @param CreditCardUser $creditCardUser
-     * @return mixed
-     */
-    public function getDuesPayments(CreditCardUser $creditCardUser)
-    {
-        return $this->createQueryBuilder('ccc')
-            ->select('p.id')
-            ->leftJoin('ccc.payments', 'p')
-            ->where('ccc.creditCardUser = :credit_card_user')
-            ->andWhere('p.legalDue = true')
-            ->setParameter('credit_card_user', $creditCardUser)
-            ->getQuery()
-            ->getResult();
     }
 
     /**
