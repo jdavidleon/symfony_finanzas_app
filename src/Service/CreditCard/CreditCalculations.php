@@ -83,13 +83,14 @@ class CreditCalculations
     }
 
     /**
-     * @param $paymentDay
-     * @throws \Exception
+     * @param $paymentMonth
+     * @return string
      */
-    public function calculateNextPaymentDate($paymentDay)
+    public function calculateNextPaymentDate($paymentMonth = null)
     {
-        $today = new \DateTime('now');
+        $actualMonth = $paymentMonth ?? date('m-Y');
 
+        return date('j') < 15 ? $actualMonth : date("m-Y",strtotime($actualMonth."+ 1 Month"));
     }
 }
 

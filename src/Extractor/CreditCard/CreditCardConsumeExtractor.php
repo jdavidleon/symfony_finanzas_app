@@ -148,11 +148,12 @@ class CreditCardConsumeExtractor
 
     /**
      * @param User $owner
+     * @param null $month
      * @return array
      */
-    public function extractByOwner(User $owner)
+    public function extractByOwner(User $owner, $month = null)
     {
-        return $this->cardConsumeRepository->getByOwner($owner);
+        return $this->cardConsumeRepository->getByOwner($owner, $month);
     }
 
     public function extractByCreditCard(CreditCard $card, $month = null)
@@ -166,15 +167,15 @@ class CreditCardConsumeExtractor
         return $this->sumConsumes($consumes);
     }
 
-    public function extractTotalToPayByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null)
+    public function extractTotalToPayByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
-        $consumes = $this->cardConsumeRepository->getCreditCardConsumeByCreditCardUserAndCard($cardUser, $card);
+        $consumes = $this->cardConsumeRepository->getByCardUserAndCard($cardUser, $card, $month);
         return $this->sumConsumes($consumes);
     }
 
     public function extractTotalToPayByOwner(User $owner)
     {
-        $consumes = $this->extractByOwner($owner);
+        $consumes = $this->extractByOwner($owner, $this->extractNextPaymentMonth());
         return $this->sumConsumes($consumes);
     }
 
@@ -189,6 +190,11 @@ class CreditCardConsumeExtractor
             $total += $this->extractNextPaymentAmount($consume);
         }
         return $total;
+    }
+
+    public function extractNextPaymentMonth($month = null): string
+    {
+        return $this->calculations->calculateNextPaymentDate($month);
     }
 
     /**

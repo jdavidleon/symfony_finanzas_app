@@ -3,7 +3,6 @@
 
 namespace App\Twig\Extension;
 
-
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
@@ -32,6 +31,7 @@ class CreditCardConsumeExtension extends AbstractExtension
           new TwigFunction('totalByCreditCard', [$this, 'totalByCreditCard']),
           new TwigFunction('totalByCreditCardUser', [$this, 'totalByCreditCardUserAndCard']),
           new TwigFunction('totalByOwner', [$this, 'totalByOwner']),
+          new TwigFunction('nextPaymentMonth', [$this, 'nextPaymentMonth']),
         ];
     }
 
@@ -40,13 +40,18 @@ class CreditCardConsumeExtension extends AbstractExtension
         return $this->consumeExtractor->extractTotalToPayByCreditCard( $card, $month );
     }
 
-    public function totalByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null)
+    public function totalByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
-        return $this->consumeExtractor->extractTotalToPayByCreditCardUserAndCard($cardUser, $card);
+        return $this->consumeExtractor->extractTotalToPayByCreditCardUserAndCard($cardUser, $card, $month);
     }
 
     public function totalByOwner(User $user)
     {
         return $this->consumeExtractor->extractTotalToPayByOwner($user);
+    }
+
+    public function nextPaymentMonth($month = null)
+    {
+        return $this->consumeExtractor->extractNextPaymentMonth($month);
     }
 }

@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 {% set totalByOwner = totalByOwner(app.user)|number_format(2) %}
+{% set payMonth = nextPaymentMonth() %}
 
 {% block title %}Hello !{% endblock %}
 
@@ -16,7 +17,7 @@
         <tr>
             <td>{{ card.id }}</td>
             <td>{{ card.franchise ~ ' (' ~ card.description ~ ') ' }}</td>
-            <td>$ {{ totalByCreditCard( card )|number_format(2) }}</td>
+            <td>$ {{ totalByCreditCard( card, payMonth )|number_format(2) }}</td>
             <td><a href="{{ path('credit_card_detail',{'card': card.id} ) }}">Detalles</a></td>
         </tr>
         {% endfor %}
@@ -37,7 +38,7 @@
             <tr>
                 <td>{{ user.id }}</td>
                 <td>{{ user.alias }}</td>
-                <td>{{ totalByCreditCardUser(user)|number_format(2) }}</td>
+                <td>{{ totalByCreditCardUser(app.user, payMonth)|number_format(2) }}</td>
                 <td><a href="">Detalles</a></td>
             </tr>
         {% endfor %}

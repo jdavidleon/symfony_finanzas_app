@@ -7,6 +7,7 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -23,7 +24,6 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, CreditCardConsume::class);
     }
-
 
     /**
      * @param CreditCard $creditCard
@@ -44,34 +44,16 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ]
             ]);
 
-        if ( null != $month && is_string( $month ) ){
-            $qb
-                ->andWhere(
-                    $qb->expr()->not(
-                        $qb->expr()->exists('
-                        SELECT ccp
-                    FROM \App\Entity\CreditCard\CreditCardPayments ccp
-                    WHERE
-                    ccp.creditConsume = ccc.id
-                    AND
-                    ccp.monthPayed = :month
-                    AND 
-                    ccp.deletedAt IS NULL
-                        ')
-                    )
-                )
-                ->setParameter('month', $month)
-            ;
-        }
+        $qb = $this->addPayedMonthConditional($qb, $month);
 
         return $qb
             ->getQuery()
             ->getResult();
     }
 
-    public function getByOwner(User $owner)
+    public function getByOwner(User $owner, $month = null)
     {
-        return $this->createQueryBuilder('ccc')
+        $qb = $this->createQueryBuilder('ccc')
             ->join('ccc.creditCard', 'creditCard')
             ->join('ccc.creditCardUser', 'creditCardUser')
             ->join('creditCard.owner', 'owner')
@@ -81,18 +63,23 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->setParameters([
                 'owner' => $owner,
                 'payed_status' => CreditCardConsume::STATUS_PAYED
-            ])
+            ]);
+
+        $qb = $this->addPayedMonthConditional($qb, $month);
+
+        return $qb
             ->getQuery()
             ->getResult()
             ;
     }
 
     /**
-     * @param CreditCard $card
      * @param CreditCardUser $cardUser
+     * @param CreditCard $card
+     * @param null $month
      * @return CreditCardConsume[]
      */
-    public function getCreditCardConsumeByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null)
+    public function getByCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
@@ -109,45 +96,39 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ->setParameter('card', $card);
         }
 
+        $qb = $this->addPayedMonthConditional($qb, $month);
+
         return $qb->getQuery()
             ->getResult()
             ;
     }
 
-//    public function getDebtPaymentsByConsume($consume)
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->join('c.payments', 'cp')
-//            ->where('c.id = :consume')
-//            ->set
-//    }
-
-    // /**
-    //  * @return CreditCardConsume[] Returns an array of CreditCardConsume objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param string $month
+     * @param QueryBuilder $qb
+     * @return QueryBuilder
+     */
+    private function addPayedMonthConditional(QueryBuilder $qb, string $month = null): QueryBuilder
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        if ( null != $month ) {
+            $qb
+                ->andWhere(
+                    $qb->expr()->not(
+                        $qb->expr()->exists('
+                            SELECT ccp
+                        FROM \App\Entity\CreditCard\CreditCardPayments ccp
+                        WHERE
+                        ccp.creditConsume = ccc.id
+                        AND
+                        ccp.monthPayed = :month
+                        AND 
+                        ccp.deletedAt IS NULL
+                            ')
+                    )
+                )
+                ->setParameter('month', $month);
+        }
+        return $qb;
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?CreditCardConsume
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }
