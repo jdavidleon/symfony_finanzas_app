@@ -155,14 +155,14 @@ class CreditCardConsumeExtractor
         return $this->cardConsumeRepository->getByOwner($owner);
     }
 
-    public function extractByCreditCard(CreditCard $card)
+    public function extractByCreditCard(CreditCard $card, $month = null)
     {
-       return $this->cardConsumeRepository->getCreditConsumesByCreditCard($card);
+       return $this->cardConsumeRepository->getCreditConsumesByCreditCard( $card, $month );
     }
 
-    public function extractTotalToPayByCreditCard(CreditCard $card)
+    public function extractTotalToPayByCreditCard(CreditCard $card, $month = null)
     {
-        $consumes = $this->cardConsumeRepository->getCreditConsumesByCreditCard($card);
+        $consumes = $this->cardConsumeRepository->getCreditConsumesByCreditCard($card, $month);
         return $this->sumConsumes($consumes);
     }
 

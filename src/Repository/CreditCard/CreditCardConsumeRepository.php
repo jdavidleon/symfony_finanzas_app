@@ -25,55 +25,52 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     }
 
 
-    public function getCreditConsumesByCreditCard(CreditCard $creditCard, $month = '')
+    /**
+     * @param CreditCard $creditCard
+     * @param string|null $month
+     * @return CreditCardConsume[]
+     */
+    public function getCreditConsumesByCreditCard(CreditCard $creditCard, string $month = null)
     {
-        $query = $this->getEntityManager()
-            ->createQuery(
-                "
-SELECT
-	ccc
-FROM
-	\App\Entity\CreditCard\CreditCardConsume ccc
-WHERE
-	ccc.creditCard = :credit_card
-	AND ccc.delete_at IS NULL 
-	AND ccc.status IN ( :paying )
-	AND 
-	NOT EXISTS (
-		SELECT ccp
-		FROM \App\Entity\CreditCard\CreditCardPayments ccp
-        WHERE
-		ccp.creditConsume = ccc.id
-		AND
-		ccp.monthPayed = :month
-		AND 
-		ccp.deletedAt IS NULL
-	)
-"
-            );
+        $qb = $this->createQueryBuilder('ccc')
+            ->where('ccc.creditCard = :credit_card')
+            ->andWhere('ccc.delete_at IS NULL')
+            ->andWhere('ccc.status IN ( :paying )')
+            ->setParameters([
+                'credit_card' => $creditCard,
+                'paying' => [
+                    CreditCardConsume::STATUS_PAYING,
+                    CreditCardConsume::STATUS_MORA
+                ]
+            ]);
 
-        $query->setParameters([
-            'credit_card' => $creditCard,
-            'paying' => [
-                CreditCardConsume::STATUS_PAYING,
-                CreditCardConsume::STATUS_MORA
-            ],
-            'month' => $month
-        ]);
-
-        return $query
-            ->getResult()
+        if ( null != $month && is_string( $month ) ){
+            $qb
+                ->andWhere(
+                    $qb->expr()->not(
+                        $qb->expr()->exists('
+                        SELECT ccp
+                    FROM \App\Entity\CreditCard\CreditCardPayments ccp
+                    WHERE
+                    ccp.creditConsume = ccc.id
+                    AND
+                    ccp.monthPayed = :month
+                    AND 
+                    ccp.deletedAt IS NULL
+                        ')
+                    )
+                )
+                ->setParameter('month', $month)
             ;
+        }
+
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
     public function getByOwner(User $owner)
     {
-        $query = $this->getEntityManager()
-            ->createQuery('
-            
-            ');
-
-
         return $this->createQueryBuilder('ccc')
             ->join('ccc.creditCard', 'creditCard')
             ->join('ccc.creditCardUser', 'creditCardUser')
