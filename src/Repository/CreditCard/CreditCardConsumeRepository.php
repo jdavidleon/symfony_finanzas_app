@@ -109,13 +109,20 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ;
     }
 
-    public function findCreatedConsumeList()
+    /**
+     * @param User $owner
+     * @return CreditCardConsume[]
+     */
+    public function findCreatedConsumeListByOwner(User $owner)
     {
         return $this->createQueryBuilder('ccc')
+            ->join('ccc.creditCard', 'card')
             ->where('ccc.status = :status_created')
+            ->andWhere('card.owner = :owner')
             ->andWhere('ccc.delete_at IS NULL')
             ->setParameters([
-                'status_created' => CreditCardConsume::STATUS_CREATED
+                'status_created' => CreditCardConsume::STATUS_CREATED,
+                'owner' => $owner
             ])
             ->getQuery()
             ->getResult();

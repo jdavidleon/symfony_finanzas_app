@@ -43,9 +43,9 @@ class CreditCardConsumeProvider
         return $this->cardConsumeRepository->getByCardUser($user, $card, $month);
     }
 
-    public function getCreatedConsumeList()
+    public function getCreatedConsumeListByOwner(User $owner)
     {
-        return $this->cardConsumeRepository->findCreatedConsumeList();
+        return $this->cardConsumeRepository->findCreatedConsumeListByOwner($owner);
     }
 
 }

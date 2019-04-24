@@ -51,13 +51,26 @@
     <table>
         <tr>
             <th>ID</th>
-            <th>User</th>
-            <th>Code</th>
             <th>Date</th>
+            <th>Code</th>
+            <th>User</th>
             <th>Amount</th>
             <th>Dues</th>
             <th>Description</th>
+            <th>Action</th>
         </tr>
+        {% for consume in consumes_created  %}
+            <tr>
+                <td>{{ consume.id }}</td>
+                <td>{{ consume.createdAt|date("m/d/Y") }}</td>
+                <td>{{ consume.code }}</td>
+                <td>{{ consume.creditCardUser.fullName }} ({{ consume.creditCardUser.alias }})</td>
+                <td>$ {{ consume.amount|number_format(2) }}</td>
+                <td>{{ consume.dues }}</td>
+                <td>{{ consume.description }}</td>
+                <td><a href="">Mover</a></td>
+            </tr>
+        {% endfor %}
     </table>
 
 {% endblock %}

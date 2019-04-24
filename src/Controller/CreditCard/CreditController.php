@@ -32,7 +32,7 @@ class CreditController extends Controller
     {
         $creditCardConsumes = $consumeProvider->getByOwner( $this->getUser() );
         $creditCards = $cardExtractor->extractByOwner( $this->getUser() );
-        $consumesCreated = $consumeProvider->getCreatedConsumeList();
+        $consumesCreated = $consumeProvider->getCreatedConsumeListByOwner( $this->getUser() );
 
         $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
         $cardUsers = $repo->getByOwner( $this->getUser(), true );
