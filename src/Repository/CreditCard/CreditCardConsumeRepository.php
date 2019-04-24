@@ -30,7 +30,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
      * @param string|null $month
      * @return CreditCardConsume[]
      */
-    public function getCreditConsumesByCreditCard(CreditCard $creditCard, string $month = null)
+    public function getByCreditCard(CreditCard $creditCard, string $month = null)
     {
         $qb = $this->createQueryBuilder('ccc')
             ->where('ccc.creditCard = :credit_card')
@@ -59,10 +59,13 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->join('creditCard.owner', 'owner')
             ->where('owner = :owner')
             ->andWhere('ccc.delete_at IS  NULL')
-            ->andWhere('ccc.status <> :payed_status')
+            ->andWhere('ccc.status IN ( :paying )')
             ->setParameters([
                 'owner' => $owner,
-                'payed_status' => CreditCardConsume::STATUS_PAYED
+                'paying' => [
+                    CreditCardConsume::STATUS_PAYING,
+                    CreditCardConsume::STATUS_MORA
+                ]
             ]);
 
         $qb = $this->addPayedMonthConditional($qb, $month);
@@ -79,15 +82,18 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
      * @param null $month
      * @return CreditCardConsume[]
      */
-    public function getByCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function getByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
             ->andWhere('ccc.delete_at IS NULL')
-            ->andWhere('ccc.status <> :payed_status')
+            ->andWhere('ccc.status  IN ( :paying )')
             ->setParameters([
                 'card_user' => $cardUser,
-                'payed_status' => CreditCardConsume::STATUS_PAYED
+                'paying' => [
+                    CreditCardConsume::STATUS_PAYING,
+                    CreditCardConsume::STATUS_MORA
+                ]
             ]);
 
         if ( null != $card ){
@@ -101,6 +107,18 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         return $qb->getQuery()
             ->getResult()
             ;
+    }
+
+    public function findCreatedConsumeList()
+    {
+        return $this->createQueryBuilder('ccc')
+            ->where('ccc.status = :status_created')
+            ->andWhere('ccc.delete_at IS NULL')
+            ->setParameters([
+                'status_created' => CreditCardConsume::STATUS_CREATED
+            ])
+            ->getQuery()
+            ->getResult();
     }
 
     /**

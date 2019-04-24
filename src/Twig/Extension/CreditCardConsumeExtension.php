@@ -29,7 +29,7 @@ class CreditCardConsumeExtension extends AbstractExtension
     {
         return [
           new TwigFunction('totalByCreditCard', [$this, 'totalByCreditCard']),
-          new TwigFunction('totalByCreditCardUser', [$this, 'totalByCreditCardUserAndCard']),
+          new TwigFunction('totalByCardUser', [$this, 'totalByCardUser']),
           new TwigFunction('totalByOwner', [$this, 'totalByOwner']),
           new TwigFunction('nextPaymentMonth', [$this, 'nextPaymentMonth']),
         ];
@@ -40,9 +40,9 @@ class CreditCardConsumeExtension extends AbstractExtension
         return $this->consumeExtractor->extractTotalToPayByCreditCard( $card, $month );
     }
 
-    public function totalByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function totalByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
-        return $this->consumeExtractor->extractTotalToPayByCreditCardUserAndCard($cardUser, $card, $month);
+        return $this->consumeExtractor->extractTotalToPayByCardUser($cardUser, $card, $month);
     }
 
     public function totalByOwner(User $user)
@@ -50,8 +50,8 @@ class CreditCardConsumeExtension extends AbstractExtension
         return $this->consumeExtractor->extractTotalToPayByOwner($user);
     }
 
-    public function nextPaymentMonth($month = null)
+    public function nextPaymentMonth()
     {
-        return $this->consumeExtractor->extractNextPaymentMonth($month);
+        return $this->consumeExtractor->extractNextPaymentMonth();
     }
 }

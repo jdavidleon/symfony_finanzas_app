@@ -12,17 +12,17 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
-use App\Repository\CreditCard\CreditCardConsumeRepository;
 use App\Repository\CreditCard\PaymentsRepository;
 use App\Service\CreditCard\CreditCalculations;
+use App\Service\CreditCard\CreditCardConsumeProvider;
 
 
 class CreditCardConsumeExtractor
 {
     /**
-     * @var CreditCardConsumeRepository
+     * @var CreditCardConsumeProvider
      */
-    private $cardConsumeRepository;
+    private $consumeProvider;
     /**
      * @var CreditCalculations
      */
@@ -33,12 +33,12 @@ class CreditCardConsumeExtractor
     private $paymentsRepository;
 
     public function __construct(
-        CreditCardConsumeRepository $cardConsumeRepository,
+        CreditCardConsumeProvider $consumeProvider,
         PaymentsRepository $paymentsRepository,
         CreditCalculations $calculations
     )
     {
-        $this->cardConsumeRepository = $cardConsumeRepository;
+        $this->consumeProvider = $consumeProvider;
         $this->calculations = $calculations;
         $this->paymentsRepository = $paymentsRepository;
     }
@@ -67,7 +67,7 @@ class CreditCardConsumeExtractor
     {
         return $this->calculations->calculateNextCapitalAmount(
             $this->extractActualDebt($creditCardConsume),
-            $this->getPendingDues($creditCardConsume)
+            $this->extractPendingDues($creditCardConsume)
         );
     }
 
@@ -97,7 +97,7 @@ class CreditCardConsumeExtractor
      * @param CreditCardConsume $creditCardConsume
      * @return int|null
      */
-    public function getPendingDues(CreditCardConsume $creditCardConsume)
+    public function extractPendingDues(CreditCardConsume $creditCardConsume)
     {
         $dues = $creditCardConsume->getDues();
         $payedDues = count( $this->paymentsRepository->getByConsume($creditCardConsume, true) );
@@ -121,7 +121,7 @@ class CreditCardConsumeExtractor
         return $this->calculations->calculatePendingPayments(
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
-            $this->getPendingDues( $creditCardConsume ),
+            $this->extractPendingDues( $creditCardConsume ),
             $this->getActualDueToPay( $creditCardConsume )
         );
     }
@@ -134,7 +134,7 @@ class CreditCardConsumeExtractor
     {
         return $this->calculations->calculateActualDueToPay(
             $creditCardConsume->getDues(),
-            $this->getPendingDues($creditCardConsume)
+            $this->extractPendingDues($creditCardConsume)
         );
     }
 
@@ -142,40 +142,25 @@ class CreditCardConsumeExtractor
     {
         return $this->calculations->calculateNumberOfPendingDues(
             $creditCardConsume->getDues(),
-            $this->getPendingDues($creditCardConsume)
+            $this->extractPendingDues($creditCardConsume)
         );
-    }
-
-    /**
-     * @param User $owner
-     * @param null $month
-     * @return array
-     */
-    public function extractByOwner(User $owner, $month = null)
-    {
-        return $this->cardConsumeRepository->getByOwner($owner, $month);
-    }
-
-    public function extractByCreditCard(CreditCard $card, $month = null)
-    {
-       return $this->cardConsumeRepository->getCreditConsumesByCreditCard( $card, $month );
     }
 
     public function extractTotalToPayByCreditCard(CreditCard $card, $month = null)
     {
-        $consumes = $this->cardConsumeRepository->getCreditConsumesByCreditCard($card, $month);
+        $consumes = $this->consumeProvider->getByCreditCard($card, $month);
         return $this->sumConsumes($consumes);
     }
 
-    public function extractTotalToPayByCreditCardUserAndCard(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
-        $consumes = $this->cardConsumeRepository->getByCardUserAndCard($cardUser, $card, $month);
+        $consumes = $this->consumeProvider->getByCardUser($cardUser, $card, $month);
         return $this->sumConsumes($consumes);
     }
 
     public function extractTotalToPayByOwner(User $owner)
     {
-        $consumes = $this->extractByOwner($owner, $this->extractNextPaymentMonth());
+        $consumes = $this->consumeProvider->getByOwner($owner, $this->extractNextPaymentMonth());
         return $this->sumConsumes($consumes);
     }
 
@@ -192,34 +177,9 @@ class CreditCardConsumeExtractor
         return $total;
     }
 
-    public function extractNextPaymentMonth($month = null): string
+    public function extractNextPaymentMonth(): string
     {
-        return $this->calculations->calculateNextPaymentDate($month);
+        return $this->calculations->calculateNextPaymentDate();
     }
-
-    /**
-     * @param array $debtsByUser
-     * @return array
-     */
-//    public function getDebtsByUserInCreditCard(Array $debtsByUser)
-//    {
-//        $userDebt = [];
-//        foreach ($debtsByUser as $key => $userDebts ){
-//            $total = $capital = $interest = 0;
-//            foreach ( $userDebts as $debt ){
-//                $capital += $debt['capital_payment'];
-//                $interest += $debt['interest'];
-//                $total += $debt['total'];
-//            }
-//            $userDebt[$key] = array(
-//                'user' => $userDebts[0]['user'],
-//                'total_capital' => $capital,
-//                'total_interest' => $interest,
-//                'total_payment' => $total
-//            );
-//        }
-//
-//        return $userDebt;
-//    }
 
 }

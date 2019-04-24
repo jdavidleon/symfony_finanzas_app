@@ -7,6 +7,7 @@ use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Extractor\CreditCard\CreditCardExtractor;
 use App\Form\Credit\CreditConsumeType;
+use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,14 +24,15 @@ class CreditController extends Controller
     /**
      * @Security("is_granted('ROLE_USER')")
      * @Route("/list", name="credit_list")
-     * @param CreditCardConsumeExtractor $creditCardConsumeExtractor
+     * @param CreditCardConsumeProvider $consumeProvider
      * @param CreditCardExtractor $cardExtractor
      * @return Response
      */
-    public function index(CreditCardConsumeExtractor $creditCardConsumeExtractor, CreditCardExtractor $cardExtractor)
+    public function index(CreditCardConsumeProvider $consumeProvider, CreditCardExtractor $cardExtractor)
     {
-        $creditCardConsumes = $creditCardConsumeExtractor->extractByOwner( $this->getUser() );
+        $creditCardConsumes = $consumeProvider->getByOwner( $this->getUser() );
         $creditCards = $cardExtractor->extractByOwner( $this->getUser() );
+        $consumesCreated = $consumeProvider->getCreatedConsumeList();
 
         $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
         $cardUsers = $repo->getByOwner( $this->getUser(), true );
@@ -38,7 +40,8 @@ class CreditController extends Controller
         return $this->render('credit/index.html.twig', [
             'credit_cards' => $creditCards,
             'consumes' => $creditCardConsumes,
-            'card_users' => $cardUsers
+            'card_users' => $cardUsers,
+            'consumes_created' => $consumesCreated
         ]);
     }
 
