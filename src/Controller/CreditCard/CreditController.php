@@ -92,9 +92,13 @@ class CreditController extends Controller
 
     }
 
-//    public function userCreditCardResume()
-//    {
-//
-//    }
+    /**
+     * @Route("/assignconsumepaydate/{consumeId}", name="establish_consume_paydate")
+     * @param CreditCardConsume $consumeId
+     */
+    public function establishPayDateConsume(CreditCardConsume $consumeId)
+    {
+
+    }
 
 }
