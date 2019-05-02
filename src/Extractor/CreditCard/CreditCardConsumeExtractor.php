@@ -155,25 +155,34 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume[] $cardConsume
-     * @param $groupBy
      * @return array
      */
-    public function extractListConsumeBy($cardConsume, $groupBy = null)
+    public function extractConsumeListBy($cardConsume)
     {
         $arrayConsumes = [];
 
         foreach ($cardConsume as $consume){
-//            switch ($groupBy){
-//                case 'user':
-//                    $key = $consume->getCreditCardUser()->getId();
-//                    break;
-//                case 'credit_card':
-//                    $key = $consume->getCreditCard()->getId();
-//                    break;
-//                default:
-//                    $key = $consume->getCreditCardUser()->getId();
-//            }
             $arrayConsumes[] = $this->resume($consume);
+        }
+
+        return $arrayConsumes;
+    }
+
+    public function extractListGroupedBy($cardConsume, $groupBy = null)
+    {
+        $arrayConsumes = [];
+        foreach ($cardConsume as $consume){
+            switch ($groupBy){
+                case 'user':
+                    $key = $consume->getCreditCardUser()->getId();
+                    break;
+                case 'credit_card':
+                    $key = $consume->getCreditCard()->getId();
+                    break;
+                default:
+                    $key = $consume->getCreditCardUser()->getId();
+            }
+            $arrayConsumes[$key][] = $this->resume($consume);
         }
 
         return $arrayConsumes;
@@ -200,6 +209,7 @@ class CreditCardConsumeExtractor
             'capital_amount' => $this->extractNextCapitalAmount($consume),
             'interest_amount' => $this->extractNextInterestAmount($consume),
             'total_amount' => $this->extractNextPaymentAmount($consume),
+            'payments' => $consume->getPayments(),
         ];
 
         return $consumeArray;

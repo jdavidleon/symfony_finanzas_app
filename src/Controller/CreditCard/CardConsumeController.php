@@ -57,7 +57,7 @@ class CardConsumeController extends Controller
     )
     {
         $consumes = $consumeProvider->getByCardUser($cardUser);
-        $consumes = $consumeExtractor->extractListConsumeBy($consumes, 'user');
+        $consumes = $consumeExtractor->extractConsumeListBy($consumes);
 
         return $this->render('credit/card_user.html.twig', [
             'consumes' => $consumes
