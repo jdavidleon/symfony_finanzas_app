@@ -49,14 +49,10 @@ class CreditCardConsumeExtractor
      */
     public function extractActualDebt(CreditCardConsume $creditCardConsume): int
     {
-        $pays = $this->paymentsRepository->getByConsume($creditCardConsume);
-
-        $payments = [];
-        foreach ($pays as $pay) {
-            $payments[] = $pay->getCapitalAmount();
-        }
-
-        return $this->calculations->calculateActualCreditCardConsumeDebt($creditCardConsume->getAmount(), $payments);
+        return $this->calculations->calculateActualCreditCardConsumeDebt(
+            $creditCardConsume->getAmount(),
+            $creditCardConsume->getAmountPayed()
+        );
     }
 
     /**
@@ -99,16 +95,9 @@ class CreditCardConsumeExtractor
      */
     public function extractPendingDues(CreditCardConsume $creditCardConsume)
     {
-        $dues = $creditCardConsume->getDues();
-        $payedDues = count( $this->paymentsRepository->getByConsume($creditCardConsume, true) );
-
-        if ($payedDues >= $dues ){
-            $payedDues = 0;
-        }
-
         return $this->calculations->calculateNumberOfPendingDues(
-            $dues,
-            $payedDues
+            $creditCardConsume->getDues(),
+            $creditCardConsume->getDuesPayed()
         );
     }
 
@@ -162,6 +151,58 @@ class CreditCardConsumeExtractor
     {
         $consumes = $this->consumeProvider->getByOwner($owner, $this->extractNextPaymentMonth());
         return $this->sumConsumes($consumes);
+    }
+
+    /**
+     * @param CreditCardConsume[] $cardConsume
+     * @param $groupBy
+     * @return array
+     */
+    public function extractListConsumeBy($cardConsume, $groupBy = null)
+    {
+        $arrayConsumes = [];
+
+        foreach ($cardConsume as $consume){
+//            switch ($groupBy){
+//                case 'user':
+//                    $key = $consume->getCreditCardUser()->getId();
+//                    break;
+//                case 'credit_card':
+//                    $key = $consume->getCreditCard()->getId();
+//                    break;
+//                default:
+//                    $key = $consume->getCreditCardUser()->getId();
+//            }
+            $arrayConsumes[] = $this->resume($consume);
+        }
+
+        return $arrayConsumes;
+    }
+
+    /**
+     * @param CreditCardConsume $consume
+     * @return array
+     */
+    private function resume(CreditCardConsume $consume)
+    {
+        $consumeArray = [
+            'user_id' => $consume->getCreditCardUser()->getId(),
+            'user_name' => $consume->getCreditCardUser()->getFullName(),
+            'user_alias' => $consume->getCreditCardUser()->getAlias(),
+            'id' => $consume->getId(),
+            'credit_card' => $consume->getCreditCard(),
+            'description' => $consume->getDescription(),
+            'amount' => $consume->getAmount(),
+            'pending_amount' => $this->extractActualDebt($consume),
+            'dues' => $consume->getDues(),
+            'pending_dues' => $this->extractPendingDues($consume),
+            'interest' => $consume->getInterest(),
+            'capital_amount' => $this->extractNextCapitalAmount($consume),
+            'interest_amount' => $this->extractNextInterestAmount($consume),
+            'total_amount' => $this->extractNextPaymentAmount($consume),
+        ];
+
+        return $consumeArray;
     }
 
     /**

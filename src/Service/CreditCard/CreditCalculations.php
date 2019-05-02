@@ -16,9 +16,9 @@ class CreditCalculations
      * @param int $amount
      * @return int
      */
-    public function calculateActualCreditCardConsumeDebt(int $amount, array $payments = []): int
+    public function calculateActualCreditCardConsumeDebt(int $amount, $payments): int
     {
-        return $amount - array_sum($payments);
+        return $amount - $payments;
     }
 
     public function calculateNextInterestAmount($actualDebt, $interest)

@@ -110,6 +110,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     }
 
     /**
+     * Retorna los consumos con status creado
      * @param User $owner
      * @return CreditCardConsume[]
      */

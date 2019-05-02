@@ -46,6 +46,17 @@ class CreditCardConsume
 
     /**
      * @ORM\Column(type="float")
+     * */
+    private $amountPayed;
+
+    /**
+     * @ORM\Column(type="smallint")
+     * */
+    private $duesPayed;
+
+
+    /**
+     * @ORM\Column(type="float")
      */
     private $interest;
 
@@ -284,5 +295,42 @@ class CreditCardConsume
     public function setDescription($description): void
     {
         $this->description = $description;
+    }
+
+    public function setStatusToActivate()
+    {
+        $this->status = true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDuesPayed()
+    {
+        return $this->duesPayed;
+    }
+
+    /**
+     * @param mixed $duesPayed
+     */
+    public function setDuesPayed($duesPayed): void
+    {
+        $this->duesPayed = $duesPayed;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAmountPayed()
+    {
+        return $this->amountPayed;
+    }
+
+    /**
+     * @param mixed $amountPayed
+     */
+    public function setAmountPayed($amountPayed): void
+    {
+        $this->amountPayed = $amountPayed;
     }
 }
