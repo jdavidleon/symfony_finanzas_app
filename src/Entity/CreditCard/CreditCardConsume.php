@@ -297,7 +297,7 @@ class CreditCardConsume
         $this->description = $description;
     }
 
-    public function setStatusToActivate()
+    public function activate()
     {
         $this->status = true;
     }

@@ -31,7 +31,7 @@ class CardConsumeController extends Controller
     public function activateConsumeAction(CreditCardConsume $consume)
     {
         try{
-            $consume->setStatusToActivate();
+            $consume->activate();
             $em = $this->getDoctrine()->getManager();
             $em->persist($consume);
             $em->flush();
