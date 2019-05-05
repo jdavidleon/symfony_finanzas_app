@@ -5,8 +5,10 @@ namespace App\Controller\CreditCard;
 
 
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
+use App\Form\Credit\CreditPaymentType;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -61,6 +63,28 @@ class CardConsumeController extends Controller
 
         return $this->render('credit/card_user.html.twig', [
             'consumes' => $consumes
+        ]);
+    }
+
+
+    /**
+     * @Route("/payment/{cardConsume}")
+     * @param CreditCardConsume $cardConsume
+     * @param CreditCardConsumeExtractor $consumeExtractor
+     * @return Response
+     */
+    public function paymentAction(
+        CreditCardConsume $cardConsume,
+        CreditCardConsumeExtractor $consumeExtractor
+    )
+    {
+        $payment = new CreditCardPayments();
+        $payment->setAmount($consumeExtractor->extractNextPaymentAmount($cardConsume));
+
+        $form = $this->createForm(CreditPaymentType::class, $payment);
+
+        return $this->render('', [
+            'form' => $form->createView()
         ]);
     }
 
