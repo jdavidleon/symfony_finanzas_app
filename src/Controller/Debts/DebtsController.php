@@ -97,7 +97,7 @@ class DebtsController extends Controller
 
     /**
      *
-     * @Route("/creditors/new", name="new-creditor")
+     * @Route("/creditors/new", name="new_creditor")
      *
      * */
     public function newCreditor()

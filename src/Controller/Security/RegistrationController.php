@@ -23,6 +23,7 @@ class RegistrationController extends AbstractController
      * @param Request $request
      * @param UserPasswordEncoderInterface $passwordEncoder
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
@@ -51,9 +52,9 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        return $this->render(
-            'security/register.html.twig',
-            array('form' => $form->createView())
+        return $this->render('security/register.html.twig', [
+            'form' => $form->createView()
+            ]
         );
     }
 }

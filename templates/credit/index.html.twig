@@ -1,7 +1,76 @@
 {% extends 'base.html.twig' %}
+{% set totalByOwner = totalByOwner(app.user)|number_format(2) %}
+{% set payMonth = nextPaymentMonth() %}
 
-{% block title %}Hello {{ controller_name }}!{% endblock %}
+{% block title %}Hello !{% endblock %}
 
 {% block body %}
-<strong>Hola desde creditController</strong>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Tarjeta de Crédito</th>
+            <th>Total a Pagar</th>
+            <th>Acción</th>
+        </tr>
+        {% for card in credit_cards %}
+        <tr>
+            <td>{{ card.id }}</td>
+            <td>{{ card.franchise ~ ' (' ~ card.description ~ ') ' }}</td>
+            <td>$ {{ totalByCreditCard( card, payMonth )|number_format(2) }}</td>
+            <td><a href="{{ path('credit_card_detail',{'card': card.id} ) }}">Detalles</a></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td>Total</td>
+            <td colspan="3">{{ totalByOwner }}</td>
+        </tr>
+    </table>
+    ===============================
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Valor a Pagar</th>
+            <th>Accion</th>
+        </tr>
+        {% for user in card_users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.alias }}</td>
+                <td>{{ totalByCardUser(user, null, payMonth)|number_format(2) }}</td>
+                <td><a href="{{ path('consume_user', {'cardUser': user.id}) }}">Detalles</a></td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td>Total</td>
+            <td colspan="3">{{ totalByOwner }}</td>
+        </tr>
+    </table>
+    ===============================
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Code</th>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Dues</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+        {% for consume in consumes_created  %}
+            <tr>
+                <td>{{ consume.id }}</td>
+                <td>{{ consume.createdAt|date("m/d/Y") }}</td>
+                <td>{{ consume.code }}</td>
+                <td>{{ consume.creditCardUser.fullName }} ({{ consume.creditCardUser.alias }})</td>
+                <td>$ {{ consume.amount|number_format(2) }}</td>
+                <td>{{ consume.dues }}</td>
+                <td>{{ consume.description }}</td>
+                <td><a href="{{ path('activate_consume', { 'consume': consume.id } ) }}">Mover</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+
 {% endblock %}

@@ -8,82 +8,65 @@
 
 namespace App\Service\CreditCard;
 
-use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
-use App\Repository\CreditCard\CreditCardConsumeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 
 class CreditCalculations
 {
+    /**
+     * @param array $payments
+     * @param int $amount
+     * @return int
+     */
+    public function calculateActualCreditCardConsumeDebt(int $amount, $payments): int
+    {
+        return $amount - $payments;
+    }
+
+    public function calculateNextInterestAmount($actualDebt, $interest)
+    {
+        return ( $actualDebt * $interest ) / 100;
+    }
+
+    public function calculateNextCapitalAmount($actualDebt, $pendingDues)
+    {
+        return $actualDebt / $pendingDues;
+    }
+
+    public function calculateNextPaymentAmount($nextCapitalAmount, $nextInterestAmount)
+    {
+        return $nextCapitalAmount + $nextInterestAmount;
+    }
+    
+    public function calculateNumberOfPendingDues(int $totalDues, int $payedDues = 0): int
+    {
+        return $totalDues - $payedDues;
+    }
+
+    public function calculateActualDueToPay(int $totalDues, int $pendingDues): int
+    {
+        return $totalDues - $pendingDues + 1;
+    }
 
     /**
-     * @var CreditCardConsumeRepository
+     * Return the list of payment that have to pay
+     * @param int $actualDebt
+     * @param int $interest
+     * @param int $pendingDues
+     * @param int $actualDueNumber
+     * @return array
      */
-    private $cardConsumeRepository;
-
-    private $duesToPay = array();
-
-    public function __construct(
-        CreditCardConsumeRepository $cardConsumeRepository
-    )
+    public function calculatePendingPayments(
+        int $actualDebt,
+        int $interest,
+        int $pendingDues,
+        int $actualDueNumber = 1
+    ): array
     {
-        $this->cardConsumeRepository = $cardConsumeRepository;
-    }
+        $capitalMonthlyAmount = $actualDebt / $pendingDues;
 
-    /**
-     * @param CreditCardConsume $creditCardConsume
-     * @return float|int|null
-     */
-    public function getNextCapitalAmount(CreditCardConsume $creditCardConsume)
-    {
-        $amount = $creditCardConsume->getAmount();
-        $payments = $creditCardConsume->getPayments();
-
-        /** @var CreditCardPayments $payments */
-        return $this->getActualDebt($payments, $amount) / $this->getPendingDues($creditCardConsume);
-    }
-
-    public function getPendingDues(CreditCardConsume $creditCardConsume)
-    {
-        return $creditCardConsume->getDues() - count( $this->cardConsumeRepository->getDuesPayments( $creditCardConsume->getUser() ) );
-    }
-
-    public function getActualDebt($payments, $amount)
-    {
-        $payed = 0;
-        /* @var CreditCardPayments $pay */
-        foreach ( $payments as $pay ){
-            $payed += $pay->getCapitalAmount();
-        }
-
-        return $amount - $payed;
-    }
-
-    public function getNextInterestAmount(CreditCardConsume $creditCardConsume)
-    {
-        return ( $this->getActualDebt($creditCardConsume->getPayments(), $creditCardConsume->getAmount()) * $creditCardConsume->getInterest() ) / 100;
-    }
-
-    public function getNextPaymentAmount(CreditCardConsume $creditCardConsume)
-    {
-        return $this->getNextCapitalAmount($creditCardConsume) + $this->getNextInterestAmount($creditCardConsume);
-    }
-
-    public function getDuesToPay(CreditCardConsume $creditCardConsume)
-    {
-        $payments = $creditCardConsume->getPayments();
-
-        /** @var CreditCardPayments $payments */
-        $actualDebt = $this->getActualDebt( $payments, $creditCardConsume->getAmount());
-        $interest = $creditCardConsume->getInterest();
-        $dues = $this->getPendingDues( $creditCardConsume );
-        $dueNumber = $creditCardConsume->getDues() - $dues + 1;
-        $capitalMonthlyAmount = $actualDebt / $dues;
-
-        for ( $i = $dueNumber; $i <= $dues;  $i++ ){
+        $duesToPay = [];
+        for ( $i = $actualDueNumber; $i <= $pendingDues;  $i++ ){
             $interestToPay = ( ( $actualDebt * $interest ) / 100 );
-            $this->duesToPay[ $i ] = array(
+            $duesToPay[ $i ] = array(
                 'capital_amount' => $capitalMonthlyAmount,
                 'interest' => $interestToPay,
                 'total_to_pay' =>  $capitalMonthlyAmount + $interestToPay
@@ -91,55 +74,27 @@ class CreditCalculations
             $actualDebt -= $capitalMonthlyAmount;
         }
 
-        return $this->duesToPay;
+        return $duesToPay;
+    }
+
+    public function sumArrayValues(array $values = [])
+    {
+        return array_sum( $values );
     }
 
     /**
-     * @param array $creditCardConsume
-     * @return array
+     * @return string
      */
-    public function getCreditCardDebtsByUser(Array $creditCardConsume)
+    public function calculateNextPaymentDate()
     {
-        $debtsByUser = [];
-        /** @var CreditCardConsume $creditDebts */
-        foreach ($creditCardConsume as $creditDebts ){
-            $user = $creditDebts->getUser()->getName().' '.$creditDebts->getUser()->getLastName();
-            $debtsByUser[ $creditDebts->getUser()->getId() ][] = array(
-                'user' => $user,
-                'Deuda' => $creditDebts->getId(),
-                'abono_capital' => $this->getNextCapitalAmount( $creditDebts ),
-                'intereses' => $this->getNextInterestAmount( $creditDebts ),
-                'total' => $this->getNextPaymentAmount( $creditDebts )
-            );
-        }
-
-        return $debtsByUser;
+        $actualMonth = date('d-m-Y');
+        $nextMonth = date("m-Y", strtotime($actualMonth . "+ 1 Month"));
+        return date('j') < 15 ? substr($actualMonth, 3) : $nextMonth;
     }
 
-    /**
-     * @param array $debtsByUser
-     * @return array
-     */
-    public function getDebtsByUserInCreditCard(Array $debtsByUser)
+    public function calculateHandlingFee($handlingFee, $cardUsers)
     {
-        $userDebt = [];
-        foreach ($debtsByUser as $key => $userDebts ){
-            $total = $capital = $interest = 0;
-            foreach ( $userDebts as $debt ){
-                $capital += $debt['abono_capital'];
-                $interest += $debt['intereses'];
-                $total += $debt['total'];
-            }
-            $userDebt[$key] = array(
-                'usuario' => $userDebts[0]['user'],
-                'capital_total' => $capital,
-                'interes_total' => $interest,
-                'pago_total' => $total
-            );
-        }
-
-        return $userDebt;
+        return $handlingFee / $cardUsers;
     }
-
 }
 

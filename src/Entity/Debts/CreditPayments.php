@@ -2,7 +2,7 @@
 
 namespace App\Entity\Debts;
 
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -55,7 +55,7 @@ class CreditPayments
      */
     private $legalDue;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {

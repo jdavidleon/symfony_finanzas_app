@@ -4,7 +4,7 @@ namespace App\Entity\Security;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -63,13 +63,13 @@ class User implements UserInterface
      */
     private $lastName;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function __construct()
     {
         $this->roles = array('ROLE_USER');
-        $this->creditCardConsumes = new ArrayCollection();
         $this->creditCards = new ArrayCollection();
+        $this->setCreatedAt(new \DateTime('now'));
     }
 
     public function getId(): ?int
@@ -234,5 +234,15 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    public function getFullName()
+    {
+        return $this->getName().' '.$this->getLastName();
+    }
+
+    public function __toString()
+    {
+        return $this->getFullName();
     }
 }

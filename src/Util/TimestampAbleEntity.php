@@ -9,7 +9,7 @@
 namespace App\Util;
 
 
-trait TimestampableEntity
+trait TimestampAbleEntity
 {
     /**
      * @var \DateTime
@@ -28,15 +28,6 @@ trait TimestampableEntity
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $deletedAt;
-
-    /**
-     * TimestampableEntity constructor.
-     * @throws \Exception
-     */
-    public function __construct()
-    {
-        $this->createdAt = new \DateTime();
-    }
 
     /**
      * Sets createdAt.

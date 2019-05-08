@@ -2,7 +2,6 @@
 
 namespace App\Entity\CreditCard;
 
-use App\Entity\Security\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,9 +24,15 @@ class CreditCardConsume
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Security\User", inversedBy="id")
+     * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCardUser", inversedBy="creditCardConsume")
+     * @return CreditCardUser
      */
-    private $user;
+    private $creditCardUser;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     * */
+    private $description;
 
     /**
      * @ORM\Column(type="float")
@@ -38,6 +43,17 @@ class CreditCardConsume
      * @ORM\Column(type="smallint")
      */
     private $dues;
+
+    /**
+     * @ORM\Column(type="float")
+     * */
+    private $amountPayed;
+
+    /**
+     * @ORM\Column(type="smallint")
+     * */
+    private $duesPayed;
+
 
     /**
      * @ORM\Column(type="float")
@@ -77,6 +93,7 @@ class CreditCardConsume
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\CreditCard\CreditCard", inversedBy="creditCardConsumes")
      * @ORM\JoinColumn(nullable=false)
+     * @return CreditCard $creditCard
      */
     private $creditCard;
 
@@ -101,14 +118,14 @@ class CreditCardConsume
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getCreditCardUser(): ?CreditCardUser
     {
-        return $this->user;
+        return $this->creditCardUser;
     }
 
-    public function setUser(?User $user): self
+    public function setCreditCardUser(?CreditCardUser $creditCardUser): self
     {
-        $this->user = $user;
+        $this->creditCardUser = $creditCardUser;
 
         return $this;
     }
@@ -262,5 +279,58 @@ class CreditCardConsume
         }
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param mixed $description
+     */
+    public function setDescription($description): void
+    {
+        $this->description = $description;
+    }
+
+    public function activate()
+    {
+        $this->status = true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDuesPayed()
+    {
+        return $this->duesPayed;
+    }
+
+    /**
+     * @param mixed $duesPayed
+     */
+    public function setDuesPayed($duesPayed): void
+    {
+        $this->duesPayed = $duesPayed;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAmountPayed()
+    {
+        return $this->amountPayed;
+    }
+
+    /**
+     * @param mixed $amountPayed
+     */
+    public function setAmountPayed($amountPayed): void
+    {
+        $this->amountPayed = $amountPayed;
     }
 }

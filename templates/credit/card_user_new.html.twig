@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New credit User{% endblock %}
+
+{% block body %}
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+{{ form_start(form) }}
+{{ form_widget(form) }}
+<input type="submit">
+{{ form_end(form) }}
+
+{% endblock %}

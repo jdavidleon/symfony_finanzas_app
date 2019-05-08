@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello !{% endblock %}
+
+{% block body %}
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Deudor</th>
+            <th>Valor a Pagar</th>
+            <th>Detalle</th>
+        </tr>
+        {% for user in card_users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.alias }}</td>
+                <td>$ {{ totalByCardUser(user, card)|number_format(2) }}</td>
+                <td><a href="">Detalles</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <table>
+        <tr>
+            <th></th>
+        </tr>
+    </table>
+
+
+{% endblock %}

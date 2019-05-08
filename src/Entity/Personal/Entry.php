@@ -3,7 +3,7 @@
 namespace App\Entity\Personal;
 
 use App\Entity\Security\User;
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,7 +41,7 @@ class Entry
      */
     private $value;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {
