@@ -91,5 +91,10 @@ class CreditCalculations
         $nextMonth = date("m-Y", strtotime($actualMonth . "+ 1 Month"));
         return date('j') < 15 ? substr($actualMonth, 3) : $nextMonth;
     }
+
+    public function calculateHandlingFee($handlingFee, $cardUsers)
+    {
+        return $handlingFee / $cardUsers;
+    }
 }
 
