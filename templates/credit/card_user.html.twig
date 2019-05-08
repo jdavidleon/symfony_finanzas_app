@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello !{% endblock %}
+
+{% block body %}
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Deuda</th>
+            <th>Pendente por pagar</th>
+            <th>Proximo pago</th>
+        </tr>
+        {% for consume in consumes %}
+            <tr>
+                <td>{{ consume.id }}</td>
+                <td>{{ consume.description }}</td>
+                <td>$ {{ consume.pending_amount|number_format(2) }}</td>
+                <td>$ {{ consume.total_amount|number_format(2) }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <table>
+        <tr>
+            <th></th>
+        </tr>
+    </table>
+
+
+{% endblock %}

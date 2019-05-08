@@ -3,6 +3,7 @@
 namespace App\Entity\CreditCard;
 
 use App\Entity\Security\User;
+use App\Util\TimestampAbleEntity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -42,12 +43,16 @@ class CreditCard
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\CreditCard\CreditCardConsume", mappedBy="creditCard")
+     * @return CreditCardConsume[]
      */
     private $creditCardConsumes;
+
+    use TimestampAbleEntity;
 
     public function __construct()
     {
         $this->creditCardConsumes = new ArrayCollection();
+        $this->setCreatedAt(new \DateTime('now'));
     }
 
     public function getId(): ?int

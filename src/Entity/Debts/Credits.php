@@ -3,7 +3,7 @@
 namespace App\Entity\Debts;
 
 use App\Entity\Security\User;
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -86,7 +86,7 @@ class Credits
      * */
     private $balance;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {

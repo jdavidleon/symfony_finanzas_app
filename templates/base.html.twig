@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
+        {% block menu %}
+            <ul>
+                <li><a href="{{ path('user_registration') }}">Registro</a></li>
+                <li><a href="{{ path('credit_card_new') }}">CreditCardNew</a></li>
+                <li><a href="{{ path('credit_new') }}">CreditNew</a></li>
+                <li><a href="{{ path('card_user_new') }}">Nuevo CreditUSER</a></li>
+                <li><a href="{{ path('credit_list') }}">Credit list</a></li>
+            </ul>
+        {% endblock %}
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
     </body>

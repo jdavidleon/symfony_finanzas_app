@@ -2,6 +2,7 @@
 
 namespace App\Repository\CreditCard;
 
+use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -17,6 +18,31 @@ class PaymentsRepository extends ServiceEntityRepository
     public function __construct(RegistryInterface $registry)
     {
         parent::__construct($registry, CreditCardPayments::class);
+    }
+
+    /**
+     * @param CreditCardConsume $consume
+     * @param bool $legalDues
+     * @return CreditCardPayments[]
+     */
+    public function getByConsume(CreditCardConsume $consume, $legalDues = false)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.creditConsume = :consume')
+            ->andWhere('p.deletedAt IS NULL')
+            ->setParameters([
+                'consume' => $consume
+            ]);
+
+        if ($legalDues){
+            $qb
+                ->andWhere('p.legalDue = true');
+        }
+
+        return $qb
+            ->getQuery()
+            ->getResult()
+            ;
     }
 
     // /**

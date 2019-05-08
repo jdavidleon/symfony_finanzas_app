@@ -2,7 +2,7 @@
 
 namespace App\Entity\Personal;
 
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -27,7 +27,7 @@ class EgressType
      */
     private $active;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {

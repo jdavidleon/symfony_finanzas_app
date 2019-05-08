@@ -2,7 +2,7 @@
 
 namespace App\Entity\Debts;
 
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -78,7 +78,7 @@ class FixedCharges
         $this->fixedChargesPayment = new ArrayCollection();
     }
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {

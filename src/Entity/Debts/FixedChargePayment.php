@@ -2,7 +2,7 @@
 
 namespace App\Entity\Debts;
 
-use App\Util\TimestampableEntity;
+use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -33,7 +33,7 @@ class FixedChargePayment
      * */
     private $payedMonth;
 
-    use TimestampableEntity;
+    use TimestampAbleEntity;
 
     public function getId(): ?int
     {
