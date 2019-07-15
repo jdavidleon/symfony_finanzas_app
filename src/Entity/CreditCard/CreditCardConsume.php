@@ -85,6 +85,16 @@ class CreditCardConsume
      * */
     private $monthFirstPay;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $duesPayed;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $amountPayed;
+
     use TimestampAbleEntity;
 
     /**
@@ -264,5 +274,29 @@ class CreditCardConsume
     public function setMonthFirstPay($monthFirstPay): void
     {
         $this->monthFirstPay = $monthFirstPay;
+    }
+
+    public function getDuesPayed(): ?int
+    {
+        return $this->duesPayed;
+    }
+
+    public function setDuesPayed(?int $duesPayed): self
+    {
+        $this->duesPayed = $duesPayed;
+
+        return $this;
+    }
+
+    public function getAmountPayed(): ?float
+    {
+        return $this->amountPayed;
+    }
+
+    public function setAmountPayed(?float $amountPayed): self
+    {
+        $this->amountPayed = $amountPayed;
+
+        return $this;
     }
 }

@@ -12,11 +12,11 @@ namespace App\Service\CreditCard;
 class CreditCalculations
 {
     /**
-     * @param array $payments
-     * @param int $amount
-     * @return int
+     * @param float $payments
+     * @param float $amount
+     * @return float
      */
-    public function calculateActualCreditCardConsumeDebt(int $amount, $payments): int
+    public function calculateActualCreditCardConsumeDebt($amount,$payments): float
     {
         return $amount - $payments;
     }
