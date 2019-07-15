@@ -44,11 +44,6 @@ class CreditCardPayments
     private $amount;
 
     /**
-     * @ORM\Column(type="datetime")
-     */
-    private $payed_at;
-
-    /**
      * @ORM\Column(type="boolean")
      * */
     private $legalDue = true;
@@ -92,18 +87,6 @@ class CreditCardPayments
     public function setAmount(float $amount): self
     {
         $this->amount = $amount;
-
-        return $this;
-    }
-
-    public function getPayedAt(): ?\DateTimeInterface
-    {
-        return $this->payed_at;
-    }
-
-    public function setPayedAt(\DateTimeInterface $payed_at): self
-    {
-        $this->payed_at = $payed_at;
 
         return $this;
     }
