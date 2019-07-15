@@ -11,17 +11,20 @@ namespace App\Util;
 
 use DateTime;
 use InvalidArgumentException;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 trait TimestampAbleEntity
 {
     /**
      * @var DateTime
+     * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false)
      */
     protected $createdAt;
 
     /**
      * @var DateTime
+     * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $updatedAt;
