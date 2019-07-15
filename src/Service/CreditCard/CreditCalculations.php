@@ -54,7 +54,7 @@ class CreditCalculations
      * @param int $actualDueNumber
      * @return array
      */
-    public function calculatePendingPayments(
+    public function calculatePendingPaymentsResume(
         int $actualDebt,
         int $interest,
         int $pendingDues,
