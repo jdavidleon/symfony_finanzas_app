@@ -52,7 +52,6 @@ class CreditCard
     public function __construct()
     {
         $this->creditCardConsumes = new ArrayCollection();
-        $this->setCreatedAt(new \DateTime('now'));
     }
 
     public function getId(): ?int
