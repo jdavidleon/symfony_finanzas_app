@@ -34,7 +34,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('ccc')
             ->where('ccc.creditCard = :credit_card')
-            ->andWhere('ccc.delete_at IS NULL')
+            ->andWhere('ccc.deletedAt IS NULL')
             ->andWhere('ccc.status IN ( :paying )')
             ->setParameters([
                 'credit_card' => $creditCard,
@@ -58,7 +58,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->join('ccc.creditCardUser', 'creditCardUser')
             ->join('creditCard.owner', 'owner')
             ->where('owner = :owner')
-            ->andWhere('ccc.delete_at IS  NULL')
+            ->andWhere('ccc.deletedAt IS  NULL')
             ->andWhere('ccc.status IN ( :paying )')
             ->setParameters([
                 'owner' => $owner,
@@ -86,7 +86,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
-            ->andWhere('ccc.delete_at IS NULL')
+            ->andWhere('ccc.deletedAt IS NULL')
             ->andWhere('ccc.status  IN ( :paying )')
             ->setParameters([
                 'card_user' => $cardUser,
@@ -120,7 +120,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ->join('ccc.creditCard', 'card')
             ->where('ccc.status = :status_created')
             ->andWhere('card.owner = :owner')
-            ->andWhere('ccc.delete_at IS NULL')
+            ->andWhere('ccc.deletedAt IS NULL')
             ->setParameters([
                 'status_created' => CreditCardConsume::STATUS_CREATED,
                 'owner' => $owner

@@ -56,7 +56,7 @@ class CreditCardUserRepository extends ServiceEntityRepository
             ->join('ccc.creditCard', 'cc')
             ->where('cc = :credit_card')
             ->andWhere('ccc.status <> :payed')
-            ->andWhere('ccc.delete_at IS NULL')
+            ->andWhere('ccc.deletedAt IS NULL')
             ->setParameters([
                 'credit_card' => $card,
                 'payed' => CreditCardConsume::STATUS_PAYED
