@@ -8,10 +8,13 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
-use App\Form\Credit\CreditCardPaymentType;
+use App\Form\Credit\CreditPaymentType;
 use App\Service\CreditCard\CreditCardConsumeProvider;
+use App\Service\Payments\HandlePayment;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -76,43 +79,35 @@ class CardConsumeController extends Controller
      * @Route("/payment/{cardConsume}", name="pay_consume")
      * @param CreditCardConsume $cardConsume
      * @param CreditCardConsumeExtractor $consumeExtractor
+     * @param HandlePayment $handlePayment
      * @param Request $request
      * @return Response
      */
     public function paymentAction(
         CreditCardConsume $cardConsume,
         CreditCardConsumeExtractor $consumeExtractor,
+        HandlePayment $handlePayment,
         Request $request
     )
     {
-        dump($cardConsume);
-        $payment = new CreditCardPayments();
+        $form = $this->createForm(CreditPaymentType::class, null, [
+            'total_to_pay' => $consumeExtractor->extractNextPaymentAmount($cardConsume)
+        ]);
 
-        $isPost = $this->isPost($request);
-        if (!$isPost){
-            $payment->setAmount($consumeExtractor->extractNextPaymentAmount($cardConsume));
-        }
-        $form = $this->createForm(CreditCardPaymentType::class, $payment);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()){
+            try {
+                $handlePayment->processPayment($cardConsume, $form->get('total_to_pay')->getData());
 
-        if ($isPost){
-            $form->handleRequest();
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($payment);
-            $em->flush();
+                $this->addFlash('success', 'Pago realizado con Exito');
+            } catch (Exception $exception) {
+
+            }
         }
 
         return $this->render('credit/new_card_payment.html.twig', [
-            'form' => $form->createView() ?? null
+            'form' => $form->createView()
         ]);
-    }
-
-    /**
-     * @param Request $request
-     * @return bool
-     */
-    private function isPost(Request $request): bool
-    {
-        return $request->isMethod('POST');
     }
 
 }
