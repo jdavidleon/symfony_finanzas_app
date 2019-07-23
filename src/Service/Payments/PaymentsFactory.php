@@ -26,5 +26,4 @@ class PaymentsFactory
 
         return $payment;
     }
-
 }

@@ -257,7 +257,7 @@ class CreditCardConsume
 
     public function activate()
     {
-        $this->status = true;
+        $this->status = self::STATUS_PAYING;
     }
 
     /**

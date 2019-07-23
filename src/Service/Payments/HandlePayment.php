@@ -10,7 +10,6 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class HandlePayment
 {
-
     /**
      * @var CreditCardConsumeExtractor
      */
