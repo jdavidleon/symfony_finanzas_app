@@ -16,7 +16,7 @@ class CreditCalculations
      * @param float $amount
      * @return float
      */
-    public function calculateActualCreditCardConsumeDebt($amount,$payments): float
+    public function calculateActualCreditCardConsumeDebt($amount, $payments): float
     {
         return $amount - $payments;
     }
