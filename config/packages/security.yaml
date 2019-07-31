@@ -1,7 +1,7 @@
 security:
     encoders:
         App\Entity\Security\User:
-            algorithm: bcrypt
+            algorithm: auto
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -18,10 +18,10 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            anonymous: true
-            guard:
-                authenticators:
-                    - App\Security\LoginFormAuthenticator
+            anonymous: ~
+#            guard:
+#                authenticators:
+#                    - App\Security\LoginFormAuthenticator
 
             # activate different ways to authenticate
 
