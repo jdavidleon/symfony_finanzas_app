@@ -8,12 +8,11 @@
 
 namespace App\Controller\CreditCard;
 
-use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditCardUserType;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("/carduser")
  * */
-class CreditCardUserController extends Controller
+class CreditCardUserController extends AbstractController
 {
     /**
      * @Route("/user/{user}")

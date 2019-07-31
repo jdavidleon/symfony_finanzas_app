@@ -11,7 +11,7 @@ use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditPaymentType;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("/consume")
  */
-class CardConsumeController extends Controller
+class CardConsumeController extends AbstractController
 {
     public function __construct()
     {
