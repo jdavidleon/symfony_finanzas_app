@@ -48,6 +48,17 @@ class CreditCardConsume
     private $dues;
 
     /**
+     * @ORM\Column(type="float", options={"default"=0})
+     * */
+    private $amountPayed;
+
+    /**
+     * @ORM\Column(type="smallint", options={"default"=0})
+     * */
+    private $duesPayed;
+
+
+    /**
      * @ORM\Column(type="float")
      */
     private $interest;
@@ -261,6 +272,7 @@ class CreditCardConsume
     }
 
     /**
+     * TODO: VER SI ESTO TIENE SENTIDO
      * @return mixed
      */
     public function getMonthFirstPay()
@@ -278,7 +290,7 @@ class CreditCardConsume
 
     public function getDuesPayed(): ?int
     {
-        return $this->duesPayed;
+        return $this->duesPayed ?? 0;
     }
 
     public function setDuesPayed(?int $duesPayed): self

@@ -12,9 +12,7 @@ use App\Form\Credit\CreditPaymentType;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use App\Service\Payments\HandlePayment;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("/consume")
  */
-class CardConsumeController extends Controller
+class CardConsumeController extends AbstractController
 {
     public function __construct()
     {
