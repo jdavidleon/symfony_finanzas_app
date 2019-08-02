@@ -2,10 +2,10 @@
 
 namespace App\Controller\Debts;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DebtsTypeController extends Controller
+class DebtsTypeController extends AbstractController
 {
     /**
      * @Route("/debts/debts/type", name="debts_debts_type")

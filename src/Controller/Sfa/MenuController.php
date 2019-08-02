@@ -9,14 +9,14 @@
 namespace App\Controller\Sfa;
 
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  *
  * @Route("menu")
  * */
-class MenuController extends Controller
+class MenuController extends AbstractController
 {
     /**
      * @Route("view", name="view_menu")

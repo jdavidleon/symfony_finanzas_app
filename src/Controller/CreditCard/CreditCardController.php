@@ -13,7 +13,7 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Form\Credit\CreditCardType;
 use App\Repository\CreditCard\CreditCardRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("/creditcard")
  * */
-class CreditCardController extends Controller
+class CreditCardController extends AbstractController
 {
 
     /**
