@@ -16,19 +16,26 @@ class CreditCalculations
      * @param float $amount
      * @return float
      */
-    public function calculateActualCreditCardConsumeDebt($amount, $payments): float
+    public function calculateActualCreditCardConsumeDebt(float $amount, float $payments): float
     {
+        if ($amount <= $payments)
+            return 0;
+
         return $amount - $payments;
+    }
+
+    public function calculateNextCapitalAmount($actualDebt, $pendingDues)
+    {
+        if (0 >= $pendingDues){
+            return $actualDebt;
+        }
+
+        return $actualDebt / $pendingDues;
     }
 
     public function calculateNextInterestAmount($actualDebt, $interest)
     {
         return ( $actualDebt * $interest ) / 100;
-    }
-
-    public function calculateNextCapitalAmount($actualDebt, $pendingDues)
-    {
-        return $actualDebt / $pendingDues;
     }
 
     public function calculateNextPaymentAmount($nextCapitalAmount, $nextInterestAmount)
@@ -48,15 +55,15 @@ class CreditCalculations
 
     /**
      * Return the list of payment that have to pay
-     * @param int $actualDebt
-     * @param int $interest
+     * @param float $actualDebt
+     * @param float $interest
      * @param int $pendingDues
      * @param int $actualDueNumber
      * @return array
      */
     public function calculatePendingPaymentsResume(
-        int $actualDebt,
-        int $interest,
+        float $actualDebt,
+        float $interest,
         int $pendingDues,
         int $actualDueNumber = 1
     ): array
