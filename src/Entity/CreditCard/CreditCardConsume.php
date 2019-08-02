@@ -96,16 +96,6 @@ class CreditCardConsume
      * */
     private $monthFirstPay;
 
-    /**
-     * @ORM\Column(type="integer", nullable=false, options={"default": 0})
-     */
-    private $duesPayed;
-
-    /**
-     * @ORM\Column(type="float", nullable=false, options={"default": 0})
-     */
-    private $amountPayed;
-
     use TimestampAbleEntity;
 
     /**
