@@ -23,11 +23,13 @@ class CreditCalculations
 
         return $amount - $payments;
     }
-
+    /*
+     * TODO: se debe lanzar una excepción cuando actualDebt > 0 && pendingDues = 0?
+     * */
     public function calculateNextCapitalAmount($actualDebt, $pendingDues)
     {
         if (0 >= $pendingDues){
-            return $actualDebt;
+            return 0;
         }
 
         return $actualDebt / $pendingDues;
@@ -57,27 +59,35 @@ class CreditCalculations
      * Return the list of payment that have to pay
      * @param float $actualDebt
      * @param float $interest
-     * @param int $pendingDues
-     * @param int $actualDueNumber
+     * @param int $totalDues
+     * @param int $payedDues
      * @return array
      */
     public function calculatePendingPaymentsResume(
         float $actualDebt,
         float $interest,
-        int $pendingDues,
-        int $actualDueNumber = 1
+        int $totalDues,
+        int $payedDues = 0
     ): array
     {
-        $capitalMonthlyAmount = $actualDebt / $pendingDues;
+        if ($totalDues <= $payedDues){
+            return [];
+        }
+
+        $capitalMonthlyAmount = $this->calculateNextCapitalAmount(
+            $actualDebt,
+            $this->calculateNumberOfPendingDues($totalDues, $payedDues)
+        );
 
         $duesToPay = [];
-        for ( $i = $actualDueNumber; $i <= $pendingDues;  $i++ ){
-            $interestToPay = ( ( $actualDebt * $interest ) / 100 );
-            $duesToPay[ $i ] = array(
+        foreach ( range($payedDues + 1, $totalDues ) as $due){
+            $interestToPay = ( ($actualDebt * $interest) / 100 );
+            $duesToPay[] = [
+                'number_due' => $due,
                 'capital_amount' => $capitalMonthlyAmount,
                 'interest' => $interestToPay,
                 'total_to_pay' =>  $capitalMonthlyAmount + $interestToPay
-            );
+            ];
             $actualDebt -= $capitalMonthlyAmount;
         }
 

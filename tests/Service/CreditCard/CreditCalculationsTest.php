@@ -55,8 +55,8 @@ class CreditCalculationsTest extends TestCase
         $capital = $this->calculations->calculateNextCapitalAmount(200, 0);
         $capital2 = $this->calculations->calculateNextCapitalAmount(500, -2);
 
-        self::assertSame(200, $capital);
-        self::assertSame(500, $capital2);
+        self::assertSame(0, $capital);
+        self::assertSame(0, $capital2);
     }
 
     public function testNextInterestAmount()
@@ -109,22 +109,25 @@ class CreditCalculationsTest extends TestCase
         $resume = $this->calculations->calculatePendingPaymentsResume(
             3000,
             2.5,
-            3,
-            1
+            8,
+            5
         );
 
         $resumeExpected = [
-            1 => [
+            [
+                'number_due' => 6,
                 'capital_amount' => 1000,
                 'interest' => 75,
                 'total_to_pay' => 1075
             ],
-            2 => [
+            [
+                'number_due' => 7,
                 'capital_amount' => 1000,
                 'interest' => 50,
                 'total_to_pay' => 1050
             ],
-            3 => [
+            [
+                'number_due' => 8,
                 'capital_amount' => 1000,
                 'interest' => 25,
                 'total_to_pay' => 1025
@@ -139,12 +142,13 @@ class CreditCalculationsTest extends TestCase
         $resume = $this->calculations->calculatePendingPaymentsResume(
             2000,
             3,
-            1,
+            4,
             3
         );
 
         $resumeExpected = [
-            3 => [
+            [
+                'number_due' => 4,
                 'capital_amount' => 2000,
                 'interest' => 60.0,
                 'total_to_pay' => 2060
@@ -152,5 +156,24 @@ class CreditCalculationsTest extends TestCase
         ];
 
         self::assertEquals($resumeExpected, $resume);
+    }
+
+    public function testPendingPaymentsResumeWithoutPendingDues()
+    {
+        $resume = $this->calculations->calculatePendingPaymentsResume(
+            3000,
+            2.2,
+            5,
+            5
+        );
+        $resume2 = $this->calculations->calculatePendingPaymentsResume(
+            3000,
+            2.2,
+            4,
+            7
+        );
+
+        self::assertEquals([], $resume);
+        self::assertEquals([], $resume2);
     }
 }
