@@ -10,14 +10,14 @@ use App\Form\Debts\CreditorType;
 use App\Form\Debts\DebtType;
 use App\Form\Debts\FixedChargesType;
 use App\Service\Debts\DebtsHandlers;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/debts")
  *
  * */
-class DebtsController extends Controller
+class DebtsController extends AbstractController
 {
     /**
      * @Route("/", name="debts_debts_contrtoller")
