@@ -110,8 +110,8 @@ class CreditCardConsumeExtractor
         return $this->calculations->calculatePendingPaymentsResume(
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
-            $this->extractPendingDues( $creditCardConsume ),
-            $this->getActualDueToPay( $creditCardConsume )
+            $creditCardConsume->getDues(),
+            $creditCardConsume->getDuesPayed()
         );
     }
 
