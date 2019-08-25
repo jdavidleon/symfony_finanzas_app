@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Payments;
+namespace App\Factory\Payments;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
@@ -9,13 +9,13 @@ class PaymentsFactory
 {
     public static function create(
         CreditCardConsume $cardConsume,
-        $amount,
-        $capitalAmount,
-        $realCapitalAmount,
-        $interestAmount,
-        $monthPayed,
-        $legalDue = true
-    )
+        float $amount,
+        float $capitalAmount,
+        float $realCapitalAmount,
+        float $interestAmount,
+        float $monthPayed,
+        bool $legalDue = true
+    ): CreditCardPayments
     {
         $payment = new CreditCardPayments();
         $payment->setCreditConsume($cardConsume);

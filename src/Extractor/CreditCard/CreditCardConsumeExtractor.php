@@ -12,7 +12,7 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
-use App\Repository\CreditCard\PaymentsRepository;
+use App\Repository\CreditCard\CreditCardPaymentsRepository;
 use App\Service\CreditCard\CreditCalculations;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
@@ -29,13 +29,13 @@ class CreditCardConsumeExtractor
      */
     private $calculations;
     /**
-     * @var PaymentsRepository
+     * @var CreditCardPaymentsRepository
      */
     private $paymentsRepository;
 
     public function __construct(
         CreditCardConsumeProvider $consumeProvider,
-        PaymentsRepository $paymentsRepository,
+        CreditCardPaymentsRepository $paymentsRepository,
         CreditCalculations $calculations
     )
     {

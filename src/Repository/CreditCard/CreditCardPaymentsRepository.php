@@ -13,7 +13,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method CreditCardPayments[]    findAll()
  * @method CreditCardPayments[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PaymentsRepository extends ServiceEntityRepository
+class CreditCardPaymentsRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
@@ -43,6 +43,17 @@ class PaymentsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
             ;
+    }
+
+    public function getMonthListByConsume(CreditCardConsume $cardConsume)
+    {
+        return $this->createQueryBuilder('p')
+            ->select('p.monthPayed')
+            ->where('p.creditConsume = :consume')
+            ->andWhere('p.legalDue = true')
+            ->setParameter('consume', $cardConsume)
+            ->getQuery()
+            ->getArrayResult();
     }
 
     // /**
