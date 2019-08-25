@@ -11,6 +11,7 @@ class PaymentsFactory
         CreditCardConsume $cardConsume,
         $amount,
         $capitalAmount,
+        $realCapitalAmount,
         $interestAmount,
         $monthPayed,
         $legalDue = true
@@ -20,6 +21,7 @@ class PaymentsFactory
         $payment->setCreditConsume($cardConsume);
         $payment->setAmount($amount);
         $payment->setCapitalAmount($capitalAmount);
+        $payment->setRealCapitalAmount($realCapitalAmount);
         $payment->setInterestAmount($interestAmount);
         $payment->setMonthPayed($monthPayed);
         $payment->setLegalDue($legalDue);

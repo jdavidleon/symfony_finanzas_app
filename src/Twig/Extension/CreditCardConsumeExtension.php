@@ -7,6 +7,7 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
+use Exception;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -45,11 +46,20 @@ class CreditCardConsumeExtension extends AbstractExtension
         return $this->consumeExtractor->extractTotalToPayByCardUser($cardUser, $card, $month);
     }
 
+    /**
+     * @param User $user
+     * @return float|int|null
+     * @throws Exception
+     */
     public function totalByOwner(User $user)
     {
         return $this->consumeExtractor->extractTotalToPayByOwner($user);
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function nextPaymentMonth()
     {
         return $this->consumeExtractor->extractNextPaymentMonth();

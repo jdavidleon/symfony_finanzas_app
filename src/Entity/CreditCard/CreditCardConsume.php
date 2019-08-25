@@ -57,7 +57,6 @@ class CreditCardConsume
      * */
     private $duesPayed;
 
-
     /**
      * @ORM\Column(type="float")
      */
@@ -300,5 +299,10 @@ class CreditCardConsume
         $this->amountPayed = $amountPayed;
 
         return $this;
+    }
+
+    public function hasPayments()
+    {
+        return $this->payments->count() > 0;
     }
 }

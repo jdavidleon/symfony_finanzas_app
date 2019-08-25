@@ -87,7 +87,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
             ->andWhere('ccc.deletedAt IS NULL')
-            ->andWhere('ccc.status  IN ( :paying )')
+            ->andWhere('ccc.status IN (:paying)')
             ->setParameters([
                 'card_user' => $cardUser,
                 'paying' => [

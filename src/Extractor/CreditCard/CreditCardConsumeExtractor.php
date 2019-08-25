@@ -15,6 +15,7 @@ use App\Entity\Security\User;
 use App\Repository\CreditCard\PaymentsRepository;
 use App\Service\CreditCard\CreditCalculations;
 use App\Service\CreditCard\CreditCardConsumeProvider;
+use Exception;
 
 
 class CreditCardConsumeExtractor
@@ -104,6 +105,7 @@ class CreditCardConsumeExtractor
     /**
      * @param CreditCardConsume $creditCardConsume
      * @return array
+     * @throws Exception
      */
     public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume)
     {
@@ -111,7 +113,8 @@ class CreditCardConsumeExtractor
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
             $creditCardConsume->getDues(),
-            $creditCardConsume->getDuesPayed()
+            $creditCardConsume->getDuesPayed(),
+            $this->extractLastPaymentMonth($creditCardConsume)
         );
     }
 
@@ -147,6 +150,11 @@ class CreditCardConsumeExtractor
         return $this->sumConsumes($consumes);
     }
 
+    /**
+     * @param User $owner
+     * @return float|int|null
+     * @throws Exception
+     */
     public function extractTotalToPayByOwner(User $owner)
     {
         $consumes = $this->consumeProvider->getByOwner($owner, $this->extractNextPaymentMonth());
@@ -195,10 +203,10 @@ class CreditCardConsumeExtractor
     private function resume(CreditCardConsume $consume)
     {
         $consumeArray = [
+            'consume_id' => $consume->getId(),
             'user_id' => $consume->getCreditCardUser()->getId(),
             'user_name' => $consume->getCreditCardUser()->getFullName(),
             'user_alias' => $consume->getCreditCardUser()->getAlias(),
-            'id' => $consume->getId(),
             'credit_card' => $consume->getCreditCard(),
             'description' => $consume->getDescription(),
             'amount' => $consume->getAmount(),
@@ -210,6 +218,7 @@ class CreditCardConsumeExtractor
             'interest_amount' => $this->extractNextInterestAmount($consume),
             'total_amount' => $this->extractNextPaymentAmount($consume),
             'payments' => $consume->getPayments(),
+            'mora' => 0
         ];
 
         return $consumeArray;
@@ -223,14 +232,46 @@ class CreditCardConsumeExtractor
     {
         $total = 0;
         foreach ($consumes as $consume) {
+            // TODO: Ajustar método para llamar las deudas pendientes incluyendo moras
             $total += $this->extractNextPaymentAmount($consume);
         }
         return $total;
     }
 
-    public function extractNextPaymentMonth(): string
+    /**
+     * @param CreditCardConsume|null $cardConsume
+     * @return string
+     * @throws Exception
+     */
+    public function extractNextPaymentMonth(?CreditCardConsume $cardConsume = null): string
     {
-        return $this->calculations->calculateNextPaymentDate();
+        if ($cardConsume instanceof CreditCardConsume) {
+            if (!$cardConsume->hasPayments()){
+                return $cardConsume->getMonthFirstPay();
+            }else {
+                $date = $this->calculations->calculateMajorDate(
+                    $this->paymentsRepository->getMonthListByConsume($cardConsume)
+                );
+            }
+        }else {
+            $date = null;
+        }
+
+        return $this->calculations->calculateNextPaymentDate($date);
+    }
+
+    /**
+     * @param CreditCardConsume $cardConsume
+     * @return string
+     * @throws Exception
+     */
+    public function extractLastPaymentMonth(CreditCardConsume $cardConsume): string
+    {
+        if ($cardConsume->hasPayments()){
+            return $this->calculations->calculateMajorDate($this->paymentsRepository->getMonthListByConsume($cardConsume));
+        }else {
+            return $this->calculations->reverseMonth($cardConsume->getMonthFirstPay());
+        }
     }
 
 }

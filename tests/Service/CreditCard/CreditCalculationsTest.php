@@ -5,6 +5,7 @@ namespace App\Tests\Service\CreditCard;
 
 
 use App\Service\CreditCard\CreditCalculations;
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 class CreditCalculationsTest extends TestCase
@@ -13,77 +14,93 @@ class CreditCalculationsTest extends TestCase
     /**
      * @var CreditCalculations
      */
-    private $calculations;
+    private static $calculations;
 
-    public function __construct($name = null, array $data = [], $dataName = '')
+    public static function setUpBeforeClass(): void
     {
-        parent::__construct($name, $data, $dataName);
-
-        $this->calculations = new CreditCalculations();
+        self::$calculations = new CreditCalculations();
     }
 
-    public function testActualConsumeDebt()
+    /**
+     * @param float $debt
+     * @param float $payed
+     * @param float $expected
+     * @param string $message
+     *
+     * @dataProvider getActualConsumeDebtCases
+     */
+    public function testActualConsumeDebt(float $debt, float $payed, float $expected, string $message)
     {
-        $actualDebt = $this->calculations->calculateActualCreditCardConsumeDebt(2000, 450);
+        $actualDebt = self::$calculations->calculateActualCreditCardConsumeDebt($debt, $payed);
 
-        self::assertEquals(1550, $actualDebt);
+        self::assertEquals($expected, $actualDebt, $message);
     }
 
-    public function testActualConsumeDebtIfAmountIsAmountIsLessThanPayed()
+    public function getActualConsumeDebtCases()
     {
-        $actualDebt = $this->calculations->calculateActualCreditCardConsumeDebt(400, 420);
-
-        self::assertEquals(0, $actualDebt);
+        return [
+            [2000, 450, 1550, 'debt < payed'],
+            [400, 420, 0, 'payed > debt'],
+            [100, 100, 0, 'payed == debt'],
+            [0, 100, 0, 'debt = 0 &&'],
+        ];
     }
 
-    public function testNextCapitalAmount()
+    /**
+     * @param float $actualDebt
+     * @param int $pendingDues
+     * @param float $expected
+     * @param string $message
+     *
+     * @dataProvider getNextCapitalAmountCases
+     */
+    public function testNextCapitalAmount(float $actualDebt, int $pendingDues, float $expected, string $message)
     {
-        $capital = $this->calculations->calculateNextCapitalAmount(1500000, 12);
+        $capital = self::$calculations->calculateNextCapitalAmount($actualDebt, $pendingDues);
 
-        self::assertSame(125000, $capital);
+        self::assertSame($expected, $capital, $message);
     }
 
-    public function testNextCapitalWithoutAmountAndPendingDues()
+    public function getNextCapitalAmountCases()
     {
-        $capital = $this->calculations->calculateNextCapitalAmount(0, 3);
-
-        self::assertSame(0, $capital);
+        return [
+            [1500000, 12, 125000, 'actualDebt > 0 & dues > 0'],
+            [0, 3, 0, 'actualDebt == 0 & dues > 0'],
+            [200, 0, 0, 'actualDebt > 0 & dues == 0'],
+            [500, -2, 0, 'actualDebt > 0 & dues < 0'],
+            [0, 0, 0, 'actualDebt == 0 & dues == 0'],
+            [-100, 2, 0, 'actualDebt < 0 & dues > 0'],
+        ];
     }
 
-    public function testNextCapitalWithAmountButNonePendingDue()
+    /**
+     * @param float $actualDebt
+     * @param float $interest
+     * @param float $expected
+     * @param string $message
+     *
+     * @dataProvider getNextInterestAmountCases
+     */
+    public function testNextInterestAmount(float $actualDebt, float $interest, float $expected, string $message)
     {
-        $capital = $this->calculations->calculateNextCapitalAmount(200, 0);
-        $capital2 = $this->calculations->calculateNextCapitalAmount(500, -2);
+        $interest = self::$calculations->calculateNextInterestAmount($actualDebt, $interest);
 
-        self::assertSame(0, $capital);
-        self::assertSame(0, $capital2);
+        self::assertEquals($expected, $interest, $message);
     }
 
-    public function testNextInterestAmount()
+    public function getNextInterestAmountCases()
     {
-        $interest = $this->calculations->calculateNextInterestAmount(100000, 2.25);
-
-        self::assertEquals(2250, $interest);
-    }
-
-    public function testNextInterestAmountWithoutInterest()
-    {
-        $interest = $this->calculations->calculateNextInterestAmount(1000, 0);
-
-        self::assertEquals(0, $interest);
-    }
-
-    public function testNextInterestAmountWithoutAmount()
-    {
-        $interest = $this->calculations->calculateNextInterestAmount(0, 1.06);
-
-        self::assertEquals(0, $interest);
+        return [
+          [100000, 2.25, 2250, 'debt > 0 & interest > 0'],
+          [1000, 0, 0, 'debt > 0 & interest == 0'],
+          [0, 1.06, 0, 'debt == 0 & interest > 0'],
+        ];
     }
 
     public function testNextPaymentAmount()
     {
-        $payment = $this->calculations->calculateNextPaymentAmount(2000, 250);
-        $payment2 = $this->calculations->calculateNextPaymentAmount(1500, 0);
+        $payment = self::$calculations->calculateNextPaymentAmount(2000, 250);
+        $payment2 = self::$calculations->calculateNextPaymentAmount(1500, 0);
 
         self::assertSame(2250, $payment);
         self::assertSame(1500, $payment2);
@@ -91,26 +108,30 @@ class CreditCalculationsTest extends TestCase
 
     public function testCalculatePendingDues()
     {
-        $dues = $this->calculations->calculateNumberOfPendingDues(20, 10);
+        $dues = self::$calculations->calculateNumberOfPendingDues(20, 10);
 
         self::assertSame(10, $dues);
     }
 
     public function testActualDebtToPay()
     {
-        $due = $this->calculations->calculateActualDueToPay(10,
-            $this->calculations->calculateNumberOfPendingDues(10, 1));
+        $due = self::$calculations->calculateActualDueToPay(10,
+            self::$calculations->calculateNumberOfPendingDues(10, 1));
 
         self::assertSame(2, $due);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testPendingPaymentsResume()
     {
-        $resume = $this->calculations->calculatePendingPaymentsResume(
+        $resume = self::$calculations->calculatePendingPaymentsResume(
             3000,
             2.5,
             8,
-            5
+            5,
+            '2018-12-28'
         );
 
         $resumeExpected = [
@@ -118,32 +139,39 @@ class CreditCalculationsTest extends TestCase
                 'number_due' => 6,
                 'capital_amount' => 1000,
                 'interest' => 75,
-                'total_to_pay' => 1075
+                'total_to_pay' => 1075,
+                'payment_month' => '2019-01'
             ],
             [
                 'number_due' => 7,
                 'capital_amount' => 1000,
                 'interest' => 50,
-                'total_to_pay' => 1050
+                'total_to_pay' => 1050,
+                'payment_month' => '2019-02'
             ],
             [
                 'number_due' => 8,
                 'capital_amount' => 1000,
                 'interest' => 25,
-                'total_to_pay' => 1025
+                'total_to_pay' => 1025,
+                'payment_month' => '2019-03'
             ],
         ];
 
         self::assertEquals($resumeExpected, $resume);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testPendingLastPaymentsResume()
     {
-        $resume = $this->calculations->calculatePendingPaymentsResume(
+        $resume = self::$calculations->calculatePendingPaymentsResume(
             2000,
             3,
             4,
-            3
+            3,
+            null
         );
 
         $resumeExpected = [
@@ -151,22 +179,26 @@ class CreditCalculationsTest extends TestCase
                 'number_due' => 4,
                 'capital_amount' => 2000,
                 'interest' => 60.0,
-                'total_to_pay' => 2060
+                'total_to_pay' => 2060,
+                'payment_month' => '2019-09',
             ],
         ];
 
         self::assertEquals($resumeExpected, $resume);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testPendingPaymentsResumeWithoutPendingDues()
     {
-        $resume = $this->calculations->calculatePendingPaymentsResume(
+        $resume = self::$calculations->calculatePendingPaymentsResume(
             3000,
             2.2,
             5,
             5
         );
-        $resume2 = $this->calculations->calculatePendingPaymentsResume(
+        $resume2 = self::$calculations->calculatePendingPaymentsResume(
             3000,
             2.2,
             4,
@@ -175,5 +207,60 @@ class CreditCalculationsTest extends TestCase
 
         self::assertEquals([], $resume);
         self::assertEquals([], $resume2);
+    }
+
+    /**
+     * @param string|null $date
+     * @param string $expected
+     * @param string $message
+     * @throws Exception
+     *
+     * @dataProvider getNextPaymentMonthProvider
+     */
+    public function testCalculateNextPaymentMonth(?string $date, ?string $expected, string $message)
+    {
+        $nextPaymentMonth = self::$calculations->calculateNextPaymentDate($date);
+
+        if (null == $date){
+            $expected = date('Y-m');
+            if (date('j') >= 15){
+                $expected = date("Y-m", strtotime(date('Y-m') . "+ 1 Month"));
+            }
+        }
+
+        self::assertSame($expected, $nextPaymentMonth, $message);
+    }
+
+    public function getNextPaymentMonthProvider()
+    {
+        return [
+            [null, '', 'Based on today'],
+            ['2019-04-01', '2019-04', 'day < 15'],
+            ['2019-10-28', '2019-11', 'day < 15 other'],
+            ['2018-12-16', '2019-01', 'day > 15'],
+            ['2018-06-15', '2018-07', 'day == 15'],
+            ['2019-01-31', '2019-02', 'month with 31 days'],
+            ['2018-12-31', '2019-01', 'month and next month with 31 days'],
+        ];
+    }
+
+    /**
+     * @param string|null $date
+     * @throws Exception
+     *
+     * @dataProvider getNextPaymentMonthProviderExceptions
+     */
+    public function testCalculateNextPaymentMonthExceptions(?string $date)
+    {
+        $this->expectException(Exception::class);
+        self::$calculations->calculateNextPaymentDate($date);
+    }
+
+    public function getNextPaymentMonthProviderExceptions()
+    {
+        return [
+            ['2018'],
+            ['04-04-2019'],
+        ];
     }
 }

@@ -5,7 +5,6 @@ namespace App\Controller\CreditCard;
 
 
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditPaymentType;
@@ -23,10 +22,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CardConsumeController extends AbstractController
 {
-    public function __construct()
-    {
-    }
-
     /**
      * @Route("/activate/{consume}", name="activate_consume")
      * @param CreditCardConsume $consume
