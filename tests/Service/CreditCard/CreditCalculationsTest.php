@@ -131,7 +131,7 @@ class CreditCalculationsTest extends TestCase
             2.5,
             8,
             5,
-            '2018-12-28'
+            '2018-12'
         );
 
         $resumeExpected = [
@@ -215,7 +215,7 @@ class CreditCalculationsTest extends TestCase
      * @param string $message
      * @throws Exception
      *
-     * @dataProvider getNextPaymentMonthProvider
+     * @dataProvider getNextPaymentMonthCases
      */
     public function testCalculateNextPaymentMonth(?string $date, ?string $expected, string $message)
     {
@@ -231,16 +231,16 @@ class CreditCalculationsTest extends TestCase
         self::assertSame($expected, $nextPaymentMonth, $message);
     }
 
-    public function getNextPaymentMonthProvider()
+    public function getNextPaymentMonthCases()
     {
         return [
             [null, '', 'Based on today'],
-            ['2019-04-01', '2019-04', 'day < 15'],
-            ['2019-10-28', '2019-11', 'day < 15 other'],
-            ['2018-12-16', '2019-01', 'day > 15'],
-            ['2018-06-15', '2018-07', 'day == 15'],
-            ['2019-01-31', '2019-02', 'month with 31 days'],
-            ['2018-12-31', '2019-01', 'month and next month with 31 days'],
+            ['2019-04', '2019-05', 'day < 15'],
+            ['2019-10', '2019-11', 'day < 15 other'],
+            ['2018-12', '2019-01', 'day > 15'],
+            ['2018-06', '2018-07', 'day == 15'],
+            ['2019-01', '2019-02', 'month with 31 days'],
+            ['2018-12', '2019-01', 'month and next month with 31 days'],
         ];
     }
 
@@ -248,7 +248,7 @@ class CreditCalculationsTest extends TestCase
      * @param string|null $date
      * @throws Exception
      *
-     * @dataProvider getNextPaymentMonthProviderExceptions
+     * @dataProvider getNextPaymentMonthExceptionsCases
      */
     public function testCalculateNextPaymentMonthExceptions(?string $date)
     {
@@ -256,11 +256,90 @@ class CreditCalculationsTest extends TestCase
         self::$calculations->calculateNextPaymentDate($date);
     }
 
-    public function getNextPaymentMonthProviderExceptions()
+    public function getNextPaymentMonthExceptionsCases()
     {
         return [
             ['2018'],
             ['04-04-2019'],
+            ['05-2019'],
+        ];
+    }
+
+    /**
+     * @param string|null $date
+     * @param string $expected
+     * @param string $message
+     * @throws Exception
+     *
+     * @dataProvider getReverseMonthCases
+     */
+    public function testReverseMonth(?string $date, ?string $expected, string $message)
+    {
+        $month = self::$calculations->reverseMonth($date);
+
+        self::assertSame($expected, $month, $message);
+    }
+
+    public function getReverseMonthCases()
+    {
+        return [
+            ['2019-04', '2019-03', 'reverse month'],
+            ['2019-12', '2019-11', 'December'],
+            ['2019-01', '2018-12', 'January'],
+        ];
+    }
+
+    /**
+     * @param string|null $date
+     * @param string $expected
+     * @param string $message
+     * @throws Exception
+     *
+     * @dataProvider getIncreaseMonthCases
+     */
+    public function testIncreaseMonth(?string $date, ?string $expected, string $message)
+    {
+        $month = self::$calculations->increaseMonth($date);
+
+        self::assertSame($expected, $month, $message);
+    }
+
+    public function getIncreaseMonthCases()
+    {
+        return [
+            ['2019-05', '2019-06', 'increase month'],
+            ['2019-12', '2020-01', 'December'],
+            ['2019-01', '2019-02', 'January'],
+        ];
+    }
+
+    /**
+     * @param array $dates
+     * @param string $expected
+     * @param string $message
+     *
+     * @dataProvider getCalculateMajorMonthCases
+     */
+    public function testCalculateMajorMonth(array $dates, string $expected, string $message)
+    {
+        $month = self::$calculations->calculateMajorMonth($dates);
+
+        self::assertSame($expected, $month, $message);
+    }
+
+    public function getCalculateMajorMonthCases()
+    {
+        return [
+            [
+                ['2019-04', '2020-04', '2019-11'],
+                '2020-04',
+                'Major Month'
+            ],
+            [
+                ['2019-11', '2019-12', '2020-01'],
+                '2020-01',
+                'Major Month'
+            ],
         ];
     }
 }

@@ -25,9 +25,7 @@ class CreditCalculations
 
         return $debt - $payed;
     }
-    /*
-     * TODO: se debe lanzar una excepción cuando actualDebt > 0 && pendingDues = 0?
-     * */
+
     /**
      * @param float $actualDebt
      * @param int $pendingDues
@@ -101,7 +99,6 @@ class CreditCalculations
                 'total_to_pay' =>  $capitalMonthlyAmount + $interestToPay,
                 'payment_month' => $paymentMonth,
             ];
-            $paymentMonth = $paymentMonth.'-28';
             $actualDebt -= $capitalMonthlyAmount;
         }
 
@@ -109,17 +106,17 @@ class CreditCalculations
     }
 
     /**
-     * @param string|null $lastPayedDate should be type 'Y-m-d'
+     * @param string|null $lastPayedMonth should be type 'Y-m-d'
      * @return string|void
      * @throws Exception
      */
-    public function calculateNextPaymentDate(?string $lastPayedDate = null): ?string
+    public function calculateNextPaymentDate(?string $lastPayedMonth = null): ?string
     {
-        if (null != $lastPayedDate){
-            $this->isDateFormatValid($lastPayedDate);
+        if (null != $lastPayedMonth){
+            return $this->increaseMonth($lastPayedMonth);
         }
 
-        $actualMonth = date($lastPayedDate ?? 'Y-m-d');
+        $actualMonth = date('Y-m-d');
         $nextMonth = date("Y-m", strtotime($actualMonth . "+ 1 Month"));
 
         $nextMonth = $this->formatNextMonth($nextMonth, $actualMonth);
@@ -129,19 +126,51 @@ class CreditCalculations
 
     /**
      * @param string $date
-     * @return string|void
+     * @return string
      * @throws Exception
      */
-    public function reverseMonth(string $date): ?string
+    public function reverseMonth(string $date): string
     {
-        if ($this->isDateFormatValid($date)) {
+        $dateTime = $this->convertToDateTime($date);
 
-            $dateTime = $this->convertToDateTime($date);
-            $dateTime->modify('-1 Month');
+        $dateTime->modify('-1 Month');
 
-            return $dateTime->format('Y-m-t');
-        }
-        return null;
+        return $dateTime->format('Y-m');
+    }
+
+    /**
+     * @param string $date
+     * @return string
+     * @throws Exception
+     */
+    public function increaseMonth(string $date): string
+    {
+        $dateTime = $this->convertToDateTime($date);
+
+        $dateTime->modify('+1 Month');
+
+        return $dateTime->format('Y-m');
+    }
+
+    public function calculateMajorMonth(array $dates): string
+    {
+        $dates = array_map([$this, 'convertToDateTime'], $dates);
+        /** @var DateTime $majorDate */
+        $majorDate = max($dates);
+
+        return $majorDate->format('Y-m');
+    }
+
+    /**
+     * @param $strDate
+     * @return DateTime
+     * @throws Exception
+     */
+    private function convertToDateTime($strDate): \DateTime
+    {
+        $this->isDateFormatValid($strDate.'-01');
+
+        return new DateTime($strDate.'-01');
     }
 
     /**
@@ -158,50 +187,29 @@ class CreditCalculations
         throw new Exception('Invalid Date Format, expected Y-m-d and received '.$date);
     }
 
-    public function calculateMajorDate(array $dates): string
-    {
-        array_map([$this, 'convertToDateTime'], $dates);
-        /** @var DateTime $majorDate */
-        $majorDate = max($dates);
-
-        return $majorDate->format('Y-m-t');
-    }
-
-    /**
-     * @param $strDate
-     * @return DateTime
-     * @throws Exception
-     */
-    private function convertToDateTime($strDate)
-    {
-        $this->isDateFormatValid($strDate.'-01');
-
-        return new DateTime($strDate-'-01');
-    }
-
-    public function calculateHandlingFee($handlingFee, $cardUsers)
-    {
-        return $handlingFee / $cardUsers;
-    }
-
-    public function calculatePaymentMonth(
-        $debt,
-        $pendingDues,
-        $interest,
-        $actualDue
-    )
-    {
-        $capitalAmount = $this->calculateNextCapitalAmount($debt, $pendingDues);
-        $interestAmount = $this->calculateNextInterestAmount($debt, $interest);
-
-        return [
-            'due' => $actualDue,
-            'capital_amount' => $capitalAmount,
-            'interest_amount' => $interestAmount,
-            'total_amount' => $this->calculateNextPaymentAmount($capitalAmount, $interestAmount),
-            'mora' => 0,
-        ];
-    }
+//    public function calculateHandlingFee($handlingFee, $cardUsers)
+//    {
+//        return $handlingFee / $cardUsers;
+//    }
+//
+//    public function calculatePaymentMonth(
+//        $debt,
+//        $pendingDues,
+//        $interest,
+//        $actualDue
+//    )
+//    {
+//        $capitalAmount = $this->calculateNextCapitalAmount($debt, $pendingDues);
+//        $interestAmount = $this->calculateNextInterestAmount($debt, $interest);
+//
+//        return [
+//            'due' => $actualDue,
+//            'capital_amount' => $capitalAmount,
+//            'interest_amount' => $interestAmount,
+//            'total_amount' => $this->calculateNextPaymentAmount($capitalAmount, $interestAmount),
+//            'mora' => 0,
+//        ];
+//    }
 
     /**
      * @param string $nextMonth

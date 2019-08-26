@@ -249,7 +249,7 @@ class CreditCardConsumeExtractor
             if (!$cardConsume->hasPayments()){
                 return $cardConsume->getMonthFirstPay();
             }else {
-                $date = $this->calculations->calculateMajorDate(
+                $date = $this->calculations->calculateMajorMonth(
                     $this->paymentsRepository->getMonthListByConsume($cardConsume)
                 );
             }
@@ -268,7 +268,9 @@ class CreditCardConsumeExtractor
     public function extractLastPaymentMonth(CreditCardConsume $cardConsume): string
     {
         if ($cardConsume->hasPayments()){
-            return $this->calculations->calculateMajorDate($this->paymentsRepository->getMonthListByConsume($cardConsume));
+            return $this->calculations->calculateMajorMonth(
+                $this->paymentsRepository->getMonthListByConsume($cardConsume)
+            );
         }else {
             return $this->calculations->reverseMonth($cardConsume->getMonthFirstPay());
         }
