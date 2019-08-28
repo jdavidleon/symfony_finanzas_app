@@ -46,9 +46,9 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume $creditCardConsume
-     * @return int
+     * @return float
      */
-    public function extractActualDebt(CreditCardConsume $creditCardConsume): int
+    public function extractActualDebt(CreditCardConsume $creditCardConsume): float
     {
         return $this->calculations->calculateActualCreditCardConsumeDebt(
             $creditCardConsume->getAmount(),
@@ -58,9 +58,21 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume $creditCardConsume
+     * @return int|null
+     */
+    public function extractPendingDues(CreditCardConsume $creditCardConsume): int
+    {
+        return $this->calculations->calculateNumberOfPendingDues(
+            $creditCardConsume->getDues(),
+            $creditCardConsume->getDuesPayed()
+        );
+    }
+
+    /**
+     * @param CreditCardConsume $creditCardConsume
      * @return float|int|null
      */
-    public function extractNextCapitalAmount(CreditCardConsume $creditCardConsume)
+    public function extractNextCapitalAmount(CreditCardConsume $creditCardConsume): float
     {
         return $this->calculations->calculateNextCapitalAmount(
             $this->extractActualDebt($creditCardConsume),
@@ -86,19 +98,6 @@ class CreditCardConsumeExtractor
         return $this->calculations->calculateNextPaymentAmount(
             $this->extractNextCapitalAmount($creditCardConsume),
             $this->extractNextInterestAmount($creditCardConsume)
-        );
-    }
-
-
-    /**
-     * @param CreditCardConsume $creditCardConsume
-     * @return int|null
-     */
-    public function extractPendingDues(CreditCardConsume $creditCardConsume)
-    {
-        return $this->calculations->calculateNumberOfPendingDues(
-            $creditCardConsume->getDues(),
-            $creditCardConsume->getDuesPayed()
         );
     }
 
