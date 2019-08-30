@@ -12,6 +12,7 @@ use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 
 class CreditCardConsumeExtractorTest extends TestCase
 {
@@ -41,11 +42,11 @@ class CreditCardConsumeExtractorTest extends TestCase
     {
         $this->cardConsumeProvider = $this->createMock(CreditCardConsumeProvider::class);
         $this->paymentsRepository = $this->createMock(CreditCardPaymentsRepository::class);
-        $this->calculations = $this->createMock(CreditCalculations::class);
+        $this->calculations = $this->prophesize(CreditCalculations::class);
         $this->consumeExtractor = new CreditCardConsumeExtractor(
             $this->cardConsumeProvider,
             $this->paymentsRepository,
-            $this->calculations
+            $this->calculations->reveal()
         );
 
         $this->creditCardConsume = $this->creditCardConsumeObject();
@@ -166,12 +167,42 @@ class CreditCardConsumeExtractorTest extends TestCase
         self::assertEquals($capitalAmount + $interestAmount, $paymentAmount);
     }
 
+    /**
+     *
+     * @throws Exception
+     */
+    public function testExtractPendingPaymentsByConsume()
+    {
+        $this->calculateConsumeActualDebtReturn();
+        $this->calculations
+            ->reverseMonth($this->creditCardConsume->getMonthFirstPay())
+            ->shouldBeCalled()
+            ->willReturn('2019-04');
+        $this->calculations
+            ->calculatePendingPaymentsResume(
+                800,
+                2.5,
+                10,
+                2,
+                '20019-04'
+            )
+            ->shouldBeCalled();
+
+
+        $this->consumeExtractor->extractPendingPaymentsByConsume(
+            $this->creditCardConsume
+        );
+    }
+
     private function calculateConsumeActualDebtReturn(int $times = 1): void
     {
         $this->calculations
-            ->expects(self::exactly($times))
-            ->method('calculateActualCreditCardConsumeDebt')
-            ->with($this->creditCardConsume->getAmount(), $this->creditCardConsume->getAmountPayed())
+            ->calculateActualCreditCardConsumeDebt(
+                $this->creditCardConsume->getAmount(),
+                $this->creditCardConsume->getAmountPayed()
+            )
+            ->shouldBeCalled()
+            ->shouldBeCalledTimes($times)
             ->willReturn((float)800);
     }
 
@@ -217,6 +248,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         $creditCardConsume->setDues(10);
         $creditCardConsume->setDuesPayed(2);
         $creditCardConsume->setInterest(2.5);
+        $creditCardConsume->setMonthFirstPay('2019-05');
         return $creditCardConsume;
     }
 
