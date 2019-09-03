@@ -129,14 +129,6 @@ class CreditCardConsumeExtractor
         );
     }
 
-    public function getNumberOfPendingDues(CreditCardConsume $creditCardConsume)
-    {
-        return $this->calculations->calculateNumberOfPendingDues(
-            $creditCardConsume->getDues(),
-            $this->extractPendingDues($creditCardConsume)
-        );
-    }
-
     public function extractTotalToPayByCreditCard(CreditCard $card, $month = null)
     {
         $consumes = $this->consumeProvider->getByCreditCard($card, $month);

@@ -30,7 +30,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
      * @param string|null $month
      * @return CreditCardConsume[]
      */
-    public function getByCreditCard(CreditCard $creditCard, string $month = null)
+    public function getByCreditCard(CreditCard $creditCard, string $month = null): array
     {
         $qb = $this->createQueryBuilder('ccc')
             ->where('ccc.creditCard = :credit_card')
