@@ -24,6 +24,12 @@ class CreditCardPayments
     private $creditConsume;
 
     /**
+     *
+     * @ORM\Column(type="smallint", nullable=true)
+     */
+    private $due;
+
+    /**
      * @ORM\Column(type="string")
      * */
     private $monthPayed;
@@ -154,5 +160,21 @@ class CreditCardPayments
     public function setRealCapitalAmount($realCapitalAmount): void
     {
         $this->realCapitalAmount = $realCapitalAmount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDue()
+    {
+        return $this->due;
+    }
+
+    /**
+     * @param mixed $due
+     */
+    public function setDue($due): void
+    {
+        $this->due = $due;
     }
 }

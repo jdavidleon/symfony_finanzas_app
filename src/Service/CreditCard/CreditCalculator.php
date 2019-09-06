@@ -11,7 +11,7 @@ namespace App\Service\CreditCard;
 use DateTime;
 use Exception;
 
-class CreditCalculations
+class CreditCalculator
 {
     /**
      * @param float $payed
@@ -31,7 +31,7 @@ class CreditCalculations
      * @param int $pendingDues
      * @return float
      */
-    public function calculateNextCapitalAmount(float $actualDebt, int $pendingDues): float
+    public function calculateCapitalAmount(float $actualDebt, int $pendingDues): float
     {
         if (0 >= $pendingDues || $actualDebt < 0){
             return 0;
@@ -55,9 +55,28 @@ class CreditCalculations
         return $totalDues - $payedDues;
     }
 
-    public function calculateActualDueToPay(int $totalDues, int $pendingDues): int
+    public function calculateNextDueToPay(int $totalDues, int $pendingDues): int
     {
         return $totalDues - $pendingDues + 1;
+    }
+
+    /**
+     * @param int $lastPayedDue
+     * @param string $lastMonthPayed
+     * @param string $nextPaymentMonth
+     * @return DateTime|int
+     * @throws Exception
+     */
+    public function calculateActualDueToPay(int $lastPayedDue, string $lastMonthPayed, string $nextPaymentMonth): int
+    {
+        $lastPayedDate = strtotime($this->yearMonthToFullDateFormat($lastMonthPayed));
+        $nextPayedDate = strtotime($this->yearMonthToFullDateFormat($nextPaymentMonth));
+
+        while (($lastPayedDate = strtotime('+1 Month', $lastPayedDate)) <= $nextPayedDate) {
+            $lastPayedDue++;
+        }
+
+        return $lastPayedDue;
     }
 
     /**
@@ -82,7 +101,7 @@ class CreditCalculations
             return [];
         }
 
-        $capitalMonthlyAmount = $this->calculateNextCapitalAmount(
+        $capitalMonthlyAmount = $this->calculateCapitalAmount(
             $actualDebt,
             $this->calculateNumberOfPendingDues($totalDues, $payedDues)
         );
@@ -162,15 +181,29 @@ class CreditCalculations
     }
 
     /**
+     * @param string $yearMonth 'Y-m'
+     * @param int $day
+     * @return string
+     * @throws Exception
+     */
+    private function yearMonthToFullDateFormat(string $yearMonth, int $day = 1): string
+    {
+        $day = (string)$day < 10 ? '0'.$day : $day;
+        $date = sprintf('%s-%s', $yearMonth, $day);
+
+        $this->isDateFormatValid($date);
+
+        return $date;
+    }
+
+    /**
      * @param $strDate
      * @return DateTime
      * @throws Exception
      */
-    private function convertToDateTime($strDate): \DateTime
+    private function convertToDateTime(string $strDate): \DateTime
     {
-        $this->isDateFormatValid($strDate.'-01');
-
-        return new DateTime($strDate.'-01');
+        return new DateTime($this->yearMonthToFullDateFormat($strDate));
     }
 
     /**

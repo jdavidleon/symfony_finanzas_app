@@ -5,6 +5,7 @@ namespace App\Repository\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayments;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -34,15 +35,14 @@ class CreditCardPaymentsRepository extends ServiceEntityRepository
                 'consume' => $consume
             ]);
 
-        if ($legalDues){
+        if ($legalDues) {
             $qb
                 ->andWhere('p.legalDue = true');
         }
 
         return $qb
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
 
     public function getMonthListByConsume(CreditCardConsume $cardConsume)
@@ -55,33 +55,4 @@ class CreditCardPaymentsRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
     }
-
-    // /**
-    //  * @return Payments[] Returns an array of Payments objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Payments
-    {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

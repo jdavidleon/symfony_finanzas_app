@@ -4,21 +4,21 @@
 namespace App\Tests\Service\CreditCard;
 
 
-use App\Service\CreditCard\CreditCalculations;
+use App\Service\CreditCard\CreditCalculator;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-class CreditCalculationsTest extends TestCase
+class CreditCalculatorTest extends TestCase
 {
 
     /**
-     * @var CreditCalculations
+     * @var CreditCalculator
      */
-    private static $calculations;
+    private static $calculator;
 
     public static function setUpBeforeClass(): void
     {
-        self::$calculations = new CreditCalculations();
+        self::$calculator = new CreditCalculator();
     }
 
     /**
@@ -31,7 +31,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testActualConsumeDebt(float $debt, float $payed, float $expected, string $message)
     {
-        $actualDebt = self::$calculations->calculateActualCreditCardConsumeDebt($debt, $payed);
+        $actualDebt = self::$calculator->calculateActualCreditCardConsumeDebt($debt, $payed);
 
         self::assertEquals($expected, $actualDebt, $message);
     }
@@ -54,9 +54,9 @@ class CreditCalculationsTest extends TestCase
      *
      * @dataProvider getNextCapitalAmountCases
      */
-    public function testNextCapitalAmount(float $actualDebt, int $pendingDues, float $expected, string $message)
+    public function testCalculateCapitalAmount(float $actualDebt, int $pendingDues, float $expected, string $message)
     {
-        $capital = self::$calculations->calculateNextCapitalAmount($actualDebt, $pendingDues);
+        $capital = self::$calculator->calculateCapitalAmount($actualDebt, $pendingDues);
 
         self::assertSame($expected, $capital, $message);
     }
@@ -83,7 +83,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testNextInterestAmount(float $actualDebt, float $interest, float $expected, string $message)
     {
-        $interest = self::$calculations->calculateNextInterestAmount($actualDebt, $interest);
+        $interest = self::$calculator->calculateNextInterestAmount($actualDebt, $interest);
 
         self::assertEquals($expected, $interest, $message);
     }
@@ -99,8 +99,8 @@ class CreditCalculationsTest extends TestCase
 
     public function testNextPaymentAmount()
     {
-        $payment = self::$calculations->calculateNextPaymentAmount(2000, 250);
-        $payment2 = self::$calculations->calculateNextPaymentAmount(1500, 0);
+        $payment = self::$calculator->calculateNextPaymentAmount(2000, 250);
+        $payment2 = self::$calculator->calculateNextPaymentAmount(1500, 0);
 
         self::assertSame(2250, $payment);
         self::assertSame(1500, $payment2);
@@ -108,15 +108,15 @@ class CreditCalculationsTest extends TestCase
 
     public function testCalculatePendingDues()
     {
-        $dues = self::$calculations->calculateNumberOfPendingDues(20, 10);
+        $dues = self::$calculator->calculateNumberOfPendingDues(20, 10);
 
         self::assertSame(10, $dues);
     }
 
     public function testActualDebtToPay()
     {
-        $due = self::$calculations->calculateActualDueToPay(10,
-            self::$calculations->calculateNumberOfPendingDues(10, 1));
+        $due = self::$calculator->calculateNextDueToPay(10,
+            self::$calculator->calculateNumberOfPendingDues(10, 1));
 
         self::assertSame(2, $due);
     }
@@ -126,7 +126,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testPendingPaymentsResume()
     {
-        $resume = self::$calculations->calculatePendingPaymentsResume(
+        $resume = self::$calculator->calculatePendingPaymentsResume(
             3000,
             2.5,
             8,
@@ -166,7 +166,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testPendingLastPaymentsResume()
     {
-        $resume = self::$calculations->calculatePendingPaymentsResume(
+        $resume = self::$calculator->calculatePendingPaymentsResume(
             2000,
             3,
             4,
@@ -192,13 +192,13 @@ class CreditCalculationsTest extends TestCase
      */
     public function testPendingPaymentsResumeWithoutPendingDues()
     {
-        $resume = self::$calculations->calculatePendingPaymentsResume(
+        $resume = self::$calculator->calculatePendingPaymentsResume(
             3000,
             2.2,
             5,
             5
         );
-        $resume2 = self::$calculations->calculatePendingPaymentsResume(
+        $resume2 = self::$calculator->calculatePendingPaymentsResume(
             3000,
             2.2,
             4,
@@ -219,7 +219,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testCalculateNextPaymentMonth(?string $date, ?string $expected, string $message)
     {
-        $nextPaymentMonth = self::$calculations->calculateNextPaymentDate($date);
+        $nextPaymentMonth = self::$calculator->calculateNextPaymentDate($date);
 
         if (null == $date){
             $expected = date('Y-m');
@@ -253,7 +253,7 @@ class CreditCalculationsTest extends TestCase
     public function testCalculateNextPaymentMonthExceptions(?string $date)
     {
         $this->expectException(Exception::class);
-        self::$calculations->calculateNextPaymentDate($date);
+        self::$calculator->calculateNextPaymentDate($date);
     }
 
     public function getNextPaymentMonthExceptionsCases()
@@ -275,7 +275,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testReverseMonth(?string $date, ?string $expected, string $message)
     {
-        $month = self::$calculations->reverseMonth($date);
+        $month = self::$calculator->reverseMonth($date);
 
         self::assertSame($expected, $month, $message);
     }
@@ -299,7 +299,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testIncreaseMonth(?string $date, ?string $expected, string $message)
     {
-        $month = self::$calculations->increaseMonth($date);
+        $month = self::$calculator->increaseMonth($date);
 
         self::assertSame($expected, $month, $message);
     }
@@ -322,7 +322,7 @@ class CreditCalculationsTest extends TestCase
      */
     public function testCalculateMajorMonth(array $dates, string $expected, string $message)
     {
-        $month = self::$calculations->calculateMajorMonth($dates);
+        $month = self::$calculator->calculateMajorMonth($dates);
 
         self::assertSame($expected, $month, $message);
     }
@@ -340,6 +340,32 @@ class CreditCalculationsTest extends TestCase
                 '2020-01',
                 'Major Month'
             ],
+        ];
+    }
+
+    /**
+     * @param $lastPayedDue
+     * @param $lastMonthPayed
+     * @param $nextPaymentMonth
+     * @param $expected
+     *
+     * @dataProvider getCalculateActualDueToPayProvider
+     * @throws Exception
+     */
+    public function testCalculateActualDueToPay($lastPayedDue, $lastMonthPayed, $nextPaymentMonth, $expected)
+    {
+        $actualDueToPay = self::$calculator->calculateActualDueToPay($lastPayedDue, $lastMonthPayed, $nextPaymentMonth);
+
+        self::assertSame($expected, $actualDueToPay);
+    }
+
+    public function getCalculateActualDueToPayProvider()
+    {
+        return [
+            [2, '2019-04', '2019-09', 7],
+            [0, '2019-11', '2020-03', 4],
+            [7, '2019-05', '2019-06', 8],
+            [1, '2019-05', '2019-05', 1],
         ];
     }
 }

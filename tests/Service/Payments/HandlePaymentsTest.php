@@ -28,8 +28,12 @@ class HandlePaymentsTest extends TestCase
      * */
     private $entityManager;
 
+
+    private $cardConsume;
+
     public function setUp(): void
     {
+        $this->cardConsume = $this->getConsume();
         $this->cardConsumeExtractor = $this->prophesize(CreditCardConsumeExtractor::class);
         $this->entityManager = $this->prophesize(EntityManagerInterface::class);
 
@@ -52,6 +56,30 @@ class HandlePaymentsTest extends TestCase
         $consume->setInterest(1);
         $consume->setMonthFirstPay('08-2019');
 
+
         $this->handlePayment->processPayment($consume, 2500);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testPaymentWhenConsumeDoesNotHavePendingDues()
+    {
+        $this->cardConsume->setAmount(1000);
+        $this->cardConsume->setAmountPayed(0);
+        $this->cardConsume->setDues(10);
+        $this->cardConsume->setDuesPayed(1);
+
+        $this->cardConsumeExtractor->extractNextPaymentAmount($this->cardConsume)->shouldBeCalled()->willReturn();
+        $this->handlePayment->processPayment($this->cardConsume, 5000);
+    }
+
+    private function getConsume()
+    {
+        $consume = new CreditCardConsume();
+        $consume->setAmountPayed(0);
+        $consume->setDuesPayed(0);
+
+        return $consume;
     }
 }

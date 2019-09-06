@@ -40,7 +40,6 @@ class HandlePayment
     /**
      * @param CreditCardConsume $consume
      * @param $payedValue
-     * @throws Exception
      */
     public function processPayment(CreditCardConsume $consume, float $payedValue): void
     {
@@ -54,6 +53,7 @@ class HandlePayment
      * @param float $realCapitalAmount
      * @param float $interestAmount
      * @param bool|null $monthPayed
+     * @param bool $legalDue
      * @return CreditCardPayments
      * @throws Exception
      */
@@ -63,7 +63,8 @@ class HandlePayment
         float $capitalAmount,
         float $realCapitalAmount,
         float $interestAmount,
-        ?bool $monthPayed
+        ?bool $monthPayed,
+        bool $legalDue = true
     ): CreditCardPayments
     {
         return PaymentsFactory::create(
@@ -72,7 +73,8 @@ class HandlePayment
             $capitalAmount,
             $realCapitalAmount,
             $interestAmount,
-            $monthPayed ?? $this->consumeExtractor->extractNextPaymentMonth()
+            $monthPayed ?? $this->consumeExtractor->extractNextPaymentMonth(),
+            $legalDue
         );
     }
 
