@@ -50,7 +50,7 @@ class CreditCardConsume
     /**
      * @ORM\Column(type="float", options={"default"=0})
      * */
-    private $amountPayed;
+    private $amountPayed = 0;
 
     /**
      * @ORM\Column(type="smallint", options={"default"=0})

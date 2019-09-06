@@ -75,15 +75,17 @@ class CreditCardConsumeExtractor
      */
     public function extractNextCapitalAmount(CreditCardConsume $creditCardConsume): float
     {
+        $capitalAmount = $this->calculator->calculateCapitalAmount(
+            $this->extractActualDebt($creditCardConsume),
+            $this->extractPendingDues($creditCardConsume)
+        );
+
         $actualDue = $this->extractActualDueToPay($creditCardConsume);
         $lastPayedDue = $creditCardConsume->getDuesPayed();
 
         $pendingDues = $actualDue - $lastPayedDue;
 
-        return $this->calculator->calculateCapitalAmount(
-                $this->extractActualDebt($creditCardConsume),
-                $this->extractPendingDues($creditCardConsume)
-            ) * $pendingDues;
+        return $capitalAmount * $pendingDues;
     }
 
     public function extractNextInterestAmount(CreditCardConsume $creditCardConsume)
