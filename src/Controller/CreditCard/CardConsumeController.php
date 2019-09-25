@@ -75,6 +75,7 @@ class CardConsumeController extends AbstractController
      * @param HandlePayment $handlePayment
      * @param Request $request
      * @return Response
+     * @throws Exception
      */
     public function paymentAction(
         CreditCardConsume $cardConsume,

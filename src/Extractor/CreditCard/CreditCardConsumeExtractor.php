@@ -45,6 +45,8 @@ class CreditCardConsumeExtractor
     }
 
     /**
+     * Initial Amount - Amount payed
+     *
      * @param CreditCardConsume $creditCardConsume
      * @return float
      */
@@ -57,6 +59,7 @@ class CreditCardConsumeExtractor
     }
 
     /**
+     * Return how many dues are pending to Pay
      * @param CreditCardConsume $creditCardConsume
      * @return int|null
      */
@@ -88,16 +91,39 @@ class CreditCardConsumeExtractor
         return $capitalAmount * $pendingDues;
     }
 
-    public function extractNextInterestAmount(CreditCardConsume $creditCardConsume)
+    /**
+     * @param CreditCardConsume $creditCardConsume
+     * @return float
+     * @throws Exception
+     */
+    public function extractNextInterestAmount(CreditCardConsume $creditCardConsume): float
     {
-        return $this->calculator->calculateNextInterestAmount(
-            $this->extractActualDebt($creditCardConsume),
-            $creditCardConsume->getInterest()
+        $actualDueToPay = $this->extractActualDueToPay($creditCardConsume);
+        $duesPayed = $creditCardConsume->getDuesPayed();
+        $interest = 0;
+
+        if ($actualDueToPay <= $duesPayed) {
+            return $interest;
+        }
+
+        $actualDebt = $this->extractActualDebt($creditCardConsume);
+        $capitalAmount = $this->calculator->calculateCapitalAmount(
+            $actualDebt,
+            $this->extractPendingDues($creditCardConsume)
         );
+        foreach (range($duesPayed + 1, $actualDueToPay) as $item){
+            $interest += $this->calculator->calculateInterestAmount(
+                $actualDebt,
+                $creditCardConsume->getInterest()
+            );
+            $actualDebt -= $capitalAmount;
+        }
+
+        return $interest;
     }
 
     /**
-     * Return what have to pay in large of time
+     * Return what have to pay in the large of time
      * @param CreditCardConsume $creditCardConsume
      * @return float|int|null
      * @throws Exception
@@ -285,10 +311,10 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume $creditCardConsume
-     * @return \DateTime|int
+     * @return int
      * @throws Exception
      */
-    public function extractActualDueToPay(CreditCardConsume $creditCardConsume)
+    public function extractActualDueToPay(CreditCardConsume $creditCardConsume): int
     {
         return $this->calculator->calculateActualDueToPay(
             $creditCardConsume->getDuesPayed(),

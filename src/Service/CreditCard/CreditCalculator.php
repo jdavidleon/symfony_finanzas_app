@@ -27,6 +27,8 @@ class CreditCalculator
     }
 
     /**
+     * Calculate the minimum Capital To Pay Based on Pending Dues
+     *
      * @param float $actualDebt
      * @param int $pendingDues
      * @return float
@@ -40,7 +42,7 @@ class CreditCalculator
         return $actualDebt / $pendingDues;
     }
 
-    public function calculateNextInterestAmount($actualDebt, $interest)
+    public function calculateInterestAmount($actualDebt, $interest)
     {
         return ( $actualDebt * $interest ) / 100;
     }
@@ -72,11 +74,12 @@ class CreditCalculator
         $lastPayedDate = strtotime($this->yearMonthToFullDateFormat($lastMonthPayed));
         $nextPayedDate = strtotime($this->yearMonthToFullDateFormat($nextPaymentMonth));
 
+        $actualDue = $lastPayedDue;
         while (($lastPayedDate = strtotime('+1 Month', $lastPayedDate)) <= $nextPayedDate) {
-            $lastPayedDue++;
+            $actualDue++;
         }
 
-        return $lastPayedDue;
+        return $actualDue;
     }
 
     /**

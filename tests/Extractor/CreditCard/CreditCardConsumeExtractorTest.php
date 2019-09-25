@@ -42,12 +42,15 @@ class CreditCardConsumeExtractorTest extends TestCase
     {
         $this->cardConsumeProvider = $this->prophesize(CreditCardConsumeProvider::class);
         $this->paymentsRepository = $this->prophesize(CreditCardPaymentsRepository::class);
-        $this->calculator = $this->prophesize(CreditCalculator::class);
+//        $this->calculator = $this->prophesize(CreditCalculator::class);
+        $this->calculator = $this->createPartialMock(CreditCalculator::class, [
+            'calculateActualDueToPay'
+        ]);
         $this->creditCardConsumeMock = $this->prophesize(CreditCardConsume::class);
         $this->consumeExtractor = new CreditCardConsumeExtractor(
             $this->cardConsumeProvider->reveal(),
             $this->paymentsRepository->reveal(),
-            $this->calculator->reveal()
+            $this->calculator
         );
 
         $this->creditCardConsume = $this->creditCardConsumeObject();
@@ -59,8 +62,6 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractActualDebt(): float
     {
-        $this->calculateConsumeActualDebtReturn($this->creditCardConsume);
-
         $actualDebt = $this->consumeExtractor->extractActualDebt(
             $this->creditCardConsume
         );
@@ -76,8 +77,6 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractPendingDues(): int
     {
-        $this->numberOfPendingDuesReturn($this->creditCardConsume);
-
         $pendingDues = $this->consumeExtractor->extractPendingDues(
             $this->creditCardConsume
         );
@@ -85,25 +84,6 @@ class CreditCardConsumeExtractorTest extends TestCase
         self::assertSame(8, $pendingDues);
 
         return $pendingDues;
-    }
-
-    /**
-     * @return float|int|null
-     * @throws Exception
-     */
-    public function testExtractNextCapitalAmount()
-    {
-        $this->calculateConsumeActualDebtReturn($this->creditCardConsume);
-        $this->numberOfPendingDuesReturn($this->creditCardConsume);
-        $this->calculateNextCapitalAmountReturn($this->creditCardConsume);
-
-        $nextCapitalAmount = $this->consumeExtractor->extractNextCapitalAmount(
-            $this->creditCardConsume
-        );
-
-        self::assertEquals(100, $nextCapitalAmount);
-
-        return $nextCapitalAmount;
     }
 
     /**
@@ -118,23 +98,16 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractNextCapitalAmountWhenHasLatePayments($actualDebt, $pendingDues, $actualDue, $lastPayedDue, $expected)
     {
-        $consume = $this->prophesize(CreditCardConsume::class);
-        $consume->getAmount();
-        $consume->getAmountPayed();
-        $consume->getDues();
-        $this->calculator->calculateActualCreditCardConsumeDebt(Argument::cetera())->willReturn($actualDebt);
-        $this->calculator->calculateNumberOfPendingDues(Argument::cetera())->willReturn($pendingDues);
-        $this->calculator->calculateNextPaymentDate()->willReturn(Argument::type('string'));
-        $this->calculator->calculateActualDueToPay(Argument::cetera())->willReturn($actualDue);
-        $this->calculator->calculateMajorMonth(Argument::type('array'))->willReturn(Argument::type('string'));
-        $this->paymentsRepository->getMonthListByConsume($consume->reveal())->willReturn([]);
-        $this->calculator->calculateCapitalAmount(Argument::cetera())->willReturn($actualDebt/$pendingDues);
+        $this->creditCardConsume->setAmount($actualDebt);
+        $this->creditCardConsume->setAmountPayed(0);
+        $this->creditCardConsume->setDues($pendingDues + $lastPayedDue);
+        $this->creditCardConsume->setDuesPayed($lastPayedDue);
 
-        $consume->hasPayments()->willReturn(0 < $lastPayedDue);
-        $consume->getDuesPayed()->willReturn($lastPayedDue);
+        $this->calculator->expects(self::any())->method('calculateActualDueToPay')->willReturn($actualDue);
+        $this->paymentsRepository->getMonthListByConsume(Argument::type(CreditCardConsume::class))->willReturn([]);
 
         $nextCapitalAmount = $this->consumeExtractor->extractNextCapitalAmount(
-            $consume->reveal()
+            $this->creditCardConsume
         );
 
         self::assertSame((float)$expected, $nextCapitalAmount);
@@ -150,8 +123,6 @@ class CreditCardConsumeExtractorTest extends TestCase
         ];
     }
 
-
-
     /**
      * @param $actualDebt
      * @param $pendingDues
@@ -164,25 +135,15 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractNextCapitalAmountWhenDontHasLatePayments($actualDebt, $pendingDues, $actualDue, $lastPayedDue, $expected)
     {
-        $consume = $this->prophesize(CreditCardConsume::class);
-        $consume->getAmount();
-        $consume->getAmountPayed();
-        $consume->getDues();
-        $this->calculator->calculateActualCreditCardConsumeDebt(Argument::cetera())->willReturn($actualDebt);
-        $this->calculator->calculateNumberOfPendingDues(Argument::cetera())->willReturn($pendingDues);
-        $this->calculator->calculateNextPaymentDate()->willReturn(Argument::type('string'));
-        $consume->hasPayments()->willReturn(0 < $lastPayedDue);
-        $consume->getMonthFirstPay()->willReturn(Argument::type('string'));
-        $this->calculator->calculateActualDueToPay(Argument::cetera())->willReturn($actualDue);
-        $this->calculator->calculateMajorMonth([])->shouldNotBeCalled();
-        $this->paymentsRepository->getMonthListByConsume($consume->reveal())->shouldNotBeCalled();
-        $this->calculator->reverseMonth(Argument::type('string'))->willReturn(Argument::type('string'));
-        $this->calculator->calculateCapitalAmount(Argument::cetera())->willReturn($actualDebt/$pendingDues);
-
-        $consume->getDuesPayed()->willReturn($lastPayedDue);
+        $this->creditCardConsume->setAmount($actualDebt);
+        $this->creditCardConsume->setAmountPayed(0);
+        $this->creditCardConsume->setDues($pendingDues + $lastPayedDue);
+        $this->creditCardConsume->setDuesPayed($lastPayedDue);
+        $this->calculator->expects(self::any())->method('calculateActualDueToPay')->willReturn($actualDue);
+        $this->paymentsRepository->getMonthListByConsume(Argument::type(CreditCardConsume::class))->shouldNotBeCalled();
 
         $nextCapitalAmount = $this->consumeExtractor->extractNextCapitalAmount(
-            $consume->reveal()
+            $this->creditCardConsume
         );
 
         self::assertSame((float)$expected, $nextCapitalAmount);
@@ -196,122 +157,67 @@ class CreditCardConsumeExtractorTest extends TestCase
         ];
     }
 
-
     /**
-     * @return float|int
+     * @dataProvider getInterestAmountProvider
+     * @param float $amount
+     * @param float $interest
+     * @param int $dues
+     * @param int $duesPayed
+     * @param int $actualDue
+     * @param float $expected
+     * @param string $message
+     * @throws Exception
      */
-    public function testExtractNextInterestAmount()
+    public function testExtractNextInterestAmountBasedOnLatePayments(
+        float $amount,
+        float $interest,
+        int $dues,
+        int $duesPayed,
+        int $actualDue,
+        float $expected,
+        string $message = ''
+    )
     {
-        $this->calculateConsumeActualDebtReturn($this->creditCardConsume);
-        $this->calculateNextInterestAmountReturn($this->creditCardConsume);
+        $this->creditCardConsume->setAmount($amount);
+        $this->creditCardConsume->setAmountPayed(0);
+        $this->creditCardConsume->setInterest($interest);
+        $this->creditCardConsume->setDues($dues);
+        $this->creditCardConsume->setDuesPayed($duesPayed);
+
+        $this->calculator->expects(self::any())->method('calculateActualDueToPay')->willReturn($actualDue);
 
         $interestAmount = $this->consumeExtractor->extractNextInterestAmount(
             $this->creditCardConsume
         );
 
-        self::assertEquals(20, $interestAmount);
-
-        return $interestAmount;
-    }
-
-    /**
-     * @dataProvider getInterestAmountProvider
-     * @param float $amount
-     * @param float $interest
-     * @param float $expected
-     * @throws Exception
-     */
-    public function testExtractNextInterestAmountWhenDoesNotHaveLatePayments(float $amount, float $interest, float $expected)
-    {
-        $consume = new CreditCardConsume();
-        $consume->setAmount($amount);
-        $consume->setInterest($interest);
-
-        $debt = $consume->getAmount();
-        $payed = $consume->getAmountPayed();
-        $this->calculator->calculateActualCreditCardConsumeDebt($debt, $payed)->willReturn($debt - $payed);
-        $this->calculator->calculateNextInterestAmount($debt, $consume->getInterest())->willReturn($expected);
-
-
-        $interestAmount = $this->consumeExtractor->extractNextInterestAmount(
-              $consume
-        );
-
-        self::assertEquals((float)$expected, $interestAmount);
+        self::assertEquals((float)$expected, $interestAmount, $message);
     }
 
     public function getInterestAmountProvider()
     {
         return [
-            [1000, 2, 20],
-            [2500, 1.8, 24],
-            [2999, 0.9, 26.991],
-        ];
-    }
-
-
-
-    /**
-     * @dataProvider getInterestAmountProvider
-     * @param float $amount
-     * @param float $interest
-     * @param float $expected
-     * @throws Exception
-     */
-    public function testExtractNextInterestAmountWhenHaveLatePayments(float $amount, float $interest, float $expected)
-    {
-        $consume = new CreditCardConsume();
-        $consume->setAmount($amount);
-        $consume->setInterest($interest);
-
-        $debt = $consume->getAmount();
-        $payed = $consume->getAmountPayed();
-        $this->calculator->calculateActualCreditCardConsumeDebt($debt, $payed)->willReturn($debt - $payed);
-        $this->calculator->calculateNextInterestAmount($debt, $consume->getInterest())->willReturn($expected);
-
-
-        $interestAmount = $this->consumeExtractor->extractNextInterestAmount(
-            $consume
-        );
-
-        self::assertEquals((float)$expected, $interestAmount);
-    }
-
-    public function getInterestAmountProvider2()
-    {
-        return [
-            [1000, 2, 20],
-            [2500, 1.8, 24],
-            [2999, 0.9, 26.991],
+            [1000, 2, 10, 0, 3, 54, '3 pending dues'],
+            [2000, 1.8, 10, 1, 10, 180, '9 pending dues'],
+            [157400, 2.25, 8, 5, 7, 5902.5, '2 pending dues'],
+            [452450, 1.52, 20, 8, 8, 0, 'Not pending dues'],
+            [1000, 10, 10, 1, 1, 0, 'Not pending dues'],
         ];
     }
 
     /**
      *
-     * @param float $capitalAmount
-     * @param float $interestAmount
      *
-     * @depends testExtractNextCapitalAmount
-     * @depends testExtractNextInterestAmount
      * @throws Exception
      */
-    public function testExtractNextPaymentAmount(
-        float $capitalAmount,
-        float $interestAmount
-    )
+    public function testExtractNextPaymentAmount()
     {
-        $this->calculateConsumeActualDebtReturn($this->creditCardConsume, 2);
-        $this->numberOfPendingDuesReturn($this->creditCardConsume);
-        $this->calculateNextCapitalAmountReturn($this->creditCardConsume);
-        $this->calculateNextInterestAmountReturn($this->creditCardConsume);
-
-        $this->calculateNextPaymentAmountReturn($this->creditCardConsume);
+        $this->calculator->expects(self::any())->method('calculateActualDueToPay')->willReturn(3);
 
         $paymentAmount = $this->consumeExtractor->extractNextPaymentAmount(
             $this->creditCardConsume
         );
 
-        self::assertEquals($capitalAmount + $interestAmount, $paymentAmount);
+        self::assertEquals(120, $paymentAmount);
     }
 
     /**
@@ -443,7 +349,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         $interest = $cardConsume->getInterest();
         $interestAmount = ($actualDebt * $interest) / 100;
         $this->calculator
-            ->calculateNextInterestAmount(
+            ->calculateInterestAmount(
                 $actualDebt,
                 $interest
             )

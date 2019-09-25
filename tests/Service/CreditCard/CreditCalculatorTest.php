@@ -70,6 +70,7 @@ class CreditCalculatorTest extends TestCase
             [500, -2, 0, 'actualDebt > 0 & dues < 0'],
             [0, 0, 0, 'actualDebt == 0 & dues == 0'],
             [-100, 2, 0, 'actualDebt < 0 & dues > 0'],
+            [1000, 10, 100, 'actualDebt < 0 & dues > 0'],
         ];
     }
 
@@ -83,7 +84,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testNextInterestAmount(float $actualDebt, float $interest, float $expected, string $message)
     {
-        $interest = self::$calculator->calculateNextInterestAmount($actualDebt, $interest);
+        $interest = self::$calculator->calculateInterestAmount($actualDebt, $interest);
 
         self::assertEquals($expected, $interest, $message);
     }
