@@ -201,6 +201,8 @@ class CreditCardConsumeExtractorTest extends TestCase
             [157400, 2.25, 8, 5, 7, 5902.5, '2 pending dues'],
             [452450, 1.52, 20, 8, 8, 0, 'Not pending dues'],
             [1000, 10, 10, 1, 1, 0, 'Not pending dues'],
+            [0, 1.5, 10, 6, 8, 0, 'Without debt'],
+            [456100, 0, 10, 1, 8, 0, 'Interest in zero'],
         ];
     }
 
