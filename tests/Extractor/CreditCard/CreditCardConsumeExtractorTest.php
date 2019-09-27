@@ -44,7 +44,8 @@ class CreditCardConsumeExtractorTest extends TestCase
         $this->paymentsRepository = $this->prophesize(CreditCardPaymentsRepository::class);
 //        $this->calculator = $this->prophesize(CreditCalculator::class);
         $this->calculator = $this->createPartialMock(CreditCalculator::class, [
-            'calculateActualDueToPay'
+            'calculateActualDueToPay',
+            'reverseMonth'
         ]);
         $this->creditCardConsumeMock = $this->prophesize(CreditCardConsume::class);
         $this->consumeExtractor = new CreditCardConsumeExtractor(
@@ -228,40 +229,65 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractPendingPaymentsByConsume()
     {
-        $this->calculateConsumeActualDebtReturn($this->creditCardConsume);
-        $this->calculator
-            ->reverseMonth($this->creditCardConsume->getMonthFirstPay())
-            ->shouldBeCalled()
-            ->willReturn('2019-04');
-        $this->calculator
-            ->calculatePendingPaymentsResume(
-                800,
-                $this->creditCardConsume->getInterest(),
-                $this->creditCardConsume->getDues(),
-                $this->creditCardConsume->getDuesPayed(),
-                '2019-04'
-            )
-            ->shouldBeCalled();
+        $this->creditCardConsume->setAmount(2000);
+        $this->creditCardConsume->setAmountPayed(1800);
+        $this->creditCardConsume->setDues(10);
+        $this->creditCardConsume->setDuesPayed(9);
+        $this->creditCardConsume->setInterest(2);
+        $firstMonth = new \DateTime();
+        $firstMonth->modify('-1 Month');
+        $monthFirstPay = $firstMonth->format('Y-m');
+        $this->creditCardConsume->setMonthFirstPay($monthFirstPay);
 
-        $this->consumeExtractor->extractPendingPaymentsByConsume(
-            $this->creditCardConsume
-        );
-    }
-
-    public function testGetActualDueToPay()
-    {
-        $this->numberOfPendingDuesReturn($this->creditCardConsume);
+        $firstMonth->modify('-1 Month');
         $this->calculator
-            ->calculateNextDueToPay(
-                $this->creditCardConsume->getDues(),
-                8
-            )
-            ->shouldBeCalled()
+            ->method('reverseMonth')
+            ->with($monthFirstPay)
+            ->willReturn($firstMonth->format('Y-m'))
         ;
 
-        $this->consumeExtractor->getActualDueToPay(
+        $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume(
             $this->creditCardConsume
         );
+
+        $firstMonth->modify('+1 Month');
+        $expected = [
+            'number_due' => 10,
+            'capital_amount' => (float)200,
+            'interest' => (float)4,
+            'total_to_pay' => (float)204,
+            'payment_month' => $firstMonth->format('Y-m'),
+        ];
+
+        self::assertSame([$expected], $pendingPayments);
+    }
+
+    /**
+     *
+     * @dataProvider getActualDueProvider
+     * @param int $dues
+     * @param int $duesPayed
+     * @param int $expected
+     */
+    public function testGetActualDueToPay(int $dues, int $duesPayed, int $expected)
+    {
+        $this->creditCardConsume->setDues($dues);
+        $this->creditCardConsume->setDuesPayed($duesPayed);
+
+        $actualDueToPay = $this->consumeExtractor->getActualDueToPay(
+            $this->creditCardConsume
+        );
+
+        self::assertSame($expected, $actualDueToPay);
+    }
+
+    public function getActualDueProvider()
+    {
+        return [
+            [10, 8, 9],
+            [1, 0, 1],
+//            [0, 0, 0], Todo: que tanto sentido tiene esto???
+        ];
     }
 
     public function testExtractTotalToPayByCreditCardWithOutConsumes()
