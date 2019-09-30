@@ -6,6 +6,7 @@ namespace App\Tests\Extractor\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Repository\CreditCard\CreditCardPaymentsRepository;
 use App\Service\CreditCard\CreditCalculator;
@@ -290,6 +291,9 @@ class CreditCardConsumeExtractorTest extends TestCase
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function testExtractTotalToPayByCreditCardWithOutConsumes()
     {
         $creditCard = new CreditCard();
@@ -301,10 +305,11 @@ class CreditCardConsumeExtractorTest extends TestCase
         self::assertEquals(0, $totalToPay);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testExtractTotalToPayByCreditCard()
     {
-        $creditCard = new CreditCard();
-
         $consume2 = clone $this->creditCardConsume;
         $consume2->setAmount(5000);
         $consume2->setAmountPayed(1000);
@@ -314,91 +319,69 @@ class CreditCardConsumeExtractorTest extends TestCase
 
         $return = [
             $this->creditCardConsume,
-            $consume2
+            $consume2,
         ];
         $this->getByCreditCardReturn($return);
 
-        /** @var CreditCardConsume $consume */
-        foreach ($return as $consume){
-            $this->calculateConsumeActualDebtReturn($consume, 2);
-            $this->numberOfPendingDuesReturn($consume);
-            $this->calculateNextCapitalAmountReturn($consume);
-            $this->calculateNextInterestAmountReturn($consume);
-            $this->calculateNextPaymentAmountReturn($consume);
-        }
+        $this->calculator
+            ->expects(self::exactly(4))
+            ->method('calculateActualDueToPay')
+            ->withConsecutive(
+                [$this->creditCardConsume->getDuesPayed()],
+                [$this->creditCardConsume->getDuesPayed()],
+                [$consume2->getDuesPayed()],
+                [$consume2->getDuesPayed()]
+            )
+            ->willReturnOnConsecutiveCalls(3, 3, 11, 11);
 
-        $totalToPay = $this->consumeExtractor->extractTotalToPayByCreditCard($creditCard);
+        $totalToPay = $this->consumeExtractor->extractTotalToPayByCreditCard(new CreditCard());
 
         self::assertEquals(600, $totalToPay);
     }
 
-    private function calculateConsumeActualDebtReturn(CreditCardConsume $consume, $times= 1): void
-    {
-        $actualDebt = $consume->getAmount() - $consume->getAmountPayed();
-        $this->calculator
-            ->calculateActualCreditCardConsumeDebt(
-                $consume->getAmount(),
-                $consume->getAmountPayed()
-            )
-            ->shouldBeCalled()
-            ->shouldBeCalledTimes($times)
-            ->willReturn((float)$actualDebt);
-    }
 
-    private function numberOfPendingDuesReturn(CreditCardConsume $consume): void
-    {
-        $pendingDues = $consume->getDues() - $consume->getDuesPayed();
-        $this->calculator
-            ->calculateNumberOfPendingDues(
-                $consume->getDues(),
-                $consume->getDuesPayed()
-            )
-            ->shouldBeCalled()
-            ->willReturn($pendingDues);
-    }
 
     /**
-     * @param CreditCardConsume $consume
+     * @throws Exception
      */
-    private function calculateNextCapitalAmountReturn(CreditCardConsume $consume): void
+    public function testExtractTotalToPayByCardUser()
     {
-        $actualDebt = $consume->getAmount() - $consume->getAmountPayed();
-        $pendingDues = $consume->getDues() - $consume->getDuesPayed();
-        $capitalAmount = $actualDebt/$pendingDues;
-        $this->calculator
-            ->calculateCapitalAmount($actualDebt, $pendingDues)
-            ->shouldBeCalled()
-            ->willReturn((float)$capitalAmount);
-    }
+        $consume2 = clone $this->creditCardConsume;
+        $consume2->setAmount(450000);
+        $consume2->setAmountPayed(150000);
+        $consume2->setInterest(2.2);
+        $consume2->setDues(10);
+        $consume2->setDuesPayed(0);
 
-    private function calculateNextInterestAmountReturn(CreditCardConsume $cardConsume): void
-    {
-        $actualDebt = $cardConsume->getAmount() - $cardConsume->getAmountPayed();
-        $interest = $cardConsume->getInterest();
-        $interestAmount = ($actualDebt * $interest) / 100;
-        $this->calculator
-            ->calculateInterestAmount(
-                $actualDebt,
-                $interest
+        $return = [
+            $this->creditCardConsume,
+            $consume2,
+        ];
+        $this->cardConsumeProvider
+            ->getByCardUser(
+                Argument::type(CreditCardUser::class),
+                null,
+                null
             )
             ->shouldBeCalled()
-            ->willReturn($interestAmount);
+            ->willReturn($return);
+
+        $this->calculator
+            ->expects(self::exactly(4))
+            ->method('calculateActualDueToPay')
+            ->withConsecutive(
+                [$this->creditCardConsume->getDuesPayed()],
+                [$this->creditCardConsume->getDuesPayed()],
+                [$consume2->getDuesPayed()],
+                [$consume2->getDuesPayed()]
+            )
+            ->willReturnOnConsecutiveCalls(3, 3, 1, 1);
+
+        $totalToPay = $this->consumeExtractor->extractTotalToPayByCardUser(new CreditCardUser());
+
+        self::assertEquals(36720, $totalToPay);
     }
 
-    /**
-     * @param CreditCardConsume $consume
-     */
-    private function calculateNextPaymentAmountReturn(CreditCardConsume $consume): void
-    {
-        $actualDebt = $consume->getAmount() - $consume->getAmountPayed();
-        $pendingDues = $consume->getDues() - $consume->getDuesPayed();
-        $interestAmount = ($actualDebt * $consume->getInterest()) / 100;
-        $capitalAmount = $actualDebt/$pendingDues;
-        $this->calculator
-            ->calculateNextPaymentAmount($capitalAmount, $interestAmount)
-            ->shouldBeCalled()
-            ->willReturn((float)$capitalAmount + $interestAmount);
-    }
     /**
      * @return CreditCardConsume
      * @throws Exception

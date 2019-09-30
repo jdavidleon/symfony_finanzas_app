@@ -164,13 +164,26 @@ class CreditCardConsumeExtractor
         );
     }
 
-    public function extractTotalToPayByCreditCard(CreditCard $card, $month = null)
+    /**
+     * @param CreditCard $card
+     * @param null $month
+     * @return float
+     * @throws Exception
+     */
+    public function extractTotalToPayByCreditCard(CreditCard $card, $month = null): float
     {
         $consumes = $this->consumeProvider->getByCreditCard($card, $month);
         return $this->sumConsumes($consumes);
     }
 
-    public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    /**
+     * @param CreditCardUser $cardUser
+     * @param CreditCard|null $card
+     * @param null $month
+     * @return float
+     * @throws Exception
+     */
+    public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null): float
     {
         $consumes = $this->consumeProvider->getByCardUser($cardUser, $card, $month);
         return $this->sumConsumes($consumes);
@@ -252,13 +265,13 @@ class CreditCardConsumeExtractor
 
     /**
      * @param array $consumes
-     * @return float|int|null
+     * @return float
+     * @throws Exception
      */
-    private function sumConsumes(array $consumes)
+    private function sumConsumes(array $consumes): float
     {
         $total = 0;
         foreach ($consumes as $consume) {
-            // TODO: Ajustar método para llamar las deudas pendientes incluyendo moras
             $total += $this->extractNextPaymentAmount($consume);
         }
         return $total;
@@ -304,8 +317,13 @@ class CreditCardConsumeExtractor
      */
     private function getCalculateMajorMonth(?CreditCardConsume $cardConsume): string
     {
+        $dateList = [];
+        foreach ($this->paymentsRepository->getMonthListByConsume($cardConsume) as $date){
+            $dateList[] = array_values($date);
+        }
+
         return $this->calculator->calculateMajorMonth(
-            $this->paymentsRepository->getMonthListByConsume($cardConsume)
+            $dateList
         );
     }
 

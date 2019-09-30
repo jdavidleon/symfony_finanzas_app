@@ -167,6 +167,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testPendingLastPaymentsResume()
     {
+
         $resume = self::$calculator->calculatePendingPaymentsResume(
             2000,
             3,
@@ -175,13 +176,18 @@ class CreditCalculatorTest extends TestCase
             null
         );
 
+        $date = new \DateTime();
+        if ((int)$date->format('d') > 15){
+            $date->modify('+1 Month');
+        }
+
         $resumeExpected = [
             [
                 'number_due' => 4,
                 'capital_amount' => 2000,
                 'interest' => 60.0,
                 'total_to_pay' => 2060,
-                'payment_month' => '2019-09',
+                'payment_month' => $date->format('Y-m'),
             ],
         ];
 
