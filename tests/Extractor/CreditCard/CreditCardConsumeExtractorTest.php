@@ -205,6 +205,7 @@ class CreditCardConsumeExtractorTest extends TestCase
             [1000, 10, 10, 1, 1, 0, 'Not pending dues'],
             [0, 1.5, 10, 6, 8, 0, 'Without debt'],
             [456100, 0, 10, 1, 8, 0, 'Interest in zero'],
+            [5000, 3, 10, 5, 5, 0, 'Actual pay == last pay'],
         ];
     }
 
@@ -360,8 +361,8 @@ class CreditCardConsumeExtractorTest extends TestCase
         $this->cardConsumeProvider
             ->getByCardUser(
                 Argument::type(CreditCardUser::class),
-                null,
-                null
+                Argument::type(CreditCard::class),
+                '2019-08'
             )
             ->shouldBeCalled()
             ->willReturn($return);
@@ -377,7 +378,7 @@ class CreditCardConsumeExtractorTest extends TestCase
             )
             ->willReturnOnConsecutiveCalls(3, 3, 1, 1);
 
-        $totalToPay = $this->consumeExtractor->extractTotalToPayByCardUser(new CreditCardUser());
+        $totalToPay = $this->consumeExtractor->extractTotalToPayByCardUser(new CreditCardUser(), new CreditCard(), '2019-08');
 
         self::assertEquals(36720, $totalToPay);
     }
