@@ -52,6 +52,7 @@ class CardConsumeController extends AbstractController
      * @param CreditCardConsumeProvider $consumeProvider
      * @param CreditCardConsumeExtractor $consumeExtractor
      * @return Response
+     * @throws Exception
      */
     public function userConsumeAction(
         CreditCardUser $cardUser,
@@ -60,7 +61,7 @@ class CardConsumeController extends AbstractController
     )
     {
         $consumes = $consumeProvider->getByCardUser($cardUser);
-        $consumes = $consumeExtractor->extractConsumeListBy($consumes);
+        $consumes = $consumeExtractor->extractConsumeResume($consumes);
 
         return $this->render('credit/card_user.html.twig', [
             'consumes' => $consumes

@@ -201,24 +201,31 @@ class CreditCardConsumeExtractor
     }
 
     /**
-     * @param CreditCardConsume[] $cardConsume
+     * @param CreditCardConsume[] $cardConsumes
      * @return array
+     * @throws Exception
      */
-    public function extractConsumeListBy($cardConsume)
+    public function extractConsumeResume(array $cardConsumes): array
     {
         $arrayConsumes = [];
 
-        foreach ($cardConsume as $consume){
+        foreach ($cardConsumes as $consume){
             $arrayConsumes[] = $this->resume($consume);
         }
 
         return $arrayConsumes;
     }
 
-    public function extractListGroupedBy($cardConsume, $groupBy = null)
+    /**
+     * @param CreditCardConsume[] $cardConsumes
+     * @param null $groupBy
+     * @return array
+     * @throws Exception
+     */
+    public function extractListGroupedBy($cardConsumes, $groupBy = null)
     {
         $arrayConsumes = [];
-        foreach ($cardConsume as $consume){
+        foreach ($cardConsumes as $consume){
             switch ($groupBy){
                 case 'user':
                     $key = $consume->getCreditCardUser()->getId();
@@ -238,6 +245,7 @@ class CreditCardConsumeExtractor
     /**
      * @param CreditCardConsume $consume
      * @return array
+     * @throws Exception
      */
     private function resume(CreditCardConsume $consume)
     {
@@ -257,7 +265,9 @@ class CreditCardConsumeExtractor
             'interest_amount' => $this->extractNextInterestAmount($consume),
             'total_amount' => $this->extractNextPaymentAmount($consume),
             'payments' => $consume->getPayments(),
-            'mora' => 0
+            'pending_payments' => $this->extractPendingPaymentsByConsume($consume),
+            'status' => $consume->getStatus(),
+            'mora' => 0 // todo: definir deudas
         ];
 
         return $consumeArray;

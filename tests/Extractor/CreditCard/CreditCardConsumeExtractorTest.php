@@ -7,14 +7,17 @@ namespace App\Tests\Extractor\CreditCard;
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
+use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Repository\CreditCard\CreditCardPaymentsRepository;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
+use DateTime;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use ReflectionProperty;
 
 class CreditCardConsumeExtractorTest extends TestCase
 {
@@ -236,7 +239,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         $this->creditCardConsume->setDues(10);
         $this->creditCardConsume->setDuesPayed(9);
         $this->creditCardConsume->setInterest(2);
-        $firstMonth = new \DateTime();
+        $firstMonth = new DateTime();
         $firstMonth->modify('-1 Month');
         $monthFirstPay = $firstMonth->format('Y-m');
         $this->creditCardConsume->setMonthFirstPay($monthFirstPay);
@@ -340,8 +343,6 @@ class CreditCardConsumeExtractorTest extends TestCase
         self::assertEquals(600, $totalToPay);
     }
 
-
-
     /**
      * @throws Exception
      */
@@ -381,6 +382,86 @@ class CreditCardConsumeExtractorTest extends TestCase
         $totalToPay = $this->consumeExtractor->extractTotalToPayByCardUser(new CreditCardUser(), new CreditCard(), '2019-08');
 
         self::assertEquals(36720, $totalToPay);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractTotalToPayByOwner()
+    {
+        $this->creditCardConsume->setAmount(2000);
+        $this->creditCardConsume->setAmountPayed(0);
+        $this->creditCardConsume->setInterest(2);
+        $this->creditCardConsume->setDues(10);
+        $this->creditCardConsume->setDuesPayed(0);
+
+        $date = new DateTime();
+        if ((int)$date->format('d') >= 15){
+            $date->modify('first day of next month');
+        }
+
+        $return = [
+            $this->creditCardConsume
+        ];
+        $this->cardConsumeProvider
+            ->getByOwner(
+                Argument::type(User::class),
+                $date->format('Y-m')
+            )
+            ->shouldBeCalled()
+            ->willReturn($return);
+
+        $this->calculator
+            ->expects(self::exactly(2))
+            ->method('calculateActualDueToPay')
+            ->withConsecutive(
+                [$this->creditCardConsume->getDuesPayed()],
+                [$this->creditCardConsume->getDuesPayed()]
+            )
+            ->willReturnOnConsecutiveCalls( 1, 1);
+
+        $totalToPay = $this->consumeExtractor->extractTotalToPayByOwner(new User());
+
+        self::assertEquals(240, $totalToPay);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractConsumeResume()
+    {
+        $cardConsume1 = $this->creditCardConsume;
+        $cardConsume1->setMonthFirstPay('2019-01');
+        $creditCardUser = new CreditCardUser();
+        $cardConsume1->setCreditCardUser($creditCardUser);
+        $creditCard = new CreditCard();
+        $cardConsume1->setCreditCard($creditCard);
+        $cardConsume1->setDescription('Test Consume');
+
+        $this->setIdByReflection($cardConsume1, 12);
+        $this->setIdByReflection($creditCardUser, 455);
+        $this->setIdByReflection($creditCard, 85);
+
+        $resume = [
+            []
+        ];
+
+        $consumesResume = $this->consumeExtractor->extractConsumeResume([$cardConsume1]);
+
+        self::assertEquals($resume, $consumesResume);
+    }
+
+    /**
+     * @param $object
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function setIdByReflection($object, $value)
+    {
+        $reflector = new ReflectionProperty($object, 'id');
+        $reflector->setAccessible(true);
+        $reflector->setValue($object, $value);
     }
 
     /**
