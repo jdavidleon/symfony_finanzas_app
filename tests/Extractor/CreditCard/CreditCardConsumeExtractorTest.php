@@ -432,8 +432,17 @@ class CreditCardConsumeExtractorTest extends TestCase
     public function testExtractConsumeResume()
     {
         $cardConsume1 = $this->creditCardConsume;
-        $cardConsume1->setMonthFirstPay('2019-01');
+        $cardConsume1->setAmount(1000);
+        $cardConsume1->setAmountPayed(0);
+        $cardConsume1->setInterest(2.2);
+        $cardConsume1->setDues(10);
+        $cardConsume1->setDuesPayed(0);
+        $cardConsume1->setStatus(CreditCardConsume::STATUS_PAYING);
+        $cardConsume1->setMonthFirstPay(date('Y-m'));
         $creditCardUser = new CreditCardUser();
+        $creditCardUser->setName('J');
+        $creditCardUser->setLastName('D');
+        $creditCardUser->setAlias('JD');
         $cardConsume1->setCreditCardUser($creditCardUser);
         $creditCard = new CreditCard();
         $cardConsume1->setCreditCard($creditCard);
@@ -444,7 +453,26 @@ class CreditCardConsumeExtractorTest extends TestCase
         $this->setIdByReflection($creditCard, 85);
 
         $resume = [
-            []
+            [
+                'consume_id' => 12,
+                'user_id' => 455,
+                'user_name' => 'J D',
+                'user_alias' => 'JD',
+                'credit_card' => $creditCard,
+                'description' => $this->creditCardConsume->getDescription(),
+                'amount' => $this->creditCardConsume->getAmount(),
+                'pending_amount' => $cardConsume1->getAmount(),
+                'dues' => 10,
+                'pending_dues' => 10,
+                'interest' => 2.2,
+                'capital_amount' => 100,
+                'interest_amount' => 22,
+                'total_amount' => 122,
+                'payments' => [],
+                'pending_payments' => [],
+                'status' => CreditCardConsume::STATUS_PAYING,
+                'mora' => 0 // todo: definir deudas
+            ]
         ];
 
         $consumesResume = $this->consumeExtractor->extractConsumeResume([$cardConsume1]);
