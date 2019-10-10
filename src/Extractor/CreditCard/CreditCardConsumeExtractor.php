@@ -328,8 +328,11 @@ class CreditCardConsumeExtractor
     private function getCalculateMajorMonth(?CreditCardConsume $cardConsume): string
     {
         $dateList = [];
-        foreach ($this->paymentsRepository->getMonthListByConsume($cardConsume) as $date){
-            $dateList[] = array_values($date);
+        // Todo: mejorar el retorno de month
+        foreach ($this->paymentsRepository->getMonthListByConsume($cardConsume) as $arrayDate){
+            foreach ($arrayDate as $date){
+                $dateList[] = $date;
+            }
         }
 
         return $this->calculator->calculateMajorMonth(

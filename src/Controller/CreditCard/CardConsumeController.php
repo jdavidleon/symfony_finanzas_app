@@ -8,6 +8,7 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditPaymentType;
+use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use App\Service\Payments\HandlePayment;
 use Exception;
@@ -25,13 +26,15 @@ class CardConsumeController extends AbstractController
     /**
      * @Route("/activate/{consume}", name="activate_consume")
      * @param CreditCardConsume $consume
+     * @param CreditCalculator $calculator
      * @return RedirectResponse
      */
-    public function activateConsumeAction(CreditCardConsume $consume)
+    public function activateConsumeAction(CreditCardConsume $consume, CreditCalculator $calculator)
     {
         try{
             if  ($consume->getStatus() == CreditCardConsume::STATUS_CREATED){
                 $consume->activate();
+                $consume->setMonthFirstPay($calculator->calculateNextPaymentDate());
             }else{
                 $consume->setStatus(CreditCardConsume::STATUS_CREATED);
             }
