@@ -4,6 +4,7 @@
 namespace App\Twig\Extension;
 
 use App\Entity\CreditCard\CreditCard;
+use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
@@ -29,11 +30,22 @@ class CreditCardConsumeExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
+          new TwigFunction('nextPaymentMonthByConsume', [$this, 'nextPaymentMonthByConsume']),
           new TwigFunction('totalByCreditCard', [$this, 'totalByCreditCard']),
           new TwigFunction('totalByCardUser', [$this, 'totalByCardUser']),
           new TwigFunction('totalByOwner', [$this, 'totalByOwner']),
           new TwigFunction('nextPaymentMonth', [$this, 'nextPaymentMonth']),
         ];
+    }
+
+    /**
+     * @param CreditCardConsume $cardConsume
+     * @return float|int|null
+     * @throws Exception
+     */
+    public function nextPaymentMonthByConsume(CreditCardConsume $cardConsume)
+    {
+        return $this->consumeExtractor->extractNextPaymentAmount($cardConsume);
     }
 
     /**

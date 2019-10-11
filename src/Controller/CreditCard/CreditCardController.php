@@ -10,7 +10,9 @@ namespace App\Controller\CreditCard;
 
 
 use App\Entity\CreditCard\CreditCard;
+use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
+use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditCardType;
 use App\Repository\CreditCard\CreditCardRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -80,17 +82,24 @@ class CreditCardController extends AbstractController
      * @Route("/card/{card}", name="credit_card_detail")
      *
      * @param CreditCard $card
+     * @param CreditCardConsumeExtractor $consumeExtractor
      * @return string
      */
-    public function creditCardDetail(CreditCard $card)
+    public function creditCardDetail(CreditCard $card, CreditCardConsumeExtractor $consumeExtractor)
     {
         $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
 
         $cardUsers = $repo->getByCreditCard($card);
 
+        $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
+        $consumesByCard = $consumeRepo->getByCreditCard($card);
+
+        dump($consumesByCard);
+
         return $this->render('credit/credit_card_detail.html.twig',[
             'card' => $card,
-            'card_users' => $cardUsers
+            'card_users' => $cardUsers,
+            'card_consumes' => $consumesByCard
         ]);
     }
 }

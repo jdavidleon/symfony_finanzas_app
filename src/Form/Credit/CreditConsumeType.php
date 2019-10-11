@@ -22,6 +22,7 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 class CreditConsumeType extends AbstractType
 {
@@ -68,7 +69,10 @@ class CreditConsumeType extends AbstractType
             ->add('interest', NumberType::class, [
                 'scale' => 2
             ])
-            ->add('consume_at', DateType::class)
+            ->add('consume_at', DateType::class, [
+                'widget' => 'single_text',
+                'data' => new \DateTime()
+            ])
         ;
     }
 
