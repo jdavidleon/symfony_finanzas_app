@@ -6,7 +6,7 @@ use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardPaymentsRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardPaymentRepository")
  */
 class CreditCardPayment
 {

@@ -10,7 +10,7 @@ use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
-use App\Repository\CreditCard\CreditCardPaymentsRepository;
+use App\Repository\CreditCard\CreditCardPaymentRepository;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use DateTime;
@@ -30,7 +30,7 @@ class CreditCardConsumeExtractorTest extends TestCase
     private $calculator;
 
     /**
-     * @var MockObject|CreditCardPaymentsRepository
+     * @var MockObject|CreditCardPaymentRepository
      */
     private $paymentsRepository;
 
@@ -46,7 +46,7 @@ class CreditCardConsumeExtractorTest extends TestCase
     public function setUp(): void
     {
         $this->cardConsumeProvider = $this->prophesize(CreditCardConsumeProvider::class);
-        $this->paymentsRepository = $this->prophesize(CreditCardPaymentsRepository::class);
+        $this->paymentsRepository = $this->prophesize(CreditCardPaymentRepository::class);
         $this->calculator = $this->createPartialMock(CreditCalculator::class, [
             'calculateActualDueToPay',
             'reverseMonth'

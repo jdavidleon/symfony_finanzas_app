@@ -8,7 +8,7 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Factory\Payments\PaymentsFactory;
-use App\Repository\CreditCard\CreditCardPaymentsRepository;
+use App\Repository\CreditCard\CreditCardPaymentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -23,7 +23,7 @@ class HandlePayment
      */
     private $entityManager;
     /**
-     * @var CreditCardPaymentsRepository
+     * @var CreditCardPaymentRepository
      */
     private $paymentsRepository;
 

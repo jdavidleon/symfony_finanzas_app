@@ -142,7 +142,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                     $qb->expr()->not(
                         $qb->expr()->exists('
                             SELECT ccp
-                        FROM \App\Entity\CreditCard\CreditCardPayments ccp
+                        FROM \App\Entity\CreditCard\CreditCardPayment ccp
                         WHERE
                         ccp.creditConsume = ccc.id
                         AND

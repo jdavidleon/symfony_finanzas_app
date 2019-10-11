@@ -36,11 +36,24 @@ class CreditCardConsumeExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @param CreditCard $card
+     * @param null $month
+     * @return float
+     * @throws Exception
+     */
     public function totalByCreditCard(CreditCard $card, $month = null)
     {
         return $this->consumeExtractor->extractTotalToPayByCreditCard( $card, $month );
     }
 
+    /**
+     * @param CreditCardUser $cardUser
+     * @param CreditCard|null $card
+     * @param null $month
+     * @return float
+     * @throws Exception
+     */
     public function totalByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
         return $this->consumeExtractor->extractTotalToPayByCardUser($cardUser, $card, $month);

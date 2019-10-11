@@ -5,7 +5,6 @@ namespace App\Repository\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
@@ -14,7 +13,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  * @method CreditCardPayment[]    findAll()
  * @method CreditCardPayment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CreditCardPaymentsRepository extends ServiceEntityRepository
+class CreditCardPaymentRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
