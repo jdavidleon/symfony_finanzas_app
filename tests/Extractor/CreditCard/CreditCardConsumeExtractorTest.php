@@ -6,6 +6,7 @@ namespace App\Tests\Extractor\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
@@ -46,7 +47,6 @@ class CreditCardConsumeExtractorTest extends TestCase
     {
         $this->cardConsumeProvider = $this->prophesize(CreditCardConsumeProvider::class);
         $this->paymentsRepository = $this->prophesize(CreditCardPaymentsRepository::class);
-//        $this->calculator = $this->prophesize(CreditCalculator::class);
         $this->calculator = $this->createPartialMock(CreditCalculator::class, [
             'calculateActualDueToPay',
             'reverseMonth'
@@ -438,7 +438,8 @@ class CreditCardConsumeExtractorTest extends TestCase
         $cardConsume1->setDues(10);
         $cardConsume1->setDuesPayed(0);
         $cardConsume1->setStatus(CreditCardConsume::STATUS_PAYING);
-        $cardConsume1->setMonthFirstPay(date('Y-m'));
+        $date = new DateTime();
+        $cardConsume1->setMonthFirstPay($date->format('Y-m'));
         $creditCardUser = new CreditCardUser();
         $creditCardUser->setName('J');
         $creditCardUser->setLastName('D');
@@ -447,6 +448,10 @@ class CreditCardConsumeExtractorTest extends TestCase
         $creditCard = new CreditCard();
         $cardConsume1->setCreditCard($creditCard);
         $cardConsume1->setDescription('Test Consume');
+
+        $date->modify('-1 Month');
+        $this->calculator->expects(self::any())->method('reverseMonth')->willReturn($date->format('Y-m'));
+        $this->calculator->expects(self::any())->method('calculateActualDueToPay')->willReturn(1);
 
         $this->setIdByReflection($cardConsume1, 12);
         $this->setIdByReflection($creditCardUser, 455);
@@ -459,25 +464,84 @@ class CreditCardConsumeExtractorTest extends TestCase
                 'user_name' => 'J D',
                 'user_alias' => 'JD',
                 'credit_card' => $creditCard,
-                'description' => $this->creditCardConsume->getDescription(),
-                'amount' => $this->creditCardConsume->getAmount(),
+                'description' => $cardConsume1->getDescription(),
+                'amount' => $cardConsume1->getAmount(),
                 'pending_amount' => $cardConsume1->getAmount(),
                 'dues' => 10,
                 'pending_dues' => 10,
-                'interest' => 2.2,
-                'capital_amount' => 100,
-                'interest_amount' => 22,
-                'total_amount' => 122,
-                'payments' => [],
-                'pending_payments' => [],
-                'status' => CreditCardConsume::STATUS_PAYING,
+                'interest' => (float)2.2,
+                'capital_amount' => (float)100,
+                'interest_amount' => (float)22,
+                'total_amount' => (float)122,
+                'payments' => $cardConsume1->getPayments(),
+                'pending_payments' => $this->calculator->calculatePendingPaymentsResume(
+                        1000,
+                        2.2,
+                        10,
+                        0,
+                        $date->format('Y-m')
+                    ),
+                'status' => $cardConsume1->getStatus(),
                 'mora' => 0 // todo: definir deudas
             ]
         ];
 
         $consumesResume = $this->consumeExtractor->extractConsumeResume([$cardConsume1]);
 
-        self::assertEquals($resume, $consumesResume);
+        self::assertSame($resume, $consumesResume);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractNextPaymentMonthWithNullEntryDate()
+    {
+        $date = new DateTime();
+
+        if ($date->format('d') > 15) {
+            $date->modify('first day of next month');
+        }
+
+        $nextPaymentMonth = $this->consumeExtractor->extractNextPaymentMonth(null);
+
+        self::assertSame($date->format('Y-m'), $nextPaymentMonth);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractNextPaymentMonthOfConsumeWhenDontHavePayments()
+    {
+        $this->creditCardConsume->setMonthFirstPay('2019-01');
+
+        $nextPaymentMonth = $this->consumeExtractor->extractNextPaymentMonth($this->creditCardConsume);
+
+        self::assertSame('2019-01', $nextPaymentMonth);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractNextPaymentMonthOfConsumeWhenHasPayments()
+    {
+        $this->creditCardConsume->setMonthFirstPay('2019-01');
+        $payment = new CreditCardPayments();
+        $this->creditCardConsume->addPayment($payment);
+
+        $payment2 = new CreditCardPayments();
+        $this->creditCardConsume->addPayment($payment2);
+
+        $this->paymentsRepository
+            ->getMonthListByConsume($this->creditCardConsume)
+            ->willReturn([
+                ['monthPayed' => '2019-04'],
+                ['monthPayed' => '2019-05'],
+                ['monthPayed' => '2019-06'],
+            ]);
+
+        $nextPaymentMonth = $this->consumeExtractor->extractNextPaymentMonth($this->creditCardConsume);
+
+        self::assertSame('2019-07', $nextPaymentMonth);
     }
 
     /**
@@ -518,6 +582,5 @@ class CreditCardConsumeExtractorTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($return);
     }
-
 
 }
