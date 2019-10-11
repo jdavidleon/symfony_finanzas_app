@@ -6,7 +6,7 @@ namespace App\Tests\Extractor\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
+use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
@@ -525,10 +525,10 @@ class CreditCardConsumeExtractorTest extends TestCase
     public function testExtractNextPaymentMonthOfConsumeWhenHasPayments()
     {
         $this->creditCardConsume->setMonthFirstPay('2019-01');
-        $payment = new CreditCardPayments();
+        $payment = new CreditCardPayment();
         $this->creditCardConsume->addPayment($payment);
 
-        $payment2 = new CreditCardPayments();
+        $payment2 = new CreditCardPayment();
         $this->creditCardConsume->addPayment($payment2);
 
         $this->paymentsRepository
@@ -544,6 +544,62 @@ class CreditCardConsumeExtractorTest extends TestCase
         self::assertSame('2019-07', $nextPaymentMonth);
     }
 
+    /**
+     * @throws Exception
+     */
+    public function testExtractLastPaymentMonthWhenHasPayments()
+    {
+        $this->creditCardConsume->addPayment(new CreditCardPayment());
+        $this->creditCardConsume->addPayment(new CreditCardPayment());
+
+        $this->paymentsRepository
+            ->getMonthListByConsume($this->creditCardConsume)
+            ->willReturn([
+                ['monthPayed' => '2020-11'],
+                ['monthPayed' => '2020-12'],
+                ['monthPayed' => '2021-01'],
+            ])
+        ;
+
+        $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
+
+        self::assertSame('2021-01', $lastPaymentMonth);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractLastPaymentMonthWhenDoesNotHasPayments()
+    {
+        $this->creditCardConsume->setMonthFirstPay('2018-03');
+
+        $this->calculator->method('reverseMonth')->willReturn('2018-02');
+
+        $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
+
+        self::assertSame('2018-02', $lastPaymentMonth);
+    }
+
+    /**
+     * @throws Exception
+     */
+//    public function testExtractListGroupedByUser()
+//    {
+//        $consume1 = new CreditCardConsume();
+//        $consume1->setAmount(1000);
+//        $consume1->setAmountPayed(0);
+//        $consume1->setInterest(2.2);
+//        $consume1->setDues(10);
+//        $consume1->setDuesPayed(0);
+//        $consume1->setStatus(CreditCardConsume::STATUS_PAYING);
+//        $consume2 = new CreditCardConsume();
+//        $consume2 = new CreditCardConsume();
+//
+//        $this->consumeExtractor->extractListGroupedBy([], 'user');
+//    }
+    
+    
     /**
      * @param $object
      * @param $value

@@ -222,25 +222,25 @@ class CreditCardConsumeExtractor
      * @return array
      * @throws Exception
      */
-    public function extractListGroupedBy($cardConsumes, $groupBy = null)
-    {
-        $arrayConsumes = [];
-        foreach ($cardConsumes as $consume){
-            switch ($groupBy){
-                case 'user':
-                    $key = $consume->getCreditCardUser()->getId();
-                    break;
-                case 'credit_card':
-                    $key = $consume->getCreditCard()->getId();
-                    break;
-                default:
-                    $key = $consume->getCreditCardUser()->getId();
-            }
-            $arrayConsumes[$key][] = $this->resume($consume);
-        }
-
-        return $arrayConsumes;
-    }
+//    public function extractListGroupedBy($cardConsumes, $groupBy = null)
+//    {
+//        $arrayConsumes = [];
+//        foreach ($cardConsumes as $consume){
+//            switch ($groupBy){
+//                case 'user':
+//                    $key = $consume->getCreditCardUser()->getId();
+//                    break;
+//                case 'credit_card':
+//                    $key = $consume->getCreditCard()->getId();
+//                    break;
+//                default:
+//                    $key = $consume->getCreditCardUser()->getId();
+//            }
+//            $arrayConsumes[$key][] = $this->resume($consume);
+//        }
+//
+//        return $arrayConsumes;
+//    }
 
     /**
      * @param CreditCardConsume $consume

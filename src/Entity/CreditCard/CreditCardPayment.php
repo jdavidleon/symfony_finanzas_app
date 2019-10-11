@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardPaymentsRepository")
  */
-class CreditCardPayments
+class CreditCardPayment
 {
     /**
      * @ORM\Id()

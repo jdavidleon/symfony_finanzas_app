@@ -5,7 +5,7 @@ namespace App\Service\Payments;
 
 
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
+use App\Entity\CreditCard\CreditCardPayment;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Factory\Payments\PaymentsFactory;
 use App\Repository\CreditCard\CreditCardPaymentsRepository;
@@ -54,7 +54,7 @@ class HandlePayment
      * @param float $interestAmount
      * @param bool|null $monthPayed
      * @param bool $legalDue
-     * @return CreditCardPayments
+     * @return CreditCardPayment
      * @throws Exception
      */
     private function createCardConsumePayment(
@@ -65,7 +65,7 @@ class HandlePayment
         float $interestAmount,
         ?bool $monthPayed,
         bool $legalDue = true
-    ): CreditCardPayments
+    ): CreditCardPayment
     {
         return PaymentsFactory::create(
             $consume,
@@ -81,13 +81,13 @@ class HandlePayment
     /**
      * @param CreditCardConsume $consume
      * @param $payedValue
-     * @return CreditCardPayments
+     * @return CreditCardPayment
      * @throws Exception
      */
     private function createTimelyPayment(
         CreditCardConsume $consume,
         float $payedValue
-    ): CreditCardPayments
+    ): CreditCardPayment
     {
         $interestAmount = $this->consumeExtractor->extractNextInterestAmount($consume);
         return $this->createCardConsumePayment(

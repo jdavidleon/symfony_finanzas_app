@@ -3,7 +3,7 @@
 namespace App\Factory\Payments;
 
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
+use App\Entity\CreditCard\CreditCardPayment;
 
 class PaymentsFactory
 {
@@ -15,9 +15,9 @@ class PaymentsFactory
         float $interestAmount,
         float $monthPayed,
         bool $legalDue = true
-    ): CreditCardPayments
+    ): CreditCardPayment
     {
-        $payment = new CreditCardPayments();
+        $payment = new CreditCardPayment();
         $payment->setCreditConsume($cardConsume);
         $payment->setAmount($amount);
         $payment->setCapitalAmount($capitalAmount);
