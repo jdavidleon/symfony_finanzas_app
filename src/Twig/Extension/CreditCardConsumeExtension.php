@@ -30,12 +30,25 @@ class CreditCardConsumeExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
+          new TwigFunction('nextPaymentAmountByConsume', [$this, 'nextPaymentAmountByConsume']),
           new TwigFunction('nextPaymentMonthByConsume', [$this, 'nextPaymentMonthByConsume']),
+          new TwigFunction('nextPaymentAmo', [$this, 'nextPaymentMonthByConsume']),
           new TwigFunction('totalByCreditCard', [$this, 'totalByCreditCard']),
           new TwigFunction('totalByCardUser', [$this, 'totalByCardUser']),
           new TwigFunction('totalByOwner', [$this, 'totalByOwner']),
           new TwigFunction('nextPaymentMonth', [$this, 'nextPaymentMonth']),
+          new TwigFunction('actualDueToPayByConsume', [$this, 'actualDueToPayByConsume']),
         ];
+    }
+
+    /**
+     * @param CreditCardConsume $cardConsume
+     * @return float|int|null
+     * @throws Exception
+     */
+    public function nextPaymentAmountByConsume(CreditCardConsume $cardConsume)
+    {
+        return $this->consumeExtractor->extractNextPaymentAmount($cardConsume);
     }
 
     /**
@@ -88,5 +101,15 @@ class CreditCardConsumeExtension extends AbstractExtension
     public function nextPaymentMonth()
     {
         return $this->consumeExtractor->extractNextPaymentMonth();
+    }
+
+    /**
+     * @param CreditCardConsume $cardConsume
+     * @return int
+     * @throws Exception
+     */
+    public function actualDueToPayByConsume(CreditCardConsume $cardConsume)
+    {
+        return $this->consumeExtractor->extractActualDueToPay($cardConsume);
     }
 }

@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Consume Detail{% endblock %}
+
+{% block body %}
+    <ul>
+        <li>Descripción: {{ consume.description }}</li>
+        <li>Código: {{ consume.code }}</li>
+        <li>Fecha: {{ consume.consumeAt|date('d/m/Y') }}</li>
+        <li>Deudor: {{ consume.creditCardUser.fullName }}</li>
+        <li>Valor de la deuda: {{ consume.amount|number_format(2) }}</li>
+        <li>Monto Pago; {{ consume.amountPayed|number_format(2) }}</li>
+        <li>Interes: {{ consume.interest }}</li>
+        <li>Cuotas: {{ consume.dues }}</li>
+        <li>Pago actual: $ {{ nextPaymentAmountByConsume(consume)|number_format(2) }}</li>
+        <li>Cuota actual: {{ actualDueToPayByConsume(consume) }}</li>
+    </ul>
+    <table>
+        <tr>
+            <th>cuota</th>
+            <th>Mes</th>
+            <th>capital</th>
+            <th>interes</th>
+            <th>Total</th>
+        </tr>
+        {% for detail in consume_detail %}
+            <tr>
+                <td>{{ detail.number_due }}</td>
+                <td>{{ detail.payment_month }}</td>
+                <td>$ {{ detail.capital_amount|number_format(2) }}</td>
+                <td>$ {{ detail.interest|number_format(2) }}</td>
+                <td>$ {{ detail.total_to_pay|number_format(2) }} </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+
+{% endblock %}

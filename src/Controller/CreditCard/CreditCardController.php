@@ -94,8 +94,6 @@ class CreditCardController extends AbstractController
         $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
         $consumesByCard = $consumeRepo->getByCreditCard($card);
 
-        dump($consumesByCard);
-
         return $this->render('credit/credit_card_detail.html.twig',[
             'card' => $card,
             'card_users' => $cardUsers,

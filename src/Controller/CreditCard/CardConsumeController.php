@@ -71,6 +71,28 @@ class CardConsumeController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/consume/{consume}", name="consume_detail")
+     * @param CreditCardConsume $consume
+     * @param CreditCardConsumeExtractor $consumeExtractor
+     * @return Response
+     * @throws Exception
+     */
+    public function consumeDetail(CreditCardConsume $consume, CreditCardConsumeExtractor $consumeExtractor)
+    {
+        $consumeDetail = $consumeExtractor->extractPendingPaymentsByConsume($consume, true);
+//        $consumeResume = $consumeExtractor->extractConsumeResume([
+//            $consume
+//        ]);
+//
+//        dump($consumeResume);die;
+
+        return $this->render('credit/consume_detail.html.twig', [
+            'consume_detail' => $consumeDetail,
+            'consume' => $consume,
+        ]);
+    }
+
 
     /**
      * @Route("/payment/{cardConsume}", name="pay_consume")

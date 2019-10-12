@@ -83,11 +83,12 @@ class CreditCalculator
     }
 
     /**
-     * Return the list of payment that have to pay
+     * Return the list of payment that have to pay till the end of the debt
      * @param float $actualDebt
      * @param float $interest
      * @param int $totalDues
      * @param int $payedDues
+     * @param int|null $endDue
      * @param string|null $lastPayedMonth
      * @return array
      * @throws Exception
@@ -97,6 +98,7 @@ class CreditCalculator
         float $interest,
         int $totalDues,
         int $payedDues = 0,
+        ?int $endDue = null,
         ?string $lastPayedMonth = null
     ): array
     {
@@ -109,9 +111,13 @@ class CreditCalculator
             $this->calculateNumberOfPendingDues($totalDues, $payedDues)
         );
 
+        if (null == $endDue) {
+            $endDue = $totalDues;
+        }
+
         $paymentMonth = $lastPayedMonth;
         $duesToPay = [];
-        foreach ( range($payedDues + 1, $totalDues ) as $due){
+        foreach ( range($payedDues + 1, $endDue ) as $due){
             $interestToPay = ( ($actualDebt * $interest) / 100 );
             $paymentMonth = $this->calculateNextPaymentDate($paymentMonth);
             $duesToPay[] = [

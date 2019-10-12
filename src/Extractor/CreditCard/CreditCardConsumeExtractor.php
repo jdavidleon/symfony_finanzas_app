@@ -138,16 +138,18 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume $creditCardConsume
+     * @param bool $atDate
      * @return array
      * @throws Exception
      */
-    public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume)
+    public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume, bool $atDate = false): array
     {
         return $this->calculator->calculatePendingPaymentsResume(
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
             $creditCardConsume->getDues(),
             $creditCardConsume->getDuesPayed(),
+            $atDate ? $this->extractActualDueToPay($creditCardConsume): null,
             $this->extractLastPaymentMonth($creditCardConsume)
         );
     }

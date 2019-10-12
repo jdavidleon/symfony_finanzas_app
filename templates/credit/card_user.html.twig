@@ -7,6 +7,7 @@
     <table>
         <tr>
             <th>ID</th>
+            <th>Tarjeta</th>
             <th>Deuda</th>
             <th>Pendente por pagar</th>
             <th>Proximo pago</th>
@@ -15,6 +16,7 @@
         {% for consume in consumes %}
             <tr>
                 <td>{{ consume.consume_id }}</td>
+                <td>{{ consume.credit_card.franchise }}</td>
                 <td>{{ consume.description }}</td>
                 <td>$ {{ consume.pending_amount|number_format(2) }}</td>
                 <td>$ {{ consume.total_amount|number_format(2) }}</td>

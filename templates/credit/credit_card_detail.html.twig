@@ -24,6 +24,7 @@
     <table>
         <tr>
             <th>ID</th>
+            <th>Card Consume Code</th>
             <th>Consume</th>
             <th>Deudor</th>
             <th>Valor a Pagar</th>
@@ -32,10 +33,11 @@
         {% for consume in card_consumes %}
             <tr>
                 <td>{{ consume.id }}</td>
+                <td>{{ consume.code }}</td>
                 <td>{{ consume.description }}</td>
                 <td title="{{ consume.creditCardUser.fullName }}"> {{ consume.creditCardUser.alias }} </td>
                 <td>$ {{ nextPaymentMonthByConsume(consume)|number_format(2) }}</td>
-                <td><a href="">Detalles</a></td>
+                <td><a href="{{ path('consume_detail', {'consume': consume.id}) }}">Detalles</a></td>
             </tr>
         {% endfor %}
     </table>
