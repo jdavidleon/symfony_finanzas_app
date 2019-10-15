@@ -479,6 +479,7 @@ class CreditCardConsumeExtractorTest extends TestCase
                         2.2,
                         10,
                         0,
+                        10,
                         $date->format('Y-m')
                     ),
                 'status' => $cardConsume1->getStatus(),
@@ -498,7 +499,7 @@ class CreditCardConsumeExtractorTest extends TestCase
     {
         $date = new DateTime();
 
-        if ($date->format('d') > 15) {
+        if ($date->format('d') >= 15) {
             $date->modify('first day of next month');
         }
 

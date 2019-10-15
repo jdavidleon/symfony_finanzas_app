@@ -127,11 +127,12 @@ class CreditCalculatorTest extends TestCase
      */
     public function testPendingPaymentsResume()
     {
-        $resume = self::$calculator->calculatePendingPaymentsResume(
+            $resume = self::$calculator->calculatePendingPaymentsResume(
             3000,
             2.5,
             8,
             5,
+            8,
             '2018-12'
         );
 
@@ -177,7 +178,7 @@ class CreditCalculatorTest extends TestCase
         );
 
         $date = new \DateTime();
-        if ((int)$date->format('d') > 15){
+        if ((int)$date->format('d') >= 15){
             $date->modify('+1 Month');
         }
 
