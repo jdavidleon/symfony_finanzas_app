@@ -4,15 +4,18 @@
 namespace App\Controller\CreditCard;
 
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
+use App\Form\Credit\BasicPaymentType;
 use App\Form\Credit\CreditPaymentType;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use App\Service\Payments\HandlePayment;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -127,6 +130,41 @@ class CardConsumeController extends AbstractController
 
         return $this->render('credit/new_card_payment.html.twig', [
             'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("basic_payment/{card}/{user}")
+     *
+     * @param CreditCard $card
+     * @param CreditCardUser $user
+     * @param HandlePayment $paymentsHandler
+     * @return Response
+     */
+    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, HandlePayment $paymentsHandler)
+    {
+        $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
+        $consumes = $consumeRepo->getByCardAndUser($card, $user);
+
+
+        $form = $this->createForm(BasicPaymentType::class, [
+            'credit_card' => $card,
+            'credit_card_user' => $user,
+        ]);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $paymentsHandler->processPaymentByCardAndUser($card, $user);
+            } catch (Exception $e) {
+
+            }
+
+            return $this->redirectToRoute('');
+        }
+
+
+        return $this->render('', [
+            'consumes' => $consumes
         ]);
     }
 

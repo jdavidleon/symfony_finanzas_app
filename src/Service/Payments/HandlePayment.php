@@ -4,11 +4,12 @@
 namespace App\Service\Payments;
 
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Factory\Payments\PaymentsFactory;
-use App\Repository\CreditCard\CreditCardPaymentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -22,10 +23,6 @@ class HandlePayment
      * @var EntityManagerInterface
      */
     private $entityManager;
-    /**
-     * @var CreditCardPaymentRepository
-     */
-    private $paymentsRepository;
 
     public function __construct(
         CreditCardConsumeExtractor $consumeExtractor,
@@ -44,6 +41,36 @@ class HandlePayment
     public function processPayment(CreditCardConsume $consume, float $payedValue): void
     {
 
+    }
+
+    /**
+     * @param CreditCard $creditCard
+     * @param CreditCardUser $user
+     * @throws Exception
+     */
+    public function processPaymentByCardAndUser(CreditCard $creditCard, CreditCardUser $user)
+    {
+        $consumeRepo = $this->entityManager->getRepository(CreditCardConsume::class);
+
+        foreach ($consumeRepo->getByCardAndUser($creditCard, $user) as $consume) {
+            $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume);
+
+            foreach ($pendingPayments as $payment) {
+                $payment = $this->createCardConsumePayment(
+                    $consume,
+                    $payment['total_to_pay'],
+                    $payment['capital_amount'],
+                    $payment['capital_amount'],
+                    $payment['interest'],
+                    $payment['payment_month'],
+                    true
+                );
+
+                $this->entityManager->persist($payment);
+            }
+        }
+
+        $this->entityManager->flush();
     }
 
     /**

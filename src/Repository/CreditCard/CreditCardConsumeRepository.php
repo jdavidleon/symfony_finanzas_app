@@ -109,6 +109,27 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ;
     }
 
+    public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser)
+    {
+        return $this->createQueryBuilder('ccc')
+            ->where('ccc.creditCardUser = :user')
+            ->andWhere('ccc.creditCard = :card')
+            ->andWhere('ccc.creditCardUser = :user')
+            ->andWhere('ccc.deletedAt IS NULL')
+            ->andWhere('ccc.status IN (:statuses)')
+            ->setParameters([
+                'card' => $card,
+                'user' => $cardUser,
+                'statuses' => [
+                    CreditCardConsume::STATUS_PAYING,
+                    CreditCardConsume::STATUS_MORA,
+                ],
+            ])
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
     /**
      * Retorna los consumos con status creado
      * @param User $owner

@@ -305,4 +305,13 @@ class CreditCardConsume
     {
         return $this->payments->count() > 0;
     }
+
+    public function changeStatusToPayed(): self
+    {
+        if ($this->amount - $this->amountPayed <= 0) {
+            $this->status = self::STATUS_PAYED;
+        }
+
+        return $this;
+    }
 }

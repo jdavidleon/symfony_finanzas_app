@@ -4,9 +4,20 @@ namespace App\Factory\Payments;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
+use App\Service\CreditCard\CardConsumeManager;
 
 class PaymentsFactory
 {
+    /**
+     * @var CardConsumeManager
+     */
+    private static $consumeManager;
+
+    public function __construct(CardConsumeManager $consumeManager)
+    {
+        self::$consumeManager = $consumeManager;
+    }
+
     public static function create(
         CreditCardConsume $cardConsume,
         float $amount,
@@ -25,6 +36,8 @@ class PaymentsFactory
         $payment->setInterestAmount($interestAmount);
         $payment->setMonthPayed($monthPayed);
         $payment->setLegalDue($legalDue);
+
+        self::$consumeManager->balanceManagement($payment);
 
         return $payment;
     }

@@ -117,10 +117,11 @@ class CreditCardPayment
     /**
      * @return mixed
      */
-    public function getLegalDue()
+    public function isLegalDue()
     {
         return $this->legalDue;
     }
+
 
     /**
      * @param mixed $legalDue

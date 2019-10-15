@@ -10,6 +10,7 @@
             <th>Deudor</th>
             <th>Valor a Pagar</th>
             <th>Detalle</th>
+            <th>Acción</th>
         </tr>
         {% for user in card_users %}
             <tr>
@@ -17,6 +18,7 @@
                 <td>{{ user.alias }}</td>
                 <td>$ {{ totalByCardUser(user, card)|number_format(2) }}</td>
                 <td><a href="">Detalles</a></td>
+                <td><a href="">Pagar</a></td>
             </tr>
         {% endfor %}
     </table>
