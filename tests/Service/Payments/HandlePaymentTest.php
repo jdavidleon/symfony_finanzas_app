@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
-class HandlePaymentsTest extends TestCase
+class HandlePaymentTest extends TestCase
 {
     /**
      * @var HandlePayment;

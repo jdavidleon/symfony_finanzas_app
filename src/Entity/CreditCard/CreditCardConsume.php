@@ -218,6 +218,14 @@ class CreditCardConsume
 
     public function addPayment(CreditCardPayment $payment): self
     {
+        $this->addAmountPayed($payment->getAmount());
+
+        if ($payment->isLegalDue()) {
+            $this->addDuePayed();
+        }
+
+        $this->changeStatusToPayed();
+
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
             $payment->setCreditConsume($this);
@@ -282,9 +290,9 @@ class CreditCardConsume
         return $this->duesPayed ?? 0;
     }
 
-    public function setDuesPayed(?int $duesPayed): self
+    public function addDuePayed(): self
     {
-        $this->duesPayed = $duesPayed;
+        $this->duesPayed++;
 
         return $this;
     }
@@ -294,9 +302,9 @@ class CreditCardConsume
         return $this->amountPayed;
     }
 
-    public function setAmountPayed(?float $amountPayed): self
+    public function addAmountPayed(?float $amountPayed): self
     {
-        $this->amountPayed = $amountPayed;
+        $this->amountPayed += $amountPayed;
 
         return $this;
     }

@@ -18,7 +18,7 @@ class CreditCalculator
      * @param float $debt
      * @return float
      */
-    public function calculateActualCreditCardConsumeDebt(float $debt, float $payed): float
+    public static function calculateActualCreditCardConsumeDebt(float $debt, float $payed): float
     {
         if ($debt <= $payed)
             return 0;
@@ -33,7 +33,7 @@ class CreditCalculator
      * @param int $pendingDues
      * @return float
      */
-    public function calculateCapitalAmount(float $actualDebt, int $pendingDues): float
+    public static function calculateCapitalAmount(float $actualDebt, int $pendingDues): float
     {
         if (0 >= $pendingDues || $actualDebt < 0){
             return 0;
@@ -42,22 +42,22 @@ class CreditCalculator
         return $actualDebt / $pendingDues;
     }
 
-    public function calculateInterestAmount($actualDebt, $interest)
+    public static function calculateInterestAmount($actualDebt, $interest)
     {
         return ( $actualDebt * $interest ) / 100;
     }
 
-    public function calculateNextPaymentAmount($nextCapitalAmount, $nextInterestAmount)
+    public static function calculateNextPaymentAmount($nextCapitalAmount, $nextInterestAmount)
     {
         return $nextCapitalAmount + $nextInterestAmount;
     }
     
-    public function calculateNumberOfPendingDues(int $totalDues, int $payedDues = 0): int
+    public static function calculateNumberOfPendingDues(int $totalDues, int $payedDues = 0): int
     {
         return $totalDues - $payedDues;
     }
 
-    public function calculateNextDueToPay(int $totalDues, int $pendingDues): int
+    public static function calculateNextDueToPay(int $totalDues, int $pendingDues): int
     {
         return $totalDues - $pendingDues + 1;
     }
@@ -69,10 +69,10 @@ class CreditCalculator
      * @return DateTime|int
      * @throws Exception
      */
-    public function calculateActualDueToPay(int $lastPayedDue, string $lastMonthPayed, string $nextPaymentMonth): int
+    public static function calculateActualDueToPay(int $lastPayedDue, string $lastMonthPayed, string $nextPaymentMonth): int
     {
-        $lastPayedDate = strtotime($this->yearMonthToFullDateFormat($lastMonthPayed));
-        $nextPayedDate = strtotime($this->yearMonthToFullDateFormat($nextPaymentMonth));
+        $lastPayedDate = strtotime(self::yearMonthToFullDateFormat($lastMonthPayed));
+        $nextPayedDate = strtotime(self::yearMonthToFullDateFormat($nextPaymentMonth));
 
         $actualDue = $lastPayedDue;
         while (($lastPayedDate = strtotime('+1 Month', $lastPayedDate)) <= $nextPayedDate) {
@@ -93,7 +93,7 @@ class CreditCalculator
      * @return array
      * @throws Exception
      */
-    public function calculatePendingPaymentsResume(
+    public static function calculatePendingPaymentsResume(
         float $actualDebt,
         float $interest,
         int $totalDues,
@@ -106,9 +106,9 @@ class CreditCalculator
             return [];
         }
 
-        $capitalMonthlyAmount = $this->calculateCapitalAmount(
+        $capitalMonthlyAmount = self::calculateCapitalAmount(
             $actualDebt,
-            $this->calculateNumberOfPendingDues($totalDues, $payedDues)
+            self::calculateNumberOfPendingDues($totalDues, $payedDues)
         );
 
         if (null == $endDue) {
@@ -119,7 +119,7 @@ class CreditCalculator
         $duesToPay = [];
         foreach ( range($payedDues + 1, $endDue ) as $due){
             $interestToPay = ( ($actualDebt * $interest) / 100 );
-            $paymentMonth = $this->calculateNextPaymentDate($paymentMonth);
+            $paymentMonth = self::calculateNextPaymentDate($paymentMonth);
             $duesToPay[] = [
                 'number_due' => $due,
                 'capital_amount' => $capitalMonthlyAmount,
@@ -138,16 +138,16 @@ class CreditCalculator
      * @return string|void
      * @throws Exception
      */
-    public function calculateNextPaymentDate(?string $lastPayedMonth = null): ?string
+    public static function calculateNextPaymentDate(?string $lastPayedMonth = null): ?string
     {
         if (null != $lastPayedMonth){
-            return $this->increaseMonth($lastPayedMonth);
+            return self::increaseMonth($lastPayedMonth);
         }
 
         $actualMonth = date('Y-m-d');
         $nextMonth = date("Y-m", strtotime($actualMonth . "+ 1 Month"));
 
-        $nextMonth = $this->formatNextMonth($nextMonth, $actualMonth);
+        $nextMonth = self::formatNextMonth($nextMonth, $actualMonth);
 
         return (int)substr($actualMonth, -2) < 15 ? substr($actualMonth, 0, 7) : $nextMonth;
     }
@@ -157,9 +157,9 @@ class CreditCalculator
      * @return string
      * @throws Exception
      */
-    public function reverseMonth(string $date): string
+    public static function reverseMonth(string $date): string
     {
-        $dateTime = $this->convertToDateTime($date);
+        $dateTime = self::convertToDateTime($date);
 
         $dateTime->modify('-1 Month');
 
@@ -171,18 +171,18 @@ class CreditCalculator
      * @return string
      * @throws Exception
      */
-    public function increaseMonth(string $date): string
+    public static function increaseMonth(string $date): string
     {
-        $dateTime = $this->convertToDateTime($date);
+        $dateTime = self::convertToDateTime($date);
 
         $dateTime->modify('+1 Month');
 
         return $dateTime->format('Y-m');
     }
 
-    public function calculateMajorMonth(array $dates): string
+    public static function calculateMajorMonth(array $dates): string
     {
-        $dates = array_map([$this, 'convertToDateTime'], $dates);
+        $dates = array_map([self::class, 'convertToDateTime'], $dates);
         /** @var DateTime $majorDate */
         $majorDate = max($dates);
 
@@ -195,12 +195,12 @@ class CreditCalculator
      * @return string
      * @throws Exception
      */
-    private function yearMonthToFullDateFormat(string $yearMonth, int $day = 1): string
+    private static function yearMonthToFullDateFormat(string $yearMonth, int $day = 1): string
     {
         $day = (string)$day < 10 ? '0'.$day : $day;
         $date = sprintf('%s-%s', $yearMonth, $day);
 
-        $this->isDateFormatValid($date);
+        self::isDateFormatValid($date);
 
         return $date;
     }
@@ -210,9 +210,9 @@ class CreditCalculator
      * @return DateTime
      * @throws Exception
      */
-    private function convertToDateTime(string $strDate): \DateTime
+    private static function convertToDateTime(string $strDate): \DateTime
     {
-        return new DateTime($this->yearMonthToFullDateFormat($strDate));
+        return new DateTime(self::yearMonthToFullDateFormat($strDate));
     }
 
     /**
@@ -220,7 +220,7 @@ class CreditCalculator
      * @return bool
      * @throws Exception
      */
-    private function isDateFormatValid($date){
+    private static function isDateFormatValid($date){
         $valores = explode('-', $date);
         if(count($valores) == 3 && checkdate($valores[1], $valores[2], $valores[0])){
             return true;
@@ -258,7 +258,7 @@ class CreditCalculator
      * @param string $actualMonth
      * @return false|string
      */
-    private function formatNextMonth(string $nextMonth, string $actualMonth)
+    private static function formatNextMonth(string $nextMonth, string $actualMonth)
     {
         $monthNext = (int)substr($nextMonth, -2);
         $monthActual = (int)substr($actualMonth, 5, 2);

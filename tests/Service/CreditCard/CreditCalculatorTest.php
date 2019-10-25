@@ -84,7 +84,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testNextInterestAmount(float $actualDebt, float $interest, float $expected, string $message)
     {
-        $interest = self::$calculator->calculateInterestAmount($actualDebt, $interest);
+        $interest = CreditCalculator::calculateInterestAmount($actualDebt, $interest);
 
         self::assertEquals($expected, $interest, $message);
     }
@@ -127,7 +127,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testPendingPaymentsResume()
     {
-            $resume = self::$calculator->calculatePendingPaymentsResume(
+        $resume = self::$calculator->calculatePendingPaymentsResume(
             3000,
             2.5,
             8,

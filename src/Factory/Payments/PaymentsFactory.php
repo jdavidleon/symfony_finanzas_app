@@ -6,17 +6,8 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Service\CreditCard\CardConsumeManager;
 
-class PaymentsFactory
+class CreditCardPaymentFactory implements PaymentInterface
 {
-    /**
-     * @var CardConsumeManager
-     */
-    private static $consumeManager;
-
-    public function __construct(CardConsumeManager $consumeManager)
-    {
-        self::$consumeManager = $consumeManager;
-    }
 
     public static function create(
         CreditCardConsume $cardConsume,
@@ -37,8 +28,11 @@ class PaymentsFactory
         $payment->setMonthPayed($monthPayed);
         $payment->setLegalDue($legalDue);
 
-        self::$consumeManager->balanceManagement($payment);
-
         return $payment;
+    }
+
+    public function createPayment()
+    {
+        // TODO: Implement createPayment() method.
     }
 }

@@ -24,10 +24,7 @@ class CreditCardConsumeExtractor
      * @var CreditCardConsumeProvider
      */
     private $consumeProvider;
-    /**
-     * @var CreditCalculator
-     */
-    private $calculator;
+    
     /**
      * @var CreditCardPaymentRepository
      */
@@ -35,12 +32,10 @@ class CreditCardConsumeExtractor
 
     public function __construct(
         CreditCardConsumeProvider $consumeProvider,
-        CreditCardPaymentRepository $paymentsRepository,
-        CreditCalculator $calculations
+        CreditCardPaymentRepository $paymentsRepository
     )
     {
         $this->consumeProvider = $consumeProvider;
-        $this->calculator = $calculations;
         $this->paymentsRepository = $paymentsRepository;
     }
 
@@ -52,7 +47,7 @@ class CreditCardConsumeExtractor
      */
     public function extractActualDebt(CreditCardConsume $creditCardConsume): float
     {
-        return $this->calculator->calculateActualCreditCardConsumeDebt(
+        return CreditCalculator::calculateActualCreditCardConsumeDebt(
             $creditCardConsume->getAmount(),
             $creditCardConsume->getAmountPayed()
         );
@@ -65,7 +60,7 @@ class CreditCardConsumeExtractor
      */
     public function extractPendingDues(CreditCardConsume $creditCardConsume): int
     {
-        return $this->calculator->calculateNumberOfPendingDues(
+        return CreditCalculator::calculateNumberOfPendingDues(
             $creditCardConsume->getDues(),
             $creditCardConsume->getDuesPayed()
         );
@@ -78,7 +73,7 @@ class CreditCardConsumeExtractor
      */
     public function extractNextCapitalAmount(CreditCardConsume $creditCardConsume): float
     {
-        $capitalAmount = $this->calculator->calculateCapitalAmount(
+        $capitalAmount = CreditCalculator::calculateCapitalAmount(
             $this->extractActualDebt($creditCardConsume),
             $this->extractPendingDues($creditCardConsume)
         );
@@ -107,12 +102,12 @@ class CreditCardConsumeExtractor
         }
 
         $actualDebt = $this->extractActualDebt($creditCardConsume);
-        $capitalAmount = $this->calculator->calculateCapitalAmount(
+        $capitalAmount = CreditCalculator::calculateCapitalAmount(
             $actualDebt,
             $this->extractPendingDues($creditCardConsume)
         );
         foreach (range($duesPayed + 1, $actualDueToPay) as $item){
-            $interest += $this->calculator->calculateInterestAmount(
+            $interest += CreditCalculator::calculateInterestAmount(
                 $actualDebt,
                 $creditCardConsume->getInterest()
             );
@@ -130,7 +125,7 @@ class CreditCardConsumeExtractor
      */
     public function extractNextPaymentAmount(CreditCardConsume $creditCardConsume)
     {
-        return $this->calculator->calculateNextPaymentAmount(
+        return CreditCalculator::calculateNextPaymentAmount(
             $this->extractNextCapitalAmount($creditCardConsume),
             $this->extractNextInterestAmount($creditCardConsume)
         );
@@ -144,7 +139,7 @@ class CreditCardConsumeExtractor
      */
     public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume, bool $atDate = false): array
     {
-        return $this->calculator->calculatePendingPaymentsResume(
+        return CreditCalculator::calculatePendingPaymentsResume(
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
             $creditCardConsume->getDues(),
@@ -160,7 +155,7 @@ class CreditCardConsumeExtractor
      */
     public function getActualDueToPay(CreditCardConsume $creditCardConsume)
     {
-        return $this->calculator->calculateNextDueToPay(
+        return CreditCalculator::calculateNextDueToPay(
             $creditCardConsume->getDues(),
             $this->extractPendingDues($creditCardConsume)
         );
@@ -204,7 +199,7 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume[] $cardConsumes
-     * @return array
+     * @return CardConsumeResume[]
      * @throws Exception
      */
     public function extractConsumeResume(array $cardConsumes): array
@@ -246,33 +241,20 @@ class CreditCardConsumeExtractor
 
     /**
      * @param CreditCardConsume $consume
-     * @return array
+     * @return CardConsumeResume
      * @throws Exception
      */
-    private function resume(CreditCardConsume $consume)
+    private function resume(CreditCardConsume $consume): CardConsumeResume
     {
-        $consumeArray = [
-            'consume_id' => $consume->getId(),
-            'user_id' => $consume->getCreditCardUser()->getId(),
-            'user_name' => $consume->getCreditCardUser()->getFullName(),
-            'user_alias' => $consume->getCreditCardUser()->getAlias(),
-            'credit_card' => $consume->getCreditCard(),
-            'description' => $consume->getDescription(),
-            'amount' => $consume->getAmount(),
-            'pending_amount' => $this->extractActualDebt($consume),
-            'dues' => $consume->getDues(),
-            'pending_dues' => $this->extractPendingDues($consume),
-            'interest' => $consume->getInterest(),
-            'capital_amount' => $this->extractNextCapitalAmount($consume),
-            'interest_amount' => $this->extractNextInterestAmount($consume),
-            'total_amount' => $this->extractNextPaymentAmount($consume),
-            'payments' => $consume->getPayments(),
-            'pending_payments' => $this->extractPendingPaymentsByConsume($consume),
-            'status' => $consume->getStatus(),
-            'mora' => 0 // todo: definir deudas
-        ];
-
-        return $consumeArray;
+        return new CardConsumeResume(
+            $consume,
+            $this->extractPendingDues($consume),
+            $this->extractNextCapitalAmount($consume),
+            $this->extractNextInterestAmount($consume),
+            $this->extractNextPaymentAmount($consume),
+            $this->extractActualDebt($consume),
+            $this->extractPendingPaymentsByConsume($consume)
+        );
     }
 
     /**
@@ -306,7 +288,7 @@ class CreditCardConsumeExtractor
             $date = null;
         }
 
-        return $this->calculator->calculateNextPaymentDate($date);
+        return CreditCalculator::calculateNextPaymentDate($date);
     }
 
     /**
@@ -319,7 +301,7 @@ class CreditCardConsumeExtractor
         if ($cardConsume->hasPayments()){
             return $this->getCalculateMajorMonth($cardConsume);
         }else {
-            return $this->calculator->reverseMonth($cardConsume->getMonthFirstPay());
+            return CreditCalculator::reverseMonth($cardConsume->getMonthFirstPay());
         }
     }
 
@@ -337,7 +319,7 @@ class CreditCardConsumeExtractor
             }
         }
 
-        return $this->calculator->calculateMajorMonth(
+        return CreditCalculator::calculateMajorMonth(
             $dateList
         );
     }
@@ -349,10 +331,10 @@ class CreditCardConsumeExtractor
      */
     public function extractActualDueToPay(CreditCardConsume $creditCardConsume): int
     {
-        return $this->calculator->calculateActualDueToPay(
+        return CreditCalculator::calculateActualDueToPay(
             $creditCardConsume->getDuesPayed(),
             $this->extractLastPaymentMonth($creditCardConsume),
-            $this->calculator->calculateNextPaymentDate()
+            CreditCalculator::calculateNextPaymentDate()
         );
     }
 
