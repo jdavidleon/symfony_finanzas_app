@@ -69,7 +69,6 @@ class User implements UserInterface
     {
         $this->roles = array('ROLE_USER');
         $this->creditCards = new ArrayCollection();
-        $this->setCreatedAt(new \DateTime('now'));
     }
 
     public function getId(): ?int

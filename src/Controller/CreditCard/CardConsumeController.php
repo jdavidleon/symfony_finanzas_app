@@ -4,36 +4,43 @@
 namespace App\Controller\CreditCard;
 
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
-use App\Entity\CreditCard\CreditCardPayments;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
+use App\Form\Credit\BasicPaymentType;
 use App\Form\Credit\CreditPaymentType;
+use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
+use App\Service\Payments\HandlePayment;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/consume")
  */
-class CardConsumeController extends Controller
+class CardConsumeController extends AbstractController
 {
-    public function __construct()
-    {
-    }
-
     /**
      * @Route("/activate/{consume}", name="activate_consume")
      * @param CreditCardConsume $consume
+     * @param CreditCalculator $calculator
      * @return RedirectResponse
      */
-    public function activateConsumeAction(CreditCardConsume $consume)
+    public function activateConsumeAction(CreditCardConsume $consume, CreditCalculator $calculator)
     {
         try{
-            $consume->activate();
+            if  ($consume->getStatus() == CreditCardConsume::STATUS_CREATED){
+                $consume->activate();
+                $consume->setMonthFirstPay($calculator->calculateNextPaymentDate());
+            }else{
+                $consume->setStatus(CreditCardConsume::STATUS_CREATED);
+            }
             $em = $this->getDoctrine()->getManager();
             $em->persist($consume);
             $em->flush();
@@ -51,6 +58,7 @@ class CardConsumeController extends Controller
      * @param CreditCardConsumeProvider $consumeProvider
      * @param CreditCardConsumeExtractor $consumeExtractor
      * @return Response
+     * @throws Exception
      */
     public function userConsumeAction(
         CreditCardUser $cardUser,
@@ -59,32 +67,104 @@ class CardConsumeController extends Controller
     )
     {
         $consumes = $consumeProvider->getByCardUser($cardUser);
-        $consumes = $consumeExtractor->extractConsumeListBy($consumes);
+        $consumes = $consumeExtractor->extractConsumeResume($consumes);
 
         return $this->render('credit/card_user.html.twig', [
             'consumes' => $consumes
         ]);
     }
 
-
     /**
-     * @Route("/payment/{cardConsume}")
-     * @param CreditCardConsume $cardConsume
+     * @Route("/consume/{consume}", name="consume_detail")
+     * @param CreditCardConsume $consume
      * @param CreditCardConsumeExtractor $consumeExtractor
      * @return Response
+     * @throws Exception
+     */
+    public function consumeDetail(CreditCardConsume $consume, CreditCardConsumeExtractor $consumeExtractor)
+    {
+        $consumeDetail = $consumeExtractor->extractPendingPaymentsByConsume($consume, true);
+//        $consumeResume = $consumeExtractor->extractConsumeResume([
+//            $consume
+//        ]);
+//
+//        dump($consumeResume);die;
+
+        return $this->render('credit/consume_detail.html.twig', [
+            'consume_detail' => $consumeDetail,
+            'consume' => $consume,
+        ]);
+    }
+
+
+    /**
+     * @Route("/payment/{cardConsume}", name="pay_consume")
+     * @param CreditCardConsume $cardConsume
+     * @param CreditCardConsumeExtractor $consumeExtractor
+     * @param HandlePayment $handlePayment
+     * @param Request $request
+     * @return Response
+     * @throws Exception
      */
     public function paymentAction(
         CreditCardConsume $cardConsume,
-        CreditCardConsumeExtractor $consumeExtractor
+        CreditCardConsumeExtractor $consumeExtractor,
+        HandlePayment $handlePayment,
+        Request $request
     )
     {
-        $payment = new CreditCardPayments();
-        $payment->setAmount($consumeExtractor->extractNextPaymentAmount($cardConsume));
+        $form = $this->createForm(CreditPaymentType::class, null, [
+            'total_to_pay' => $consumeExtractor->extractNextPaymentAmount($cardConsume)
+        ]);
 
-        $form = $this->createForm(CreditPaymentType::class, $payment);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()){
+            try {
+                $handlePayment->processPayment($cardConsume, $form->get('total_to_pay')->getData());
+
+                $this->addFlash('success', 'Pago realizado con Exito');
+            } catch (Exception $exception) {
+
+            }
+        }
+
+        return $this->render('credit/new_card_payment.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("basic_payment/{card}/{user}")
+     *
+     * @param CreditCard $card
+     * @param CreditCardUser $user
+     * @param HandlePayment $paymentsHandler
+     * @return Response
+     */
+    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, HandlePayment $paymentsHandler)
+    {
+        $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
+        $consumes = $consumeRepo->getByCardAndUser($card, $user);
+
+
+        $form = $this->createForm(BasicPaymentType::class, [
+            'credit_card' => $card,
+            'credit_card_user' => $user,
+        ]);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $paymentsHandler->processPaymentByCardAndUser($card, $user);
+            } catch (Exception $e) {
+
+            }
+
+            return $this->redirectToRoute('');
+        }
+
 
         return $this->render('', [
-            'form' => $form->createView()
+            'consumes' => $consumes
         ]);
     }
 

@@ -14,10 +14,9 @@ use App\Entity\Personal\Entry;
 use App\Form\Personal\EgressType;
 use App\Form\Personal\EntryType;
 use App\Service\Personal\BalanceCalculations;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\Date;
 
 /*TODO: Trabajar en las vistas*/
 /**
@@ -25,7 +24,7 @@ use Symfony\Component\Validator\Constraints\Date;
  * @Route("/entries")
  *
  * */
-class PersonalController extends Controller
+class PersonalController extends AbstractController
 {
 
     /**

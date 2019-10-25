@@ -2,9 +2,12 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Util\TimestampAbleEntity;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardConsumeRepository")
@@ -45,15 +48,14 @@ class CreditCardConsume
     private $dues;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", options={"default"=0})
      * */
-    private $amountPayed;
+    private $amountPayed = 0;
 
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="smallint", options={"default"=0})
      * */
-    private $duesPayed;
-
+    private $duesPayed = 0;
 
     /**
      * @ORM\Column(type="float")
@@ -70,20 +72,6 @@ class CreditCardConsume
      */
     private $status;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $created_at;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $update_at;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $delete_at;
 
     /**
      * @ORM\Column(type="date")
@@ -98,17 +86,23 @@ class CreditCardConsume
     private $creditCard;
 
     /**
-     * @ORM\OneToMany(targetEntity="CreditCardPayments", mappedBy="creditConsume")
+     * @ORM\OneToMany(targetEntity="CreditCardPayment", mappedBy="creditConsume")
      */
     private $payments;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     * */
+    private $monthFirstPay;
+
+    use TimestampAbleEntity;
+
+    /**
      * CreditCardConsume constructor.
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
-        $this->created_at = new \DateTime('now');
         $this->status = self::STATUS_CREATED;
         $this->payments = new ArrayCollection();
     }
@@ -178,42 +172,6 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $created_at): self
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUpdateAt(): ?\DateTimeInterface
-    {
-        return $this->update_at;
-    }
-
-    public function setUpdateAt(?\DateTimeInterface $update_at): self
-    {
-        $this->update_at = $update_at;
-
-        return $this;
-    }
-
-    public function getDeleteAt(): ?\DateTimeInterface
-    {
-        return $this->delete_at;
-    }
-
-    public function setDeleteAt(?\DateTimeInterface $delete_at): self
-    {
-        $this->delete_at = $delete_at;
-
-        return $this;
-    }
-
     public function getStatus(): ?bool
     {
         return $this->status;
@@ -226,12 +184,12 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getConsumeAt(): ?\DateTimeInterface
+    public function getConsumeAt(): ?DateTimeInterface
     {
         return $this->consume_at;
     }
 
-    public function setConsumeAt(\DateTimeInterface $consume_at): self
+    public function setConsumeAt(DateTimeInterface $consume_at): self
     {
         $this->consume_at = $consume_at;
 
@@ -251,15 +209,23 @@ class CreditCardConsume
     }
 
     /**
-     * @return Collection|CreditCardPayments[]
+     * @return Collection|CreditCardPayment[]
      */
     public function getPayments(): Collection
     {
         return $this->payments;
     }
 
-    public function addPayment(CreditCardPayments $payment): self
+    public function addPayment(CreditCardPayment $payment): self
     {
+        $this->addAmountPayed($payment->getAmount());
+
+        if ($payment->isLegalDue()) {
+            $this->addDuePayed();
+        }
+
+        $this->changeStatusToPayed();
+
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
             $payment->setCreditConsume($this);
@@ -268,7 +234,7 @@ class CreditCardConsume
         return $this;
     }
 
-    public function removePayment(CreditCardPayments $payment): self
+    public function removePayment(CreditCardPayment $payment): self
     {
         if ($this->payments->contains($payment)) {
             $this->payments->removeElement($payment);
@@ -299,38 +265,61 @@ class CreditCardConsume
 
     public function activate()
     {
-        $this->status = true;
+        $this->status = self::STATUS_PAYING;
     }
 
     /**
+     * TODO: VER SI ESTO TIENE SENTIDO
      * @return mixed
      */
-    public function getDuesPayed()
+    public function getMonthFirstPay()
     {
-        return $this->duesPayed;
+        return $this->monthFirstPay;
     }
 
     /**
-     * @param mixed $duesPayed
+     * @param mixed $monthFirstPay
      */
-    public function setDuesPayed($duesPayed): void
+    public function setMonthFirstPay($monthFirstPay): void
     {
-        $this->duesPayed = $duesPayed;
+        $this->monthFirstPay = $monthFirstPay;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAmountPayed()
+    public function getDuesPayed(): ?int
+    {
+        return $this->duesPayed ?? 0;
+    }
+
+    public function addDuePayed(): self
+    {
+        $this->duesPayed++;
+
+        return $this;
+    }
+
+    public function getAmountPayed(): ?float
     {
         return $this->amountPayed;
     }
 
-    /**
-     * @param mixed $amountPayed
-     */
-    public function setAmountPayed($amountPayed): void
+    public function addAmountPayed(?float $amountPayed): self
     {
-        $this->amountPayed = $amountPayed;
+        $this->amountPayed += $amountPayed;
+
+        return $this;
+    }
+
+    public function hasPayments()
+    {
+        return $this->payments->count() > 0;
+    }
+
+    public function changeStatusToPayed(): self
+    {
+        if ($this->amount - $this->amountPayed <= 0) {
+            $this->status = self::STATUS_PAYED;
+        }
+
+        return $this;
     }
 }

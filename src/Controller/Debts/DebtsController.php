@@ -10,14 +10,16 @@ use App\Form\Debts\CreditorType;
 use App\Form\Debts\DebtType;
 use App\Form\Debts\FixedChargesType;
 use App\Service\Debts\DebtsHandlers;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Exception;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/debts")
  *
  * */
-class DebtsController extends Controller
+class DebtsController extends AbstractController
 {
     /**
      * @Route("/", name="debts_debts_contrtoller")
@@ -32,8 +34,8 @@ class DebtsController extends Controller
     /**
      * @Route("/list", name="debts_debts_contrtoller")
      * @param DebtsExtractor $debtsExtractor
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function debtsLists(DebtsExtractor $debtsExtractor)
     {
@@ -47,8 +49,8 @@ class DebtsController extends Controller
     /**
      * @Route("/new", name="debts_debts_contrtoller")
      * @param DebtsHandlers $debtsHandlers
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function newDebt(DebtsHandlers $debtsHandlers)
     {
@@ -70,8 +72,8 @@ class DebtsController extends Controller
     }
 
     /**
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function newFixedCharges()
     {
