@@ -2,9 +2,12 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Util\TimestampAbleEntity;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardConsumeRepository")
@@ -70,20 +73,6 @@ class CreditCardConsume
      */
     private $status;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $created_at;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $update_at;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $delete_at;
 
     /**
      * @ORM\Column(type="date")
@@ -103,12 +92,18 @@ class CreditCardConsume
     private $payments;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     * */
+    private $monthFirstPay;
+
+    use TimestampAbleEntity;
+
+    /**
      * CreditCardConsume constructor.
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
-        $this->created_at = new \DateTime('now');
         $this->status = self::STATUS_CREATED;
         $this->payments = new ArrayCollection();
     }
@@ -178,42 +173,6 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $created_at): self
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUpdateAt(): ?\DateTimeInterface
-    {
-        return $this->update_at;
-    }
-
-    public function setUpdateAt(?\DateTimeInterface $update_at): self
-    {
-        $this->update_at = $update_at;
-
-        return $this;
-    }
-
-    public function getDeleteAt(): ?\DateTimeInterface
-    {
-        return $this->delete_at;
-    }
-
-    public function setDeleteAt(?\DateTimeInterface $delete_at): self
-    {
-        $this->delete_at = $delete_at;
-
-        return $this;
-    }
-
     public function getStatus(): ?bool
     {
         return $this->status;
@@ -226,12 +185,12 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getConsumeAt(): ?\DateTimeInterface
+    public function getConsumeAt(): ?DateTimeInterface
     {
         return $this->consume_at;
     }
 
-    public function setConsumeAt(\DateTimeInterface $consume_at): self
+    public function setConsumeAt(DateTimeInterface $consume_at): self
     {
         $this->consume_at = $consume_at;
 
@@ -299,39 +258,47 @@ class CreditCardConsume
 
     public function activate()
     {
-        $this->status = true;
+        $this->status = self::STATUS_PAYING;
     }
 
     /**
      * TODO: VER SI ESTO TIENE SENTIDO
      * @return mixed
      */
-    public function getDuesPayed(): int
+    public function getMonthFirstPay()
+    {
+        return $this->monthFirstPay;
+    }
+
+    /**
+     * @param mixed $monthFirstPay
+     */
+    public function setMonthFirstPay($monthFirstPay): void
+    {
+        $this->monthFirstPay = $monthFirstPay;
+    }
+
+    public function getDuesPayed(): ?int
     {
         return $this->duesPayed ?? 0;
     }
 
-    /**
-     * @param mixed $duesPayed
-     */
-    public function setDuesPayed($duesPayed): void
+    public function setDuesPayed(?int $duesPayed): self
     {
         $this->duesPayed = $duesPayed;
+
+        return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAmountPayed()
+    public function getAmountPayed(): ?float
     {
         return $this->amountPayed;
     }
 
-    /**
-     * @param mixed $amountPayed
-     */
-    public function setAmountPayed($amountPayed): void
+    public function setAmountPayed(?float $amountPayed): self
     {
         $this->amountPayed = $amountPayed;
+
+        return $this;
     }
 }

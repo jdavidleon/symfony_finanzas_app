@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Form\Credit;
-
 
 use App\Entity\Debts\CreditPayments;
 use Symfony\Component\Form\AbstractType;
@@ -15,9 +13,13 @@ class CreditPaymentType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('totalAmount', MoneyType::class, [
+            ->add('amount', MoneyType::class, [
                 'label' => 'total to pay',
-                'currency' => 'COP'
+                'currency' => 'COP',
+                'data' => $options['total_to_pay'],
+                'invalid_message' => "label.error.invalid_money_format",
+                'required' => true,
+                'scale' => 0,
             ]);
     }
 
@@ -25,7 +27,7 @@ class CreditPaymentType extends AbstractType
     {
         $resolver
             ->setDefaults([
-                'data_class' => CreditPayments::class
+               'total_to_pay' => 0
             ]);
     }
 }

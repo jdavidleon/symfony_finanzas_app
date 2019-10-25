@@ -25,7 +25,7 @@ class CreditCardRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('cc')
             ->where('cc = :credit_card')
-            ->andWhere('cc.delete_at IS NULL')
+            ->andWhere('cc.deletedAt IS NULL')
             ->setParameters([
                 'credit_card' => $creditCard
             ])

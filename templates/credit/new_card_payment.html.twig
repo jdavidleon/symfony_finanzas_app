@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello !{% endblock %}
+
+{% block body %}
+
+    {{ form_start(form) }}
+    {{ form_row(form.amount) }}
+    <button type="submit">Pay!</button>
+    {{ form_end(form) }}
+
+{% endblock %}

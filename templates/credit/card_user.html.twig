@@ -10,6 +10,7 @@
             <th>Deuda</th>
             <th>Pendente por pagar</th>
             <th>Proximo pago</th>
+            <th>Accion</th>
         </tr>
         {% for consume in consumes %}
             <tr>
@@ -17,6 +18,7 @@
                 <td>{{ consume.description }}</td>
                 <td>$ {{ consume.pending_amount|number_format(2) }}</td>
                 <td>$ {{ consume.total_amount|number_format(2) }}</td>
+                <td><a href="{{ path('pay_consume', {'cardConsume' : consume.id}) }}">Pagar</a></td>
             </tr>
         {% endfor %}
     </table>
