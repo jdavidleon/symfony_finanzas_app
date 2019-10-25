@@ -7,18 +7,20 @@
     <table>
         <tr>
             <th>ID</th>
+            <th>Tarjeta</th>
             <th>Deuda</th>
-            <th>Pendente por pagar</th>
-            <th>Proximo pago</th>
-            <th>Accion</th>
+            <th>Próximo pago</th>
+            <th>Pendiente por pagar</th>
+            <th>Acción</th>
         </tr>
         {% for consume in consumes %}
             <tr>
-                <td>{{ consume.id }}</td>
-                <td>{{ consume.description }}</td>
-                <td>$ {{ consume.pending_amount|number_format(2) }}</td>
-                <td>$ {{ consume.total_amount|number_format(2) }}</td>
-                <td><a href="{{ path('pay_consume', {'cardConsume' : consume.id}) }}">Pagar</a></td>
+                <td>{{ consume.cardConsume.id }}</td>
+                <td>{{ consume.cardConsume.creditCard.franchise }}</td>
+                <td>{{ consume.cardConsume.description }}</td>
+                <td>$ {{ consume.nextPaymentAmount|number_format(2) }}</td>
+                <td>$ {{ consume.pendingAmount|number_format(2) }}</td>
+                <td><a href="{{ path('pay_consume', {'cardConsume' : consume.cardConsume.id}) }}">Pagar</a></td>
             </tr>
         {% endfor %}
     </table>

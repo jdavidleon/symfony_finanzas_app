@@ -33,7 +33,7 @@ class CreditCardConsumeProvider
         return $this->cardConsumeRepository->getByOwner($owner, $month);
     }
 
-    public function getByCreditCard(CreditCard $card, $month = null)
+    public function getByCreditCard(CreditCard $card, $month = null): array
     {
         return $this->cardConsumeRepository->getByCreditCard( $card, $month );
     }

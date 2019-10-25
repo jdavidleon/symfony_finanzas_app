@@ -30,7 +30,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
      * @param string|null $month
      * @return CreditCardConsume[]
      */
-    public function getByCreditCard(CreditCard $creditCard, string $month = null)
+    public function getByCreditCard(CreditCard $creditCard, string $month = null): array
     {
         $qb = $this->createQueryBuilder('ccc')
             ->where('ccc.creditCard = :credit_card')
@@ -87,7 +87,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
             ->andWhere('ccc.deletedAt IS NULL')
-            ->andWhere('ccc.status  IN ( :paying )')
+            ->andWhere('ccc.status IN (:paying)')
             ->setParameters([
                 'card_user' => $cardUser,
                 'paying' => [
@@ -105,6 +105,27 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         $qb = $this->addPayedMonthConditional($qb, $month);
 
         return $qb->getQuery()
+            ->getResult()
+            ;
+    }
+
+    public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser)
+    {
+        return $this->createQueryBuilder('ccc')
+            ->where('ccc.creditCardUser = :user')
+            ->andWhere('ccc.creditCard = :card')
+            ->andWhere('ccc.creditCardUser = :user')
+            ->andWhere('ccc.deletedAt IS NULL')
+            ->andWhere('ccc.status IN (:statuses)')
+            ->setParameters([
+                'card' => $card,
+                'user' => $cardUser,
+                'statuses' => [
+                    CreditCardConsume::STATUS_PAYING,
+                    CreditCardConsume::STATUS_MORA,
+                ],
+            ])
+            ->getQuery()
             ->getResult()
             ;
     }
@@ -142,7 +163,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                     $qb->expr()->not(
                         $qb->expr()->exists('
                             SELECT ccp
-                        FROM \App\Entity\CreditCard\CreditCardPayments ccp
+                        FROM \App\Entity\CreditCard\CreditCardPayment ccp
                         WHERE
                         ccp.creditConsume = ccc.id
                         AND

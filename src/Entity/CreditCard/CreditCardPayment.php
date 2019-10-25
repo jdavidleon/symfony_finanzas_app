@@ -6,9 +6,9 @@ use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\CreditCard\PaymentsRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardPaymentRepository")
  */
-class CreditCardPayments
+class CreditCardPayment
 {
     /**
      * @ORM\Id()
@@ -24,6 +24,12 @@ class CreditCardPayments
     private $creditConsume;
 
     /**
+     *
+     * @ORM\Column(type="smallint", nullable=true)
+     */
+    private $due;
+
+    /**
      * @ORM\Column(type="string")
      * */
     private $monthPayed;
@@ -31,12 +37,17 @@ class CreditCardPayments
     /**
      * @ORM\Column(type="float")
      */
-    private $capital_amount;
+    private $capitalAmount;
+
+    /**
+     * @ORM\Column(type="float")
+     * */
+    private $realCapitalAmount;
 
     /**
      * @ORM\Column(type="float", nullable=true)
      */
-    private $interest_amount;
+    private $interestAmount;
 
     /**
      * @ORM\Column(type="float")
@@ -57,24 +68,24 @@ class CreditCardPayments
 
     public function getCapitalAmount(): ?float
     {
-        return $this->capital_amount;
+        return $this->capitalAmount;
     }
 
-    public function setCapitalAmount(float $capital_amount): self
+    public function setCapitalAmount(float $capitalAmount): self
     {
-        $this->capital_amount = $capital_amount;
+        $this->capitalAmount = $capitalAmount;
 
         return $this;
     }
 
     public function getInterestAmount(): ?float
     {
-        return $this->interest_amount;
+        return $this->interestAmount;
     }
 
-    public function setInterestAmount(?float $interest_amount): self
+    public function setInterestAmount(?float $interestAmount): self
     {
-        $this->interest_amount = $interest_amount;
+        $this->interestAmount = $interestAmount;
 
         return $this;
     }
@@ -106,10 +117,11 @@ class CreditCardPayments
     /**
      * @return mixed
      */
-    public function getLegalDue()
+    public function isLegalDue()
     {
         return $this->legalDue;
     }
+
 
     /**
      * @param mixed $legalDue
@@ -133,5 +145,37 @@ class CreditCardPayments
     public function setMonthPayed($monthPayed): void
     {
         $this->monthPayed = $monthPayed;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRealCapitalAmount()
+    {
+        return $this->realCapitalAmount;
+    }
+
+    /**
+     * @param mixed $realCapitalAmount
+     */
+    public function setRealCapitalAmount($realCapitalAmount): void
+    {
+        $this->realCapitalAmount = $realCapitalAmount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDue()
+    {
+        return $this->due;
+    }
+
+    /**
+     * @param mixed $due
+     */
+    public function setDue($due): void
+    {
+        $this->due = $due;
     }
 }

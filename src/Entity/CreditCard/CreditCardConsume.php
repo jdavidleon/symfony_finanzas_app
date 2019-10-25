@@ -50,13 +50,12 @@ class CreditCardConsume
     /**
      * @ORM\Column(type="float", options={"default"=0})
      * */
-    private $amountPayed;
+    private $amountPayed = 0;
 
     /**
      * @ORM\Column(type="smallint", options={"default"=0})
      * */
-    private $duesPayed;
-
+    private $duesPayed = 0;
 
     /**
      * @ORM\Column(type="float")
@@ -87,7 +86,7 @@ class CreditCardConsume
     private $creditCard;
 
     /**
-     * @ORM\OneToMany(targetEntity="CreditCardPayments", mappedBy="creditConsume")
+     * @ORM\OneToMany(targetEntity="CreditCardPayment", mappedBy="creditConsume")
      */
     private $payments;
 
@@ -210,15 +209,23 @@ class CreditCardConsume
     }
 
     /**
-     * @return Collection|CreditCardPayments[]
+     * @return Collection|CreditCardPayment[]
      */
     public function getPayments(): Collection
     {
         return $this->payments;
     }
 
-    public function addPayment(CreditCardPayments $payment): self
+    public function addPayment(CreditCardPayment $payment): self
     {
+        $this->addAmountPayed($payment->getAmount());
+
+        if ($payment->isLegalDue()) {
+            $this->addDuePayed();
+        }
+
+        $this->changeStatusToPayed();
+
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
             $payment->setCreditConsume($this);
@@ -227,7 +234,7 @@ class CreditCardConsume
         return $this;
     }
 
-    public function removePayment(CreditCardPayments $payment): self
+    public function removePayment(CreditCardPayment $payment): self
     {
         if ($this->payments->contains($payment)) {
             $this->payments->removeElement($payment);
@@ -283,9 +290,9 @@ class CreditCardConsume
         return $this->duesPayed ?? 0;
     }
 
-    public function setDuesPayed(?int $duesPayed): self
+    public function addDuePayed(): self
     {
-        $this->duesPayed = $duesPayed;
+        $this->duesPayed++;
 
         return $this;
     }
@@ -295,9 +302,23 @@ class CreditCardConsume
         return $this->amountPayed;
     }
 
-    public function setAmountPayed(?float $amountPayed): self
+    public function addAmountPayed(?float $amountPayed): self
     {
-        $this->amountPayed = $amountPayed;
+        $this->amountPayed += $amountPayed;
+
+        return $this;
+    }
+
+    public function hasPayments()
+    {
+        return $this->payments->count() > 0;
+    }
+
+    public function changeStatusToPayed(): self
+    {
+        if ($this->amount - $this->amountPayed <= 0) {
+            $this->status = self::STATUS_PAYED;
+        }
 
         return $this;
     }
