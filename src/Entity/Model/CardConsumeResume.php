@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Extractor\CreditCard;
+namespace App\Entity\Model;
 
 
 use App\Entity\CreditCard\CreditCardConsume;

@@ -11,6 +11,7 @@ namespace App\Extractor\CreditCard;
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
+use App\Entity\Model\CardConsumeResume;
 use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardPaymentRepository;
 use App\Service\CreditCard\CreditCalculator;
