@@ -10,6 +10,7 @@
         <li>Deudor: {{ consume.creditCardUser.fullName }}</li>
         <li>Valor de la deuda: {{ consume.amount|number_format(2) }}</li>
         <li>Monto Pago; {{ consume.amountPayed|number_format(2) }}</li>
+        <li>Cuotas Pagas; {{ consume.duesPayed }}</li>
         <li>Interes: {{ consume.interest }}</li>
         <li>Cuotas: {{ consume.dues }}</li>
         <li>Pago actual: $ {{ nextPaymentAmountByConsume(consume)|number_format(2) }}</li>

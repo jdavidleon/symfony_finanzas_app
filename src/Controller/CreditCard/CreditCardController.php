@@ -40,7 +40,7 @@ class CreditCardController extends AbstractController
         foreach ($creditCards as $card){
             foreach ($card->getCreditCardConsumes() as $consume){
                 foreach ($consume->getPayments() as $payment){
-                    dump($payment->getAmount());
+                    dump($payment->getTotalAmount());
                 }
             }
         }

@@ -6,7 +6,7 @@ namespace App\Tests\Service\Payments;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
-use App\Service\Payments\HandlePayment;
+use App\Service\Payments\PaymentHandler;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 class HandlePaymentTest extends TestCase
 {
     /**
-     * @var HandlePayment;
+     * @var PaymentHandler;
      * */
     private $handlePayment;
 
@@ -37,7 +37,7 @@ class HandlePaymentTest extends TestCase
         $this->cardConsumeExtractor = $this->prophesize(CreditCardConsumeExtractor::class);
         $this->entityManager = $this->prophesize(EntityManagerInterface::class);
 
-        $this->handlePayment = new HandlePayment(
+        $this->handlePayment = new PaymentHandler(
             $this->cardConsumeExtractor->reveal(),
             $this->entityManager->reveal()
         );
@@ -48,7 +48,7 @@ class HandlePaymentTest extends TestCase
      */
     public function testTimelyPayment()
     {
-        self::assertInstanceOf(HandlePayment::class, $this->handlePayment);
+        self::assertInstanceOf(PaymentHandler::class, $this->handlePayment);
 
         $consume = new CreditCardConsume();
         $consume->setAmount(2000);
@@ -66,9 +66,8 @@ class HandlePaymentTest extends TestCase
     public function testPaymentWhenConsumeDoesNotHavePendingDues()
     {
         $this->cardConsume->setAmount(1000);
-        $this->cardConsume->setAmountPayed(0);
         $this->cardConsume->setDues(10);
-        $this->cardConsume->setDuesPayed(1);
+        $this->cardConsume->addDuePayed();
 
         $this->cardConsumeExtractor->extractNextPaymentAmount($this->cardConsume)->shouldBeCalled()->willReturn();
         $this->handlePayment->processPayment($this->cardConsume, 5000);
@@ -77,8 +76,6 @@ class HandlePaymentTest extends TestCase
     private function getConsume()
     {
         $consume = new CreditCardConsume();
-        $consume->setAmountPayed(0);
-        $consume->setDuesPayed(0);
 
         return $consume;
     }

@@ -8,6 +8,7 @@
 
 namespace App\Service\CreditCard;
 
+use App\Exception\InvalidDateTimeFormat;
 use DateTime;
 use Exception;
 
@@ -218,7 +219,7 @@ class CreditCalculator
     /**
      * @param $date
      * @return bool
-     * @throws Exception
+     * @throws InvalidDateTimeFormat
      */
     private static function isDateFormatValid($date){
         $valores = explode('-', $date);
@@ -226,7 +227,7 @@ class CreditCalculator
             return true;
         }
 
-        throw new Exception('Invalid Date Format, expected Y-m-d and received '.$date);
+        throw new InvalidDateTimeFormat('Invalid Date Format, expected Y-m-d and received '.$date);
     }
 
 //    public function calculateHandlingFee($handlingFee, $cardUsers)

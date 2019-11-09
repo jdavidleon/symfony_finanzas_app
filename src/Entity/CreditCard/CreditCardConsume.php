@@ -218,17 +218,16 @@ class CreditCardConsume
 
     public function addPayment(CreditCardPayment $payment): self
     {
-        $this->addAmountPayed($payment->getAmount());
-
-        if ($payment->isLegalDue()) {
-            $this->addDuePayed();
-        }
-
-        $this->changeStatusToPayed();
-
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
-            $payment->setCreditConsume($this);
+
+            $this->addAmountPayed($payment->getTotalAmount());
+
+            if ($payment->isLegalDue()) {
+                $this->addDuePayed();
+            }
+
+            $this->changeStatusToPayed();
         }
 
         return $this;
@@ -263,7 +262,7 @@ class CreditCardConsume
         $this->description = $description;
     }
 
-    public function activate()
+    public function activatePayment()
     {
         $this->status = self::STATUS_PAYING;
     }

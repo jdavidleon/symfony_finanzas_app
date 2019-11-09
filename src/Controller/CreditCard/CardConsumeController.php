@@ -12,7 +12,7 @@ use App\Form\Credit\BasicPaymentType;
 use App\Form\Credit\CreditPaymentType;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
-use App\Service\Payments\HandlePayment;
+use App\Service\Payments\PaymentHandler;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -36,7 +36,7 @@ class CardConsumeController extends AbstractController
     {
         try{
             if  ($consume->getStatus() == CreditCardConsume::STATUS_CREATED){
-                $consume->activate();
+                $consume->activatePayment();
                 $consume->setMonthFirstPay($calculator->calculateNextPaymentDate());
             }else{
                 $consume->setStatus(CreditCardConsume::STATUS_CREATED);
@@ -101,7 +101,7 @@ class CardConsumeController extends AbstractController
      * @Route("/payment/{cardConsume}", name="pay_consume")
      * @param CreditCardConsume $cardConsume
      * @param CreditCardConsumeExtractor $consumeExtractor
-     * @param HandlePayment $handlePayment
+     * @param PaymentHandler $handlePayment
      * @param Request $request
      * @return Response
      * @throws Exception
@@ -109,7 +109,7 @@ class CardConsumeController extends AbstractController
     public function paymentAction(
         CreditCardConsume $cardConsume,
         CreditCardConsumeExtractor $consumeExtractor,
-        HandlePayment $handlePayment,
+        PaymentHandler $handlePayment,
         Request $request
     )
     {
@@ -138,10 +138,10 @@ class CardConsumeController extends AbstractController
      *
      * @param CreditCard $card
      * @param CreditCardUser $user
-     * @param HandlePayment $paymentsHandler
+     * @param PaymentHandler $paymentsHandler
      * @return Response
      */
-    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, HandlePayment $paymentsHandler)
+    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, PaymentHandler $paymentsHandler)
     {
         $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
         $consumes = $consumeRepo->getByCardAndUser($card, $user);
@@ -154,7 +154,7 @@ class CardConsumeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $paymentsHandler->processPaymentByCardAndUser($card, $user);
+                $paymentsHandler->processAllPaymentsByCardAndUser($card, $user);
             } catch (Exception $e) {
 
             }

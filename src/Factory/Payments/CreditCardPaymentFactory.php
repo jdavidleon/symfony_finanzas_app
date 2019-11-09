@@ -4,12 +4,12 @@ namespace App\Factory\Payments;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
-use App\Service\CreditCard\CardConsumeManager;
+use App\Service\PaymentInterface;
 
 class CreditCardPaymentFactory implements PaymentInterface
 {
 
-    public static function create(
+    public function create(
         CreditCardConsume $cardConsume,
         float $amount,
         float $capitalAmount,
@@ -19,9 +19,8 @@ class CreditCardPaymentFactory implements PaymentInterface
         bool $legalDue = true
     ): CreditCardPayment
     {
-        $payment = new CreditCardPayment();
-        $payment->setCreditConsume($cardConsume);
-        $payment->setAmount($amount);
+        $payment = new CreditCardPayment($cardConsume);
+        $payment->setTotalAmount($amount);
         $payment->setCapitalAmount($capitalAmount);
         $payment->setRealCapitalAmount($realCapitalAmount);
         $payment->setInterestAmount($interestAmount);
@@ -29,10 +28,5 @@ class CreditCardPaymentFactory implements PaymentInterface
         $payment->setLegalDue($legalDue);
 
         return $payment;
-    }
-
-    public function createPayment()
-    {
-        // TODO: Implement createPayment() method.
     }
 }

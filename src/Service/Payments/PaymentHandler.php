@@ -9,11 +9,11 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
-use App\Factory\Payments\PaymentsFactory;
+use App\Factory\Payments\CreditCardPaymentFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
-class HandlePayment
+class PaymentHandler
 {
     /**
      * @var CreditCardConsumeExtractor
@@ -23,14 +23,19 @@ class HandlePayment
      * @var EntityManagerInterface
      */
     private $entityManager;
+    /**
+     * @var CreditCardPaymentFactory
+     */
+    private $cardPaymentFactory;
 
     public function __construct(
         CreditCardConsumeExtractor $consumeExtractor,
-        EntityManagerInterface $entityManager
-    )
-    {
+        EntityManagerInterface $entityManager,
+        CreditCardPaymentFactory $cardPaymentFactory
+    ) {
         $this->consumeExtractor = $consumeExtractor;
         $this->entityManager = $entityManager;
+        $this->cardPaymentFactory = $cardPaymentFactory;
     }
 
     /* TODO: Se debe agregar un filtro que determine por cada cuota que se debe*/
@@ -44,16 +49,18 @@ class HandlePayment
     }
 
     /**
+     * Procesa los pagos mínimos pendientes por Tarjeta de Crédito y Usuario
+     *
      * @param CreditCard $creditCard
      * @param CreditCardUser $user
      * @throws Exception
      */
-    public function processPaymentByCardAndUser(CreditCard $creditCard, CreditCardUser $user)
+    public function processAllPaymentsByCardAndUser(CreditCard $creditCard, CreditCardUser $user)
     {
         $consumeRepo = $this->entityManager->getRepository(CreditCardConsume::class);
 
         foreach ($consumeRepo->getByCardAndUser($creditCard, $user) as $consume) {
-            $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume);
+            $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
 
             foreach ($pendingPayments as $payment) {
                 $payment = $this->createCardConsumePayment(
@@ -92,9 +99,8 @@ class HandlePayment
         float $interestAmount,
         ?bool $monthPayed,
         bool $legalDue = true
-    ): CreditCardPayment
-    {
-        return PaymentsFactory::create(
+    ): CreditCardPayment {
+        return $this->cardPaymentFactory->create(
             $consume,
             $payedValue,
             $capitalAmount,
@@ -114,8 +120,7 @@ class HandlePayment
     private function createTimelyPayment(
         CreditCardConsume $consume,
         float $payedValue
-    ): CreditCardPayment
-    {
+    ): CreditCardPayment {
         $interestAmount = $this->consumeExtractor->extractNextInterestAmount($consume);
         return $this->createCardConsumePayment(
             $consume,
