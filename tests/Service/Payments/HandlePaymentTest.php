@@ -10,12 +10,6 @@ use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Service\Payments\PaymentHandler;
-use App\Factory\Payments\CreditCardPaymentFactory;
-use App\Repository\CreditCard\CreditCardConsumeRepository;
-use App\Repository\CreditCard\CreditCardPaymentRepository;
-use App\Service\CreditCard\CreditCalculator;
-use App\Service\CreditCard\CreditCardConsumeProvider;
-use App\Service\Payments\HandlePayment;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -64,7 +58,7 @@ class HandlePaymentTest extends TestCase
         $this->entityManager = $this->prophesize(EntityManagerInterface::class);
 
         $this->handlePayment = new PaymentHandler(
-            $this->cardConsumeExtractor->reveal(),
+            $this->consumeExtractor,
             $this->entityManager->reveal()
         );
     }
