@@ -2,6 +2,7 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Util\DebtInterface;
 use App\Util\TimestampAbleEntity;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -12,7 +13,7 @@ use Exception;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardConsumeRepository")
  */
-class CreditCardConsume
+class CreditCardConsume implements DebtInterface
 {
     const STATUS_CREATED = 0;
     const STATUS_PAYING = 1;

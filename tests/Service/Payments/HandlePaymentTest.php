@@ -4,13 +4,25 @@
 namespace App\Tests\Service\Payments;
 
 
+use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardPayment;
+use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Service\Payments\PaymentHandler;
+use App\Factory\Payments\CreditCardPaymentFactory;
+use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Repository\CreditCard\CreditCardPaymentRepository;
+use App\Service\CreditCard\CreditCalculator;
+use App\Service\CreditCard\CreditCardConsumeProvider;
+use App\Service\Payments\HandlePayment;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Zend\Code\Reflection\MethodReflection;
 
 class HandlePaymentTest extends TestCase
 {
@@ -20,9 +32,9 @@ class HandlePaymentTest extends TestCase
     private $handlePayment;
 
     /**
-     * @var CreditCardConsumeExtractor
+     * @var CreditCardConsumeExtractor|MockObject
      * */
-    private $cardConsumeExtractor;
+    private $consumeExtractor;
     /**
      * @var EntityManager
      * */
@@ -34,7 +46,21 @@ class HandlePaymentTest extends TestCase
     public function setUp(): void
     {
         $this->cardConsume = $this->getConsume();
-        $this->cardConsumeExtractor = $this->prophesize(CreditCardConsumeExtractor::class);
+
+        $consumeProvider = $this->prophesize(CreditCardConsumeProvider::class);
+        $paymentRepository = $this->prophesize(CreditCardPaymentRepository::class);
+
+        $this->consumeExtractor =  $this->getMockBuilder(CreditCardConsumeExtractor::class)
+            ->setMethodsExcept([
+                'extractPendingPaymentsByConsume'
+            ])
+            ->setConstructorArgs([
+                $consumeProvider->reveal(),
+                $paymentRepository->reveal(),
+                new CreditCalculator(),
+            ])
+            ->getMock()
+        ;
         $this->entityManager = $this->prophesize(EntityManagerInterface::class);
 
         $this->handlePayment = new PaymentHandler(
@@ -42,6 +68,36 @@ class HandlePaymentTest extends TestCase
             $this->entityManager->reveal()
         );
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testProcessPaymentByCardAndUser()
+    {
+        $creditCardConsumeRepo = $this->prophesize(CreditCardConsumeRepository::class);
+        $this->entityManager->getRepository(CreditCardConsume::class)->willReturn($creditCardConsumeRepo);
+
+        $cardConsume1 = $this->getConsume(5000, 2.5, 3);
+        $cardConsume2 = $this->getConsume(3000, 2.1, 2);
+
+        $consumesResponse = [
+            $cardConsume1,
+//            $cardConsume2,
+        ];
+
+        $creditCardConsumeRepo
+            ->getByCardAndUser(Argument::type(CreditCard::class), Argument::type(CreditCardUser::class))
+            ->willReturn($consumesResponse);
+
+        $this->entityManager->persist(Argument::type(CreditCardPayment::class))->shouldBeCalledTimes(5);
+        $this->entityManager->flush()->shouldBeCalled();
+
+        $paymentsFactory = $this->prophesize(CreditCardPaymentFactory::class);
+        $paymentsFactory::create(Argument::cetera())->willReturn(Argument::type(CreditCardPayment::class));
+
+        $this->handlePayment->processPaymentByCardAndUser(new CreditCard(), new CreditCardUser());
+    }
+
 
     /**
      * @throws Exception
@@ -69,11 +125,11 @@ class HandlePaymentTest extends TestCase
         $this->cardConsume->setDues(10);
         $this->cardConsume->addDuePayed();
 
-        $this->cardConsumeExtractor->extractNextPaymentAmount($this->cardConsume)->shouldBeCalled()->willReturn();
+        $this->consumeExtractor->extractNextPaymentAmount($this->cardConsume)->shouldBeCalled()->willReturn();
         $this->handlePayment->processPayment($this->cardConsume, 5000);
     }
 
-    private function getConsume()
+    private function getConsume(float $amount = 1000, float $interest = 2, int $dues = 10)
     {
         $consume = new CreditCardConsume();
 
