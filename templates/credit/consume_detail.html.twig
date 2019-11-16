@@ -23,14 +23,16 @@
             <th>capital</th>
             <th>interes</th>
             <th>Total</th>
+            <th>Status</th>
         </tr>
         {% for detail in consume_detail %}
             <tr>
-                <td>{{ detail.number_due }}</td>
-                <td>{{ detail.payment_month }}</td>
-                <td>$ {{ detail.capital_amount|number_format(2) }}</td>
+                <td>{{ detail.dueNumber }}</td>
+                <td>{{ detail.paymentMonth }}</td>
+                <td>$ {{ detail.capitalAmount|number_format(2) }}</td>
                 <td>$ {{ detail.interest|number_format(2) }}</td>
-                <td>$ {{ detail.total_to_pay|number_format(2) }} </td>
+                <td>$ {{ detail.totalToPay|number_format(2) }} </td>
+                <td>{{ detail.status }}</td>
             </tr>
         {% endfor %}
     </table>

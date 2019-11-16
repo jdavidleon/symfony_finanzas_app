@@ -11,11 +11,13 @@ namespace App\Extractor\CreditCard;
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
+use App\Entity\CreditCard\Model\ConsumePaymentResume;
 use App\Entity\Model\CardConsumeResume;
 use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardPaymentRepository;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
+use App\Service\DateHelper;
 use Exception;
 
 
@@ -135,7 +137,7 @@ class CreditCardConsumeExtractor
     /**
      * @param CreditCardConsume $creditCardConsume
      * @param bool $atDate
-     * @return array
+     * @return ConsumePaymentResume[]
      * @throws Exception
      */
     public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume, bool $atDate = false): array
@@ -302,7 +304,7 @@ class CreditCardConsumeExtractor
         if ($cardConsume->hasPayments()){
             return $this->getCalculateMajorMonth($cardConsume);
         }else {
-            return CreditCalculator::reverseMonth($cardConsume->getMonthFirstPay());
+            return DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
         }
     }
 
@@ -320,7 +322,7 @@ class CreditCardConsumeExtractor
             }
         }
 
-        return CreditCalculator::calculateMajorMonth(
+        return DateHelper::calculateMajorMonth(
             $dateList
         );
     }

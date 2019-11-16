@@ -83,7 +83,7 @@ class CardConsumeController extends AbstractController
      */
     public function consumeDetail(CreditCardConsume $consume, CreditCardConsumeExtractor $consumeExtractor)
     {
-        $consumeDetail = $consumeExtractor->extractPendingPaymentsByConsume($consume, true);
+        $consumeDetail = $consumeExtractor->extractPendingPaymentsByConsume($consume);
 //        $consumeResume = $consumeExtractor->extractConsumeResume([
 //            $consume
 //        ]);
