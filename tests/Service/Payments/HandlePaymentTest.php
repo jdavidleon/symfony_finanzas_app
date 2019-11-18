@@ -9,7 +9,12 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
-use App\Service\Payments\PaymentHandler;
+use App\Factory\Payments\CreditCardPaymentFactory;
+use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Repository\CreditCard\CreditCardPaymentRepository;
+use App\Service\CreditCard\CreditCalculator;
+use App\Service\CreditCard\CreditCardConsumeProvider;
+use App\Service\Payments\HandlePayment;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -57,7 +62,7 @@ class HandlePaymentTest extends TestCase
         ;
         $this->entityManager = $this->prophesize(EntityManagerInterface::class);
 
-        $this->handlePayment = new PaymentHandler(
+        $this->handlePayment = new HandlePayment(
             $this->consumeExtractor,
             $this->entityManager->reveal()
         );
@@ -117,7 +122,7 @@ class HandlePaymentTest extends TestCase
     {
         $this->cardConsume->setAmount(1000);
         $this->cardConsume->setDues(10);
-        $this->cardConsume->addDuePayed();
+        $this->cardConsume->addDuePayed(1);
 
         $this->consumeExtractor->extractNextPaymentAmount($this->cardConsume)->shouldBeCalled()->willReturn();
         $this->handlePayment->processPayment($this->cardConsume, 5000);
@@ -126,6 +131,9 @@ class HandlePaymentTest extends TestCase
     private function getConsume(float $amount = 1000, float $interest = 2, int $dues = 10)
     {
         $consume = new CreditCardConsume();
+        $consume->setAmount($amount);
+        $consume->setInterest($interest);
+        $consume->setDues($dues);
 
         return $consume;
     }
