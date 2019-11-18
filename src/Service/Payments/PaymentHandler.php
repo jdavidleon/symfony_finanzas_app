@@ -99,8 +99,9 @@ class PaymentHandler
         float $interestAmount,
         ?bool $monthPayed,
         bool $legalDue = true
-    ): CreditCardPayment {
-        return $this->cardPaymentFactory->create(
+    ): CreditCardPayment
+    {
+        return CreditCardPaymentFactory::create(
             $consume,
             $payedValue,
             $capitalAmount,
