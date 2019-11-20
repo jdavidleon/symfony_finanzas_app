@@ -4,11 +4,9 @@ namespace App\Factory\Payments;
 
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
-use App\Util\DebtInterface;
 
 class CreditCardPaymentFactory implements PaymentInterface
 {
-
     public function create(
         CreditCardConsume $cardConsume,
         float $amount,
@@ -28,18 +26,5 @@ class CreditCardPaymentFactory implements PaymentInterface
         $payment->setLegalDue($legalDue);
 
         return $payment;
-    }
-
-
-    /**
-     * @param DebtInterface|CreditCardConsume $debt
-     * @param $amountPayed
-     * @return PaymentInterface
-     */
-    public function createPayment(DebtInterface $debt, $amountPayed): PaymentInterface
-    {
-        $payment = new CreditCardPayment();
-        $payment->setCreditConsume($debt);
-        $payment->setAmount($amountPayed);
     }
 }
