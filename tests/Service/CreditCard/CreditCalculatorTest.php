@@ -204,6 +204,30 @@ class CreditCalculatorTest extends TestCase
     }
 
     /**
+     * @throws Exception
+     */
+    public function testPendingPaymentsResumeWhenPayedDuesIsGreaterThanOrEqualToEndDue()
+    {
+        $resume = CreditCalculator::calculatePendingPaymentsResume(
+            3000,
+            2.2,
+            15,
+            9,
+            6
+        );
+        $resume2 = CreditCalculator::calculatePendingPaymentsResume(
+            3000,
+            2.2,
+            14,
+            7,
+            7
+        );
+
+        self::assertEquals([], $resume);
+        self::assertEquals([], $resume2);
+    }
+
+    /**
      * @param string|null $date
      * @param string $expected
      * @param string $message
@@ -282,6 +306,7 @@ class CreditCalculatorTest extends TestCase
             [0, '2019-11', '2020-03', 4],
             [7, '2019-05', '2019-06', 8],
             [1, '2019-05', '2019-05', 1],
+            [0, '2020-01', '2019-12', 0],
         ];
     }
 }

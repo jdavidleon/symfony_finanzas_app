@@ -10,11 +10,6 @@ use Exception;
 
 class DateHelper
 {
-    public static function getMinorDate($date1, $date2): string
-    {
-
-    }
-
     /**
      * @param string $date
      * @return string
@@ -43,6 +38,10 @@ class DateHelper
         return $dateTime->format('Y-m');
     }
 
+    /**
+     * @param array $dates ['Y-m']
+     * @return string
+     */
     public static function calculateMajorMonth(array $dates): string
     {
         $dates = array_map([self::class, 'convertToDateTime'], $dates);
@@ -53,7 +52,7 @@ class DateHelper
     }
 
     /**
-     * @param string $strDate
+     * @param string $strDate Expected format 'Y-m'
      * @return DateTime
      * @throws Exception
      */
@@ -64,6 +63,8 @@ class DateHelper
 
 
     /**
+     * Convertimos un string con formato 'Y-m' en un 'Y-m-d'
+     *
      * @param string $yearMonth 'Y-m'
      * @param int $day
      * @return string
@@ -80,11 +81,12 @@ class DateHelper
     }
 
     /**
-     * @param $date
+     * Este método verifica que una fecha este dada en el formato 'Y-m-d'
+     *
+     * @param string $date
      * @return bool
-     * @throws InvalidDateTimeFormat
      */
-    private static function isDateFormatValid($date): bool
+    private static function isDateFormatValid(string $date): bool
     {
         $valores = explode('-', $date);
         if(count($valores) == 3 && checkdate($valores[1], $valores[2], $valores[0])){

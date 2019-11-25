@@ -132,7 +132,7 @@ class CardConsumeController extends AbstractController
     }
 
     /**
-     * @Route("basic_payment/{card}/{user}")
+     * @Route("basic_payment/{card}/{user}", name="payment_by_card_and_user")
      *
      * @param CreditCard $card
      * @param CreditCardUser $user
@@ -144,26 +144,30 @@ class CardConsumeController extends AbstractController
         $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
         $consumes = $consumeRepo->getByCardAndUser($card, $user);
 
-
-        $form = $this->createForm(BasicPaymentType::class, [
-            'credit_card' => $card,
-            'credit_card_user' => $user,
-        ]);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+/*TODO: debemos mejorar este proceso agregando validación visual y un resumen antes de ejecutar*/
+//        $form = $this->createForm(BasicPaymentType::class, [
+//            'credit_card' => $card,
+//            'credit_card_user' => $user,
+//        ]);
+//
+//        if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $paymentsHandler->processAllPaymentsByCardAndUser($card, $user);
             } catch (Exception $e) {
-
+                $this->addFlash('error', 'No se han procesados los pagos');
             }
 
-            return $this->redirectToRoute('');
-        }
+            return $this->redirectToRoute('credit_card_detail', [
+                'card' => $card->getId()
+            ]);
+
+//            return $this->redirectToRoute('');
+//        }
 
 
-        return $this->render('', [
-            'consumes' => $consumes
-        ]);
+//        return $this->render('', [
+//            'consumes' => $consumes
+//        ]);
     }
 
 }

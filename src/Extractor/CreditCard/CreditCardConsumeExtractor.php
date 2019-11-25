@@ -142,22 +142,12 @@ class CreditCardConsumeExtractor
      */
     public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume, bool $atDate = false): array
     {
-        /*
-         * TODO: validar casos en los que el pago esta al día pero se quiere imprimir hasta la cuota acutal de pago
-         * */
-        $endDue = null;
-        if ($creditCardConsume->isPaymentUpToDate()){
-            $endDue = $creditCardConsume->getDuesPayed();
-        }elseif($atDate){
-            $endDue = $this->extractActualDueToPay($creditCardConsume);
-        }
-
         return CreditCalculator::calculatePendingPaymentsResume(
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
             $creditCardConsume->getDues(),
             $creditCardConsume->getDuesPayed(),
-            $endDue,
+            $atDate ? $this->extractActualDueToPay($creditCardConsume): null,
             $this->extractLastPaymentMonth($creditCardConsume)
         );
     }
@@ -312,17 +302,20 @@ class CreditCardConsumeExtractor
     public function extractLastPaymentMonth(CreditCardConsume $cardConsume): string
     {
         if ($cardConsume->hasPayments()){
-            return $this->getCalculateMajorMonth($cardConsume);
+            $calculateMajorMonth = $this->getCalculateMajorMonth($cardConsume);
+            return $calculateMajorMonth ?? DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
         }else {
             return DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
         }
     }
 
     /**
+     * Esto solo llamara los pagos hechos con un legalDue = true
+     *
      * @param CreditCardConsume|null $cardConsume
-     * @return string
+     * @return string|null
      */
-    private function getCalculateMajorMonth(?CreditCardConsume $cardConsume): string
+    private function getCalculateMajorMonth(?CreditCardConsume $cardConsume): ?string
     {
         $dateList = [];
         // Todo: mejorar el retorno de month
@@ -330,6 +323,10 @@ class CreditCardConsumeExtractor
             foreach ($arrayDate as $date){
                 $dateList[] = $date;
             }
+        }
+
+        if (empty($dateList)) {
+            return null;
         }
 
         return DateHelper::calculateMajorMonth(
