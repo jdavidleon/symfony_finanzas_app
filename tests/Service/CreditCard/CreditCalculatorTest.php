@@ -307,6 +307,7 @@ class CreditCalculatorTest extends TestCase
             [7, '2019-05', '2019-06', 8],
             [1, '2019-05', '2019-05', 1],
             [0, '2020-01', '2019-12', 0],
+            // [12, '2020-01', '2019-12', 11], /*Todo: Tiene sentido este caso???*/
         ];
     }
 }
