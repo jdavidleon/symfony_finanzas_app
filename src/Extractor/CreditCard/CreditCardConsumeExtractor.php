@@ -142,12 +142,22 @@ class CreditCardConsumeExtractor
      */
     public function extractPendingPaymentsByConsume(CreditCardConsume $creditCardConsume, bool $atDate = false): array
     {
+        /*
+         * TODO: validar casos en los que el pago esta al día pero se quiere imprimir hasta la cuota acutal de pago
+         * */
+        $endDue = null;
+        if ($creditCardConsume->isPaymentUpToDate()){
+            $endDue = $creditCardConsume->getDuesPayed();
+        }elseif($atDate){
+            $endDue = $this->extractActualDueToPay($creditCardConsume);
+        }
+
         return CreditCalculator::calculatePendingPaymentsResume(
             $this->extractActualDebt($creditCardConsume),
             $creditCardConsume->getInterest(),
             $creditCardConsume->getDues(),
             $creditCardConsume->getDuesPayed(),
-            $atDate ? $this->extractActualDueToPay($creditCardConsume): null,
+            $endDue,
             $this->extractLastPaymentMonth($creditCardConsume)
         );
     }

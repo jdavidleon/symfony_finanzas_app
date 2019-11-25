@@ -25,7 +25,7 @@ class CreditCalculator
         if ($debt <= $payed)
             return 0;
 
-        return $debt - $payed;
+        return round($debt - $payed);
     }
 
     /**
@@ -41,17 +41,17 @@ class CreditCalculator
             return 0;
         }
 
-        return $actualDebt / $pendingDues;
+        return round($actualDebt / $pendingDues);
     }
 
-    public static function calculateInterestAmount($actualDebt, $interest)
+    public static function calculateInterestAmount($actualDebt, $interest): float
     {
-        return ( $actualDebt * $interest ) / 100;
+        return round(( $actualDebt * $interest ) / 100);
     }
 
-    public static function calculateNextPaymentAmount($nextCapitalAmount, $nextInterestAmount)
+    public static function calculateNextPaymentAmount($nextCapitalAmount, $nextInterestAmount): float
     {
-        return $nextCapitalAmount + $nextInterestAmount;
+        return round($nextCapitalAmount + $nextInterestAmount);
     }
     
     public static function calculateNumberOfPendingDues(int $totalDues, int $payedDues = 0): int
@@ -104,7 +104,7 @@ class CreditCalculator
         ?string $lastPayedMonth = null
     ): array
     {
-        if ($totalDues <= $payedDues){
+        if (($totalDues <= $payedDues) || (null != $endDue && $payedDues >= $endDue)){
             return [];
         }
 
@@ -116,7 +116,7 @@ class CreditCalculator
         $paymentMonth = $lastPayedMonth;
         $duesToPay = [];
         foreach (range($payedDues + 1, $endDue ?? $totalDues ) as $due){
-            $interestToPay = ( ($actualDebt * $interest) / 100 );
+            $interestToPay = self::calculateInterestAmount($actualDebt, $interest);
             $paymentMonth = self::calculateNextPaymentDate($paymentMonth);
             $duesToPay[] = new ConsumePaymentResume(
                 $due,

@@ -29,7 +29,7 @@ class CreditCardPayment
     private $due;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
      * */
     private $monthPayed;
 
@@ -103,6 +103,13 @@ class CreditCardPayment
     public function setTotalAmount(float $totalAmount): self
     {
         $this->totalAmount = $totalAmount;
+
+        return $this;
+    }
+
+    public function setCreditConsume($consume)
+    {
+        $this->creditConsume = $consume;
 
         return $this;
     }

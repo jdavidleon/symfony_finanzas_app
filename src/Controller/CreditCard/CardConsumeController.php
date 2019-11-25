@@ -15,7 +15,6 @@ use App\Service\CreditCard\CreditCardConsumeProvider;
 use App\Service\Payments\PaymentHandler;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -120,11 +119,10 @@ class CardConsumeController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()){
             try {
-                $handlePayment->processPayment($cardConsume, $form->get('total_to_pay')->getData());
-
-                $this->addFlash('success', 'Pago realizado con Exito');
+                $handlePayment->processPaymentWithSpecificAmount($cardConsume, $form->get('amount')->getData());
+                $this->addFlash('success', 'Pago realizado con Éxito');
             } catch (Exception $exception) {
-
+                $this->addFlash('error', 'ha habido un problema con el pago');
             }
         }
 

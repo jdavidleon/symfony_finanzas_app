@@ -94,8 +94,8 @@ class CreditCalculatorTest extends TestCase
         $payment = CreditCalculator::calculateNextPaymentAmount(2000, 250);
         $payment2 = CreditCalculator::calculateNextPaymentAmount(1500, 0);
 
-        self::assertSame(2250, $payment);
-        self::assertSame(1500, $payment2);
+        self::assertEquals(2250, $payment);
+        self::assertEquals(1500, $payment2);
     }
 
     public function testCalculatePendingDues()

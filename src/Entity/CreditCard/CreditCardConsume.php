@@ -2,6 +2,8 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Service\CreditCard\CreditCalculator;
+use App\Service\DateHelper;
 use App\Util\DebtInterface;
 use App\Util\TimestampAbleEntity;
 use DateTimeInterface;
@@ -87,7 +89,8 @@ class CreditCardConsume implements DebtInterface
     private $creditCard;
 
     /**
-     * @ORM\OneToMany(targetEntity="CreditCardPayment", mappedBy="creditConsume")
+     * @var CreditCardPayment[]
+     * @ORM\OneToMany(targetEntity="CreditCardPayment", mappedBy="creditConsume", cascade={"persist"})
      */
     private $payments;
 
@@ -222,7 +225,7 @@ class CreditCardConsume implements DebtInterface
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
 
-            $this->addAmountPayed($payment->getTotalAmount());
+            $this->addAmountPayed($payment->getCapitalAmount());
 
             if ($payment->isLegalDue()) {
                 $this->addDuePayed();
@@ -321,5 +324,41 @@ class CreditCardConsume implements DebtInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Todo: ver como mejorar esto
+     * @throws Exception
+     */
+    public function isPaymentUpToDate(): bool
+    {
+        $dates = [];
+        foreach ($this->payments as $payment){
+            if (null != $payment->getMonthPayed()) {
+                $dates[] = $payment->getMonthPayed();
+            }
+        }
+
+        if (empty($dates)){
+            $dates[] = $this->getMonthFirstPay();
+        }
+
+        $lastPaymentMonth = DateHelper::calculateMajorMonth($dates);
+        $nextPaymentMonth = CreditCalculator::calculateNextPaymentDate();
+
+        if ($lastPaymentMonth == $nextPaymentMonth) {
+            return true;
+        }
+
+        $majorMonth = DateHelper::calculateMajorMonth([
+            $lastPaymentMonth,
+            $nextPaymentMonth
+        ]);
+
+        if ($majorMonth == $lastPaymentMonth){
+            return true;
+        }
+
+        return false;
     }
 }

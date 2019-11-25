@@ -39,7 +39,6 @@ class PaymentHandler
         $this->cardPaymentFactory = $cardPaymentFactory;
     }
 
-    /* TODO: Se debe agregar un filtro que determine por cada cuota que se debe*/
     /**
      * @param CreditCardConsume $consume
      * @param $payedValue
@@ -47,34 +46,27 @@ class PaymentHandler
      */
     public function processPaymentWithSpecificAmount(CreditCardConsume $consume, float $payedValue): void
     {
-        $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume);
-        $pendingToPay = $this->consumeExtractor->extractNextPaymentAmount($consume);
-
+        $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
         foreach ($pendingPayments as $payment)
         {
-            if (0 == $pendingToPay)
+            if (0 == $payedValue)
             {
                 break;
             }
 
             if ($payedValue >= $payment->getTotalToPay()) {
-                $this->createCardConsumePayment(
-                    $consume,
-                    $payment->getTotalToPay(),
-                    $payment->getInterest(),
-                    $payment->getCapitalAmount(),
-                    $payment->getInterest(),
-                    $payment->getPaymentMonth()
-                );
+                $this->addPendingPaymentsFromArrayPayments($consume, [$payment]);
+                $this->entityManager->persist($consume);
                 $payedValue -= $payment->getTotalToPay();
             }
         }
 
         if (0 < $payedValue) {
-
+            $this->addNotLegalConsumePayment($consume, $payedValue);
+            $this->entityManager->persist($consume);
         }
 
-
+        $this->entityManager->flush();
     }
 
     /**
@@ -88,7 +80,8 @@ class PaymentHandler
         foreach ($consumeRepo->getActivesByCardUser($user) as $consume) {
             $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
 
-            $this->persistPendingPaymentsArray($consume, $pendingPayments);
+            $this->addPendingPaymentsFromArrayPayments($consume, $pendingPayments);
+            $this->entityManager->persist($consume);
         }
         
         $this->entityManager->flush();
@@ -108,7 +101,8 @@ class PaymentHandler
         foreach ($consumeRepo->getByCardAndUser($creditCard, $user) as $consume) {
             $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
 
-            $this->persistPendingPaymentsArray($consume, $pendingPayments);
+            $this->addPendingPaymentsFromArrayPayments($consume, $pendingPayments);
+            $this->entityManager->persist($consume);
         }
 
         $this->entityManager->flush();
@@ -119,7 +113,7 @@ class PaymentHandler
      * @param ConsumePaymentResume[] $payments
      * @throws Exception
      */
-    private function persistPendingPaymentsArray(CreditCardConsume $cardConsume, array $payments): void 
+    private function addPendingPaymentsFromArrayPayments(CreditCardConsume $cardConsume, array $payments): void
     {
         foreach ($payments as $payment) {
             $payment = $this->createCardConsumePayment(
@@ -131,21 +125,38 @@ class PaymentHandler
                 $payment->getPaymentMonth(),
                 true
             );
-
-            $this->entityManager->persist($payment);
+            $cardConsume->addPayment($payment);
         }
     }
-    
+
+    /**
+     * @param CreditCardConsume $consume
+     * @param float $amountPayed
+     * @throws Exception
+     */
+    private function addNotLegalConsumePayment(CreditCardConsume $consume, float $amountPayed)
+    {
+        $pay = $this->createCardConsumePayment(
+            $consume,
+            $amountPayed,
+            $amountPayed,
+            0,
+            0,
+            null,
+            false
+        );
+        $consume->addPayment($pay);
+    }
+
     /**
      * @param CreditCardConsume $consume
      * @param float $payedValue
      * @param float $capitalAmount
      * @param float $realCapitalAmount
      * @param float $interestAmount
-     * @param bool|null $monthPayed
+     * @param string|null $monthPayed
      * @param bool $legalDue
      * @return CreditCardPayment
-     * @throws Exception
      */
     private function createCardConsumePayment(
         CreditCardConsume $consume,
@@ -153,18 +164,19 @@ class PaymentHandler
         float $capitalAmount,
         float $realCapitalAmount,
         float $interestAmount,
-        ?bool $monthPayed,
+        ?string $monthPayed,
         bool $legalDue = true
     ): CreditCardPayment
     {
         $creditCardPayment = new CreditCardPaymentFactory();
+
         return $creditCardPayment->create(
             $consume,
             $payedValue,
             $capitalAmount,
             $realCapitalAmount,
             $interestAmount,
-            $monthPayed ?? $this->consumeExtractor->extractNextPaymentMonth(),
+            $monthPayed,
             $legalDue
         );
     }

@@ -13,11 +13,12 @@ class CreditCardPaymentFactory implements PaymentInterface
         float $capitalAmount,
         float $realCapitalAmount,
         float $interestAmount,
-        float $monthPayed,
+        ?string $monthPayed,
         bool $legalDue = true
     ): CreditCardPayment
     {
         $payment = new CreditCardPayment($cardConsume);
+        $payment->setDue($legalDue ? $cardConsume->getDuesPayed() + 1: null);
         $payment->setTotalAmount($amount);
         $payment->setCapitalAmount($capitalAmount);
         $payment->setRealCapitalAmount($realCapitalAmount);
