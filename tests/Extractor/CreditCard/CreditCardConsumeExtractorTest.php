@@ -210,7 +210,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         return [
             [1000, 2, 10, 0, 3, 54, '3 pending dues'],
             [2000, 1.8, 10, 1, 10, 180, '9 pending dues'],
-            [157400, 2.25, 8, 5, 7, 5902.5, '2 pending dues'],
+            [157400, 2.25, 8, 5, 7, 5903, '2 pending dues'],
             [452450, 1.52, 20, 8, 8, 0, 'Not pending dues'],
             [1000, 10, 10, 1, 1, 0, 'Not pending dues'],
             [0, 1.5, 10, 6, 8, 0, 'Without debt'],
@@ -547,6 +547,30 @@ class CreditCardConsumeExtractorTest extends TestCase
         $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
 
         self::assertSame('2021-01', $lastPaymentMonth);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractLastPaymentMonthWhenHasPaymentsButAreNotLegal()
+    {
+        $this->creditCardConsume->setMonthFirstPay('2018-09');
+        $payment1 = new CreditCardPayment($this->creditCardConsume);
+        $payment1->setLegalDue(false);
+        $this->creditCardConsume->addPayment($payment1);
+        $payment2 = new CreditCardPayment($this->creditCardConsume);
+        $payment2->setLegalDue(false);
+        $this->creditCardConsume->addPayment($payment2);
+
+        $this->paymentsRepository
+            ->getMonthListByConsume($this->creditCardConsume)
+            ->willReturn([])
+        ;
+
+        $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
+
+        self::assertSame('2018-08', $lastPaymentMonth);
     }
 
 
