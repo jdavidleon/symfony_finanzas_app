@@ -176,12 +176,15 @@ class CreditCardConsume implements DebtInterface
         return $this;
     }
 
-    public function getStatus(): ?bool
+    /**
+     * @return int|null
+     */
+    public function getStatus(): ?int
     {
         return $this->status;
     }
 
-    public function setStatus(bool $status): self
+    public function setStatus($status): self
     {
         $this->status = $status;
 
@@ -231,7 +234,7 @@ class CreditCardConsume implements DebtInterface
                 $this->addDuePayed();
             }
 
-            $this->changeStatusToPayed();
+            $this->setStatusAsPayed();
         }
 
         return $this;
@@ -317,17 +320,10 @@ class CreditCardConsume implements DebtInterface
         return $this->payments->count() > 0;
     }
 
-    public function changeStatusToPayed(): self
-    {
-        if ($this->amount - $this->amountPayed <= 0) {
-            $this->status = self::STATUS_PAYED;
-        }
-
-        return $this;
-    }
-
     /**
      * Todo: ver como mejorar esto
+     * This method check if the payments is up to date with the actual payment month
+     *
      * @throws Exception
      */
     public function isPaymentUpToDate(): bool
@@ -360,5 +356,17 @@ class CreditCardConsume implements DebtInterface
         }
 
         return false;
+    }
+
+    public function setStatusAsPayed()
+    {
+        if ($this->isConsumePayed()) {
+            $this->setStatus(self::STATUS_PAYED);
+        }
+    }
+
+    public function isConsumePayed()
+    {
+        return $this->amountPayed >= $this->amount;
     }
 }

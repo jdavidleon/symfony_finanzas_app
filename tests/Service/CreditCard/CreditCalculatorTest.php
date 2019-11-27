@@ -105,12 +105,29 @@ class CreditCalculatorTest extends TestCase
         self::assertSame(10, $dues);
     }
 
-    public function testActualDebtToPay()
+    /**
+     * @param int $totalDues
+     * @param int $payedDues
+     *
+     * @param int $expected
+     * @param string $message
+     * @dataProvider getActualDueToPayProvider
+     */
+    public function testGetNextDebtToPay(int $totalDues, int $payedDues, ?int $expected, string $message)
     {
-        $due = CreditCalculator::calculateNextDueToPay(10,
-            CreditCalculator::calculateNumberOfPendingDues(10, 1));
+        $due = CreditCalculator::calculateNextDueToPay($totalDues,
+            CreditCalculator::calculateNumberOfPendingDues($totalDues, $payedDues));
 
-        self::assertSame(2, $due);
+        self::assertSame($expected, $due, $message);
+    }
+
+    public function getActualDueToPayProvider()
+    {
+        return [
+            [10, 1, 2, 'Normal next month'],
+            [20, 20, null, 'Without pending dues'],
+            [15, 17, null, 'PayedDues > TotalDues'],
+        ];
     }
 
     /**
@@ -284,17 +301,17 @@ class CreditCalculatorTest extends TestCase
     }
 
     /**
+     * @param $totalDues
      * @param $lastPayedDue
      * @param $lastMonthPayed
      * @param $nextPaymentMonth
      * @param $expected
      *
      * @dataProvider getCalculateActualDueToPayProvider
-     * @throws Exception
      */
-    public function testCalculateActualDueToPay($lastPayedDue, $lastMonthPayed, $nextPaymentMonth, $expected)
+    public function testCalculateActualDueToPay($totalDues, $lastPayedDue, $lastMonthPayed, $nextPaymentMonth, $expected)
     {
-        $actualDueToPay = CreditCalculator::calculateActualDueToPay($lastPayedDue, $lastMonthPayed, $nextPaymentMonth);
+        $actualDueToPay = CreditCalculator::calculateActualDueToPay($totalDues, $lastPayedDue, $lastMonthPayed, $nextPaymentMonth);
 
         self::assertSame($expected, $actualDueToPay);
     }
@@ -302,11 +319,14 @@ class CreditCalculatorTest extends TestCase
     public function getCalculateActualDueToPayProvider()
     {
         return [
-            [2, '2019-04', '2019-09', 7],
-            [0, '2019-11', '2020-03', 4],
-            [7, '2019-05', '2019-06', 8],
-            [1, '2019-05', '2019-05', 1],
-            [0, '2020-01', '2019-12', 0],
+            [20 , 2, '2019-04', '2019-09', 7],
+            [20 , 0, '2019-11', '2020-03', 4],
+            [20 , 7, '2019-05', '2019-06', 8],
+            [20 , 1, '2019-05', '2019-05', 1],
+            [20 , 0, '2020-01', '2019-12', 0],
+            [19 , 2, '2018-01', '2020-12', 19],
+            [2 , 0, '2019-06', '2019-07', 1],
+            [3 , 0, '2019-04', '2019-07', 3],
             // [12, '2020-01', '2019-12', 11], /*Todo: Tiene sentido este caso???*/
         ];
     }

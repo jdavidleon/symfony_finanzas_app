@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Zend\Code\Reflection\MethodReflection;
 
-class HandlePaymentTest extends TestCase
+class PaymentHandlerTest extends TestCase
 {
     /**
      * @var PaymentHandler;

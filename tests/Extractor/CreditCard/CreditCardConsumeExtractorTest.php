@@ -20,6 +20,7 @@ use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
 use ReflectionProperty;
 
 class CreditCardConsumeExtractorTest extends TestCase
@@ -39,6 +40,9 @@ class CreditCardConsumeExtractorTest extends TestCase
 
     private $cardConsumeProvider;
 
+    /**
+     * @var CreditCardConsume|ObjectProphecy
+     */
     private $creditCardConsumeMock;
 
     /**
@@ -589,6 +593,78 @@ class CreditCardConsumeExtractorTest extends TestCase
     /**
      * @throws Exception
      */
+    public function testExtractActualDueToPayWhenDebtIsUpToDate()
+    {
+        /**
+         * @var CreditCardConsumeExtractor|MockObject $consumeExtractorMock
+         */
+        $consumeExtractorMock = $this->getMockBuilder(CreditCardConsumeExtractor::class)
+            ->setConstructorArgs([
+                    $this->cardConsumeProvider->reveal(),
+                    $this->paymentsRepository->reveal()
+                ]
+            )
+            ->setMethods(['extractLastPaymentMonth'])
+            ->getMock();
+
+        /** @var MockObject|CreditCardConsume $consumeMock */
+        $consumeMock = $this->createPartialMock(CreditCardConsume::class, [
+            'getDuesPayed'
+        ]);
+        $consumeMock->setDues(15);
+
+        $consumeMock->method('getDuesPayed')->willReturn(5);
+
+        $date = new \DateTime();
+        if ($date->format('d') < 15) {
+            $date->modify('-1 month');
+        }
+        $consumeExtractorMock->method('extractLastPaymentMonth')->willReturn($date->format('Y-m'));
+
+        $due = $consumeExtractorMock->extractActualDueToPay($consumeMock);
+
+        self::assertEquals(6, $due);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractActualDueToPayWhenLastDueMonthIsBeforeActualMonthToPay()
+    {
+        /**
+         * @var CreditCardConsumeExtractor|MockObject $consumeExtractorMock
+         */
+        $consumeExtractorMock = $this->getMockBuilder(CreditCardConsumeExtractor::class)
+            ->setConstructorArgs([
+                    $this->cardConsumeProvider->reveal(),
+                    $this->paymentsRepository->reveal()
+                ]
+            )
+            ->setMethods(['extractLastPaymentMonth'])
+            ->getMock();
+
+        /** @var MockObject|CreditCardConsume $consumeMock */
+        $consumeMock = $this->createPartialMock(CreditCardConsume::class, [
+            'getDuesPayed'
+        ]);
+        $consumeMock->setDues(8);
+
+        $consumeMock->method('getDuesPayed')->willReturn(4);
+
+        $date = new \DateTime();
+        $date->modify('-10 month');
+
+        $consumeExtractorMock->method('extractLastPaymentMonth')->willReturn($date->format('Y-m'));
+
+        $due = $consumeExtractorMock->extractActualDueToPay($consumeMock);
+
+        self::assertEquals(8, $due);
+    }
+
+    /**
+     * @throws Exception
+     */
 //    public function testExtractListGroupedByUser()
 //    {
 //        $consume1 = new CreditCardConsume();
@@ -612,7 +688,18 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     private function setIdByReflection($object, $value)
     {
-        $reflector = new ReflectionProperty($object, 'id');
+        $this->setAttByReflection($object, 'id', $value);
+    }
+
+    /**
+     * @param $object
+     * @param $att
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function setAttByReflection($object, $att, $value)
+    {
+        $reflector = new ReflectionProperty($object, $att);
         $reflector->setAccessible(true);
         $reflector->setValue($object, $value);
     }

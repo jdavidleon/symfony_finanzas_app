@@ -153,10 +153,12 @@ class CreditCardConsumeExtractor
     }
 
     /**
+     * This method return the next due to pay of a consume, if all payments did not make it yet.
+     *
      * @param CreditCardConsume $creditCardConsume
      * @return int|null
      */
-    public function getActualDueToPay(CreditCardConsume $creditCardConsume)
+    public function getActualDueToPay(CreditCardConsume $creditCardConsume): ?int
     {
         return CreditCalculator::calculateNextDueToPay(
             $creditCardConsume->getDues(),
@@ -301,12 +303,13 @@ class CreditCardConsumeExtractor
      */
     public function extractLastPaymentMonth(CreditCardConsume $cardConsume): string
     {
+        $calculateMajorMonth = null;
         if ($cardConsume->hasPayments()){
             $calculateMajorMonth = $this->getCalculateMajorMonth($cardConsume);
-            return $calculateMajorMonth ?? DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
-        }else {
-            return DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
         }
+
+        return $calculateMajorMonth ?? DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
+
     }
 
     /**
@@ -342,6 +345,7 @@ class CreditCardConsumeExtractor
     public function extractActualDueToPay(CreditCardConsume $creditCardConsume): int
     {
         return CreditCalculator::calculateActualDueToPay(
+            $creditCardConsume->getDues(),
             $creditCardConsume->getDuesPayed(),
             $this->extractLastPaymentMonth($creditCardConsume),
             CreditCalculator::calculateNextPaymentDate()

@@ -59,19 +59,27 @@ class CreditCalculator
         return $totalDues - $payedDues;
     }
 
-    public static function calculateNextDueToPay(int $totalDues, int $pendingDues): int
+    /**
+     * @param int $totalDues
+     * @param int $pendingDues
+     * @return int|null
+     */
+    public static function calculateNextDueToPay(int $totalDues, int $pendingDues): ?int
     {
+        if (0 >= $pendingDues) {
+            return null;
+        }
         return $totalDues - $pendingDues + 1;
     }
 
     /**
+     * @param int $totalDues
      * @param int $lastPayedDue
      * @param string $lastMonthPayed
      * @param string $nextPaymentMonth
      * @return DateTime|int
-     * @throws Exception
      */
-    public static function calculateActualDueToPay(int $lastPayedDue, string $lastMonthPayed, string $nextPaymentMonth): int
+    public static function calculateActualDueToPay(int $totalDues, int $lastPayedDue, string $lastMonthPayed, string $nextPaymentMonth): int
     {
         $lastPayedDate = strtotime(DateHelper::yearMonthToFullDateFormat($lastMonthPayed));
         $nextPayedDate = strtotime(DateHelper::yearMonthToFullDateFormat($nextPaymentMonth));
@@ -81,7 +89,7 @@ class CreditCalculator
             $actualDue++;
         }
 
-        return $actualDue;
+        return min($totalDues, $actualDue);
     }
 
     /**
