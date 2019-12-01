@@ -9,8 +9,11 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\CreditCard\Model\ConsumePaymentResume;
+use App\Exception\ExcedeAmountDebtException;
+use App\Exception\MinimalAmountPaymentRequiredException;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Factory\Payments\CreditCardPaymentFactory;
+use App\Factory\Payments\PaymentInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -32,7 +35,7 @@ class PaymentHandler
     public function __construct(
         CreditCardConsumeExtractor $consumeExtractor,
         EntityManagerInterface $entityManager,
-        CreditCardPaymentFactory $cardPaymentFactory
+        PaymentInterface $cardPaymentFactory
     ) {
         $this->consumeExtractor = $consumeExtractor;
         $this->entityManager = $entityManager;
@@ -46,14 +49,16 @@ class PaymentHandler
      */
     public function processPaymentWithSpecificAmount(CreditCardConsume $consume, float $payedValue): void
     {
+        if ($this->consumeExtractor->extractNextPaymentAmount($consume) > $payedValue) {
+            throw new MinimalAmountPaymentRequiredException();
+        }
+        if ($this->consumeExtractor->extractActualDebt($consume) < $payedValue) {
+            throw new ExcedeAmountDebtException();
+        }
+
         $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
         foreach ($pendingPayments as $payment)
         {
-            if (0 == $payedValue)
-            {
-                break;
-            }
-
             if ($payedValue >= $payment->getTotalToPay()) {
                 $this->addPendingPaymentsFromArrayPayments($consume, [$payment]);
                 $this->entityManager->persist($consume);
