@@ -119,7 +119,7 @@ class PaymentHandlerTest extends TestCase
         self::assertEquals(300, $consume->getAmountPayed());
         self::assertEquals(3, $consume->getDuesPayed());
 
-        $this->assertPaymentConsume($consume, $dues);
+        $this->assertLegalPaymentConsume($consume, $dues);
 
         $this->em->persist($consume)->shouldBeCalledTimes(3);
         $this->em->flush()->shouldBeCalled();
@@ -149,7 +149,7 @@ class PaymentHandlerTest extends TestCase
         self::assertEquals(1212500, $consume->getAmountPayed());
         self::assertEquals(2, $consume->getDuesPayed());
 
-        $this->assertPaymentConsume($consume, $dues);
+        $this->assertLegalPaymentConsume($consume, $dues);
 
         $noLegalPayment = $consume->getPayments()->get(2);
         self::assertEquals(212500, $noLegalPayment->getCapitalAmount());
@@ -221,8 +221,8 @@ class PaymentHandlerTest extends TestCase
         self::assertEquals(468000, $consume2->getAmountPayed());
         self::assertEquals(3, $consume2->getDuesPayed());
 
-        $this->assertPaymentConsume($consume1, $dues1);
-        $this->assertPaymentConsume($consume2, $dues2);
+        $this->assertLegalPaymentConsume($consume1, $dues1);
+        $this->assertLegalPaymentConsume($consume2, $dues2);
     }
 
     /**
@@ -268,7 +268,7 @@ class PaymentHandlerTest extends TestCase
      * @param array $dues
      * @param CreditCardConsume $consume
      */
-    private function assertPaymentConsume(CreditCardConsume $consume, array $dues): void
+    private function assertLegalPaymentConsume(CreditCardConsume $consume, array $dues): void
     {
         /** @var ConsumePaymentResume $due */
         foreach ($dues as $key => $due) {
