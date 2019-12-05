@@ -25,6 +25,10 @@ class BasicPaymentType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-
+        $resolver
+            ->setDefaults([
+                'card' => null,
+                'card_user' => null,
+            ]);
     }
 }

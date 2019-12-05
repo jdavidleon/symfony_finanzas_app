@@ -144,30 +144,27 @@ class CardConsumeController extends AbstractController
         $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
         $consumes = $consumeRepo->getByCardAndUser($card, $user);
 
-/*TODO: debemos mejorar este proceso agregando validación visual y un resumen antes de ejecutar*/
-//        $form = $this->createForm(BasicPaymentType::class, [
-//            'credit_card' => $card,
-//            'credit_card_user' => $user,
-//        ]);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
+        $form = $this->createForm(BasicPaymentType::class, [
+            'credit_card' => $card,
+            'credit_card_user' => $user,
+        ]);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $paymentsHandler->processAllPaymentsByCardAndUser($card, $user);
             } catch (Exception $e) {
                 $this->addFlash('error', 'No se han procesados los pagos');
             }
-
+                $this->addFlash();
             return $this->redirectToRoute('credit_card_detail', [
                 'card' => $card->getId()
             ]);
+        }
 
-//            return $this->redirectToRoute('');
-//        }
-
-
-//        return $this->render('', [
-//            'consumes' => $consumes
-//        ]);
+        return $this->render('credit/payment_card_and_user.html.twig', [
+            'consumes' => $consumes,
+            'form' => $form->createView()
+        ]);
     }
 
 }

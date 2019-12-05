@@ -109,6 +109,11 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
             ;
     }
 
+    /**
+     * @param CreditCard $card
+     * @param CreditCardUser $cardUser
+     * @return CreditCardConsume[]
+     */
     public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser)
     {
         return $this->createQueryBuilder('ccc')
