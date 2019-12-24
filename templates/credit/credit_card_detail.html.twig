@@ -22,6 +22,10 @@
                 <td><a href="{{ path('payment_by_card_and_user', {'card': card.id, 'user': user.id}) }}">Pagar</a></td>
             </tr>
         {% endfor %}
+        <tr>
+            <td colspan="2">Deuda total de la tarjeta:</td>
+            <td colspan="2">$ {{ total_to_pay_of_card|number_format(2) }}</td>
+        </tr>
     </table>
 
     <table>

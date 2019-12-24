@@ -169,6 +169,11 @@ class CreditCardUser
 
     public function getFullName()
     {
-        return $this->getName().' '.$this->getLastName();
+        return $this->getName() . ' ' . $this->getLastName();
+    }
+
+    public function __toString()
+    {
+        return sprintf('%s (%s)', $this->getFullName(), $this->alias);
     }
 }

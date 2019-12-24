@@ -4,7 +4,7 @@
 namespace App\Tests\Service\CreditCard;
 
 
-use App\Entity\CreditCard\Model\ConsumePaymentResume;
+use App\Model\Payment\ConsumePaymentResume;
 use App\Service\CreditCard\CreditCalculator;
 use Exception;
 use PHPUnit\Framework\TestCase;

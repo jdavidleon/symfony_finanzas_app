@@ -71,7 +71,7 @@ class CreditCardConsume implements DebtInterface
     private $code;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="smallint")
      */
     private $status;
 
@@ -233,8 +233,6 @@ class CreditCardConsume implements DebtInterface
             if ($payment->isLegalDue()) {
                 $this->addDuePayed();
             }
-
-            $this->setStatusAsPayed();
         }
 
         return $this;
@@ -312,6 +310,8 @@ class CreditCardConsume implements DebtInterface
     {
         $this->amountPayed += $amountPayed;
 
+        $this->setStatusAsPayed();
+
         return $this;
     }
 
@@ -367,6 +367,6 @@ class CreditCardConsume implements DebtInterface
 
     public function isConsumePayed()
     {
-        return $this->amountPayed >= $this->amount;
+        return round($this->amountPayed, 0) >= round($this->amount, 0);
     }
 }

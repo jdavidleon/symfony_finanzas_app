@@ -54,6 +54,8 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     public function getActivesByOwner(User $owner, $month = null)
     {
         $qb = $this->createQueryBuilder('ccc')
+            ->select('ccc, payments')
+            ->join('ccc.payments', 'payments')
             ->join('ccc.creditCard', 'creditCard')
             ->join('ccc.creditCardUser', 'creditCardUser')
             ->join('creditCard.owner', 'owner')
@@ -155,6 +157,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     }
 
     /**
+     * Todo: Esto cuando se usaría???
      * @param QueryBuilder $qb
      * @param string $month
      * @return void

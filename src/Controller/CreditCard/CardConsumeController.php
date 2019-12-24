@@ -7,9 +7,12 @@ namespace App\Controller\CreditCard;
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
+use App\Exception\ExcedeAmountDebtException;
+use App\Exception\MinimalAmountPaymentRequiredException;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\BasicPaymentType;
 use App\Form\Credit\CreditPaymentType;
+use App\Service\CreditCard\ConsumeResolver;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use App\Service\Payments\PaymentHandler;
@@ -56,20 +59,25 @@ class CardConsumeController extends AbstractController
      * @param CreditCardUser $cardUser
      * @param CreditCardConsumeProvider $consumeProvider
      * @param CreditCardConsumeExtractor $consumeExtractor
+     * @param ConsumeResolver $consumeResolver
      * @return Response
      * @throws Exception
      */
     public function userConsumeAction(
         CreditCardUser $cardUser,
         CreditCardConsumeProvider $consumeProvider,
-        CreditCardConsumeExtractor $consumeExtractor
+        CreditCardConsumeExtractor $consumeExtractor,
+        ConsumeResolver $consumeResolver
     )
     {
-        $consumes = $consumeProvider->getByCardUser($cardUser);
-        $consumes = $consumeExtractor->extractConsumeResume($consumes);
+        $consumesByUser = $consumeProvider->getByCardUser($cardUser);
+        $consumes = $consumeExtractor->extractConsumeResume($consumesByUser);
+
+        $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($consumesByUser);
 
         return $this->render('credit/card_user.html.twig', [
-            'consumes' => $consumes
+            'consumes' => $consumes,
+            'total_debt' => $totalDebt
         ]);
     }
 
@@ -121,8 +129,10 @@ class CardConsumeController extends AbstractController
             try {
                 $handlePayment->processPaymentWithSpecificAmount($cardConsume, $form->get('amount')->getData());
                 $this->addFlash('success', 'Pago realizado con Éxito');
-            } catch (Exception $exception) {
-                $this->addFlash('error', 'ha habido un problema con el pago');
+            } catch (MinimalAmountPaymentRequiredException $exception) {
+                $this->addFlash('error', $exception->getMessage());
+            } catch (ExcedeAmountDebtException $exception) {
+                $this->addFlash('error', $exception->getMessage());
             }
         }
 
@@ -137,25 +147,28 @@ class CardConsumeController extends AbstractController
      * @param CreditCard $card
      * @param CreditCardUser $user
      * @param PaymentHandler $paymentsHandler
+     * @param Request $request
      * @return Response
      */
-    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, PaymentHandler $paymentsHandler)
+    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, PaymentHandler $paymentsHandler, Request $request)
     {
         $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
         $consumes = $consumeRepo->getByCardAndUser($card, $user);
 
-        $form = $this->createForm(BasicPaymentType::class, [
-            'credit_card' => $card,
-            'credit_card_user' => $user,
+        $form = $this->createForm(BasicPaymentType::class,null, [
+            'card' => $card,
+            'card_user' => $user,
         ]);
+
+        $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $paymentsHandler->processAllPaymentsByCardAndUser($card, $user);
+                $this->addFlash('success', 'Se han completado los pagos');
             } catch (Exception $e) {
                 $this->addFlash('error', 'No se han procesados los pagos');
             }
-                $this->addFlash();
             return $this->redirectToRoute('credit_card_detail', [
                 'card' => $card->getId()
             ]);

@@ -8,12 +8,13 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
-use App\Entity\CreditCard\Model\ConsumePaymentResume;
 use App\Exception\ExcedeAmountDebtException;
 use App\Exception\MinimalAmountPaymentRequiredException;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Factory\Payments\CreditCardPaymentFactory;
 use App\Factory\Payments\PaymentInterface;
+use App\Model\Payment\ConsumePaymentResume;
+use App\Service\CreditCard\ConsumeResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -31,13 +32,26 @@ class PaymentHandler
      * @var CreditCardPaymentFactory
      */
     private $cardPaymentFactory;
+    /**
+     * @var ConsumeResolver
+     */
+    private $consumeResolver;
 
+    /**
+     * PaymentHandler constructor.
+     * @param CreditCardConsumeExtractor $consumeExtractor
+     * @param ConsumeResolver $consumeResolver
+     * @param EntityManagerInterface $entityManager
+     * @param PaymentInterface $cardPaymentFactory
+     */
     public function __construct(
         CreditCardConsumeExtractor $consumeExtractor,
+        ConsumeResolver $consumeResolver,
         EntityManagerInterface $entityManager,
         PaymentInterface $cardPaymentFactory
     ) {
         $this->consumeExtractor = $consumeExtractor;
+        $this->consumeResolver = $consumeResolver;
         $this->entityManager = $entityManager;
         $this->cardPaymentFactory = $cardPaymentFactory;
     }
@@ -52,7 +66,7 @@ class PaymentHandler
         if ($this->consumeExtractor->extractNextPaymentAmount($consume) > $payedValue) {
             throw new MinimalAmountPaymentRequiredException();
         }
-        if ($this->consumeExtractor->extractActualDebt($consume) < $payedValue) {
+        if ($this->consumeResolver->resolveTotalDebtOfConsumesArray([$consume]) < $payedValue) {
             throw new ExcedeAmountDebtException();
         }
 
@@ -78,7 +92,7 @@ class PaymentHandler
      * @param CreditCardUser $user
      * @throws Exception
      */
-    public function processAllPaymentsByUser(CreditCardUser $user)
+    public function processAllPaymentsByCreditCardUser(CreditCardUser $user)
     {
         $consumeRepo = $this->entityManager->getRepository(CreditCardConsume::class);
         
@@ -139,7 +153,7 @@ class PaymentHandler
      * @param float $amountPayed
      * @throws Exception
      */
-    private function addNotLegalConsumePayment(CreditCardConsume $consume, float $amountPayed)
+    private function addNotLegalConsumePayment(CreditCardConsume $consume, float $amountPayed): void
     {
         $pay = $this->createCardConsumePayment(
             $consume,

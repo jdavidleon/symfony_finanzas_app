@@ -8,7 +8,7 @@
 
 namespace App\Service\CreditCard;
 
-use App\Entity\CreditCard\Model\ConsumePaymentResume;
+use App\Model\Payment\ConsumePaymentResume;
 use App\Service\DateHelper;
 use DateTime;
 use Exception;

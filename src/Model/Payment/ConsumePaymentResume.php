@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Entity\CreditCard\Model;
+namespace App\Model\Payment;
 
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\DateHelper;

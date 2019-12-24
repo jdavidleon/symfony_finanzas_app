@@ -8,10 +8,10 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
-use App\Entity\CreditCard\Model\CardConsumeResume;
-use App\Entity\CreditCard\Model\ConsumePaymentResume;
 use App\Entity\Security\User;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
+use App\Model\CreditCard\CardConsumeResume;
+use App\Model\Payment\ConsumePaymentResume;
 use App\Repository\CreditCard\CreditCardPaymentRepository;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
@@ -513,18 +513,16 @@ class CreditCardConsumeExtractorTest extends TestCase
     {
         $this->creditCardConsume->setMonthFirstPay('2019-01');
         $payment = new CreditCardPayment($this->creditCardConsume);
+        $payment->setMonthPayed('2019-04');
         $this->creditCardConsume->addPayment($payment);
 
         $payment2 = new CreditCardPayment($this->creditCardConsume);
+        $payment2->setMonthPayed('2019-05');
         $this->creditCardConsume->addPayment($payment2);
 
-        $this->paymentsRepository
-            ->getMonthListByConsume($this->creditCardConsume)
-            ->willReturn([
-                ['monthPayed' => '2019-04'],
-                ['monthPayed' => '2019-05'],
-                ['monthPayed' => '2019-06'],
-            ]);
+        $payment3 = new CreditCardPayment($this->creditCardConsume);
+        $payment3->setMonthPayed('2019-06');
+        $this->creditCardConsume->addPayment($payment3);
 
         $nextPaymentMonth = $this->consumeExtractor->extractNextPaymentMonth($this->creditCardConsume);
 
@@ -536,17 +534,15 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractLastPaymentMonthWhenHasPayments()
     {
-        $this->creditCardConsume->addPayment(new CreditCardPayment($this->creditCardConsume));
-        $this->creditCardConsume->addPayment(new CreditCardPayment($this->creditCardConsume));
-
-        $this->paymentsRepository
-            ->getMonthListByConsume($this->creditCardConsume)
-            ->willReturn([
-                ['monthPayed' => '2020-11'],
-                ['monthPayed' => '2020-12'],
-                ['monthPayed' => '2021-01'],
-            ])
-        ;
+        $payment1 = new CreditCardPayment($this->creditCardConsume);
+        $payment1->setMonthPayed('2020-11');
+        $this->creditCardConsume->addPayment($payment1);
+        $payment2 = new CreditCardPayment($this->creditCardConsume);
+        $payment2->setMonthPayed('2020-12');
+        $this->creditCardConsume->addPayment($payment2);
+        $payment3 = new CreditCardPayment($this->creditCardConsume);
+        $payment3->setMonthPayed('2021-01');
+        $this->creditCardConsume->addPayment($payment3);
 
         $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
 

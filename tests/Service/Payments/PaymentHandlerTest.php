@@ -8,17 +8,19 @@ use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
-use App\Entity\CreditCard\Model\ConsumePaymentResume;
 use App\Exception\ExcedeAmountDebtException;
 use App\Exception\MinimalAmountPaymentRequiredException;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Factory\Payments\CreditCardPaymentFactory;
+use App\Model\Payment\ConsumePaymentResume;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Service\CreditCard\ConsumeResolver;
 use App\Service\Payments\PaymentHandler;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
 
 class PaymentHandlerTest extends TestCase
 {
@@ -26,14 +28,20 @@ class PaymentHandlerTest extends TestCase
     private $consumeExtractor;
     private $em;
     private $paymentFactory;
+    /**
+     * @var ConsumeResolver|ObjectProphecy
+     */
+    private $consumeResolver;
 
     protected function setUp()
     {
         $this->consumeExtractor = $this->prophesize(CreditCardConsumeExtractor::class);
         $this->em = $this->prophesize(EntityManager::class);
         $this->paymentFactory = $this->prophesize(CreditCardPaymentFactory::class);
+        $this->consumeResolver = $this->prophesize(ConsumeResolver::class);
         $this->paymentHandler = new PaymentHandler(
             $this->consumeExtractor->reveal(),
+            $this->consumeResolver->reveal(),
             $this->em->reveal(),
             $this->paymentFactory->reveal()
         );
@@ -61,7 +69,7 @@ class PaymentHandlerTest extends TestCase
         $consume = $this->consumeObject(1000, 2, 10, '2019-05');
 
         $this->consumeExtractor->extractNextPaymentAmount($consume)->willReturn(120);
-        $this->consumeExtractor->extractActualDebt($consume)->willReturn(1000);
+        $this->consumeResolver->resolveTotalDebtOfConsumesArray([$consume])->willReturn(1020);
 
         $this->expectException(ExcedeAmountDebtException::class);
 
@@ -76,7 +84,7 @@ class PaymentHandlerTest extends TestCase
         $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true)->willReturn([]);
 
         $this->consumeExtractor->extractNextPaymentAmount($consume)->willReturn(0);
-        $this->consumeExtractor->extractActualDebt($consume)->willReturn(2000);
+        $this->consumeResolver->resolveTotalDebtOfConsumesArray([$consume])->willReturn(2000);
         $this->paymentHandler->processPaymentWithSpecificAmount($consume, 1000);
 
         self::assertCount(1, $consume->getPayments());
@@ -110,7 +118,7 @@ class PaymentHandlerTest extends TestCase
         ];
 
         $this->consumeExtractor->extractNextPaymentAmount($consume)->willReturn(352);
-        $this->consumeExtractor->extractActualDebt($consume)->willReturn(1000);
+        $this->consumeResolver->resolveTotalDebtOfConsumesArray([$consume])->willReturn(1000);
         $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true)->willReturn($dues);
 
         $this->paymentHandler->processPaymentWithSpecificAmount($consume, 352);
@@ -140,7 +148,7 @@ class PaymentHandlerTest extends TestCase
         ];
 
         $this->consumeExtractor->extractNextPaymentAmount($consume)->willReturn(1087500);
-        $this->consumeExtractor->extractActualDebt($consume)->willReturn(2000000);
+        $this->consumeResolver->resolveTotalDebtOfConsumesArray([$consume])->willReturn(2000000);
         $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true)->willReturn($dues);
 
         $this->paymentHandler->processPaymentWithSpecificAmount($consume, 1300000);
@@ -160,6 +168,35 @@ class PaymentHandlerTest extends TestCase
         self::assertNull($noLegalPayment->getMonthPayed());
 
         $this->em->persist($consume)->shouldBeCalledTimes(3);
+        $this->em->flush()->shouldBeCalled();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testProcessPaymentWithSpecificAmountWhenPayTotalDebtAmount()
+    {
+        $consume = $this->consumeObject(50000, 2.5, 5, '2020-01');
+        $due1 = $this->createConsumePaymentResume(1, 10000, 1250, '2020-02');
+
+        $dues = [
+            $due1,
+        ];
+
+        $this->consumeExtractor->extractNextPaymentAmount($consume)->willReturn(11250);
+        $this->consumeResolver->resolveTotalDebtOfConsumesArray([$consume])->willReturn(51250);
+        $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true)->willReturn($dues);
+
+        $this->paymentHandler->processPaymentWithSpecificAmount($consume, 51250);
+
+        self::assertCount(2, $consume->getPayments());
+        self::assertEquals(50000, $consume->getAmountPayed());
+        self::assertEquals(1, $consume->getDuesPayed());
+        self::assertEquals(CreditCardConsume::STATUS_PAYED, $consume->getStatus());
+
+        $this->assertLegalPaymentConsume($consume, $dues);
+
+        $this->em->persist($consume)->shouldBeCalledTimes(2);
         $this->em->flush()->shouldBeCalled();
     }
 

@@ -11,8 +11,8 @@ namespace App\Extractor\CreditCard;
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
-use App\Entity\CreditCard\Model\ConsumePaymentResume;
-use App\Entity\CreditCard\Model\CardConsumeResume;
+use App\Model\Payment\ConsumePaymentResume;
+use App\Model\CreditCard\CardConsumeResume;
 use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardPaymentRepository;
 use App\Service\CreditCard\CreditCalculator;
@@ -313,20 +313,14 @@ class CreditCardConsumeExtractor
     }
 
     /**
-     * Esto solo llamara los pagos hechos con un legalDue = true
+     * Esto solo llamará los pagos hechos con un legalDue = true
      *
      * @param CreditCardConsume|null $cardConsume
      * @return string|null
      */
     private function getCalculateMajorMonth(?CreditCardConsume $cardConsume): ?string
     {
-        $dateList = [];
-        // Todo: mejorar el retorno de month
-        foreach ($this->paymentsRepository->getMonthListByConsume($cardConsume) as $arrayDate){
-            foreach ($arrayDate as $date){
-                $dateList[] = $date;
-            }
-        }
+        $dateList = $this->extractListOfMonthPayedByConsume($cardConsume);
 
         if (empty($dateList)) {
             return null;
@@ -335,6 +329,19 @@ class CreditCardConsumeExtractor
         return DateHelper::calculateMajorMonth(
             $dateList
         );
+    }
+
+    private function extractListOfMonthPayedByConsume(CreditCardConsume $cardConsume)
+    {
+        $dates = [];
+        foreach ($cardConsume->getPayments() as $payment)
+        {
+            if ($payment->isLegalDue()) {
+                $dates[] = $payment->getMonthPayed();
+            }
+        }
+
+        return $dates;
     }
 
     /**

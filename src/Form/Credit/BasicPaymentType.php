@@ -15,10 +15,12 @@ class BasicPaymentType extends AbstractType
     {
         $builder
             ->add('card', HiddenType::class, [
-                'data' => $options['card']
+                'data' => $options['card']->getId(),
+                'required' => true,
             ])
             ->add('card_user', HiddenType::class, [
-                'data' => $options['card_user']
+                'data' => $options['card_user']->getId(),
+                'required' => true,
             ])
         ;
     }
