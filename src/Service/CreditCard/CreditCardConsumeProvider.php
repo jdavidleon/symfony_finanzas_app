@@ -30,7 +30,7 @@ class CreditCardConsumeProvider
      */
     public function getByOwner(User $owner, $month = null)
     {
-        return $this->cardConsumeRepository->getByOwner($owner, $month);
+        return $this->cardConsumeRepository->getActivesByOwner($owner, $month);
     }
 
     public function getByCreditCard(CreditCard $card, $month = null): array
@@ -40,7 +40,7 @@ class CreditCardConsumeProvider
 
     public function getByCardUser(CreditCardUser $user, CreditCard $card = null, $month = null)
     {
-        return $this->cardConsumeRepository->getByCardUser($user, $card, $month);
+        return $this->cardConsumeRepository->getActivesByCardUser($user, $card, $month);
     }
 
     public function getCreatedConsumeListByOwner(User $owner)

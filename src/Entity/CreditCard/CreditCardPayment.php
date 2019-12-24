@@ -24,13 +24,12 @@ class CreditCardPayment
     private $creditConsume;
 
     /**
-     *
      * @ORM\Column(type="smallint", nullable=true)
      */
     private $due;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
      * */
     private $monthPayed;
 
@@ -52,7 +51,7 @@ class CreditCardPayment
     /**
      * @ORM\Column(type="float")
      */
-    private $amount;
+    private $totalAmount;
 
     /**
      * @ORM\Column(type="boolean")
@@ -60,6 +59,12 @@ class CreditCardPayment
     private $legalDue = true;
 
     use TimestampAbleEntity;
+
+    public function __construct(
+        CreditCardConsume $cardConsume
+    ) {
+        $this->creditConsume = $cardConsume;
+    }
 
     public function getId(): ?int
     {
@@ -90,14 +95,21 @@ class CreditCardPayment
         return $this;
     }
 
-    public function getAmount(): ?float
+    public function getTotalAmount(): ?float
     {
-        return $this->amount;
+        return $this->totalAmount;
     }
 
-    public function setAmount(float $amount): self
+    public function setTotalAmount(float $totalAmount): self
     {
-        $this->amount = $amount;
+        $this->totalAmount = $totalAmount;
+
+        return $this;
+    }
+
+    public function setCreditConsume($consume)
+    {
+        $this->creditConsume = $consume;
 
         return $this;
     }
@@ -105,13 +117,6 @@ class CreditCardPayment
     public function getCreditConsume(): ?CreditCardConsume
     {
         return $this->creditConsume;
-    }
-
-    public function setCreditConsume(?CreditCardConsume $creditConsume): self
-    {
-        $this->creditConsume = $creditConsume;
-
-        return $this;
     }
 
     /**
@@ -124,9 +129,9 @@ class CreditCardPayment
 
 
     /**
-     * @param mixed $legalDue
+     * @param bool $legalDue
      */
-    public function setLegalDue($legalDue): void
+    public function setLegalDue(bool $legalDue): void
     {
         $this->legalDue = $legalDue;
     }

@@ -2,7 +2,6 @@
 
 namespace App\Form\Credit;
 
-use App\Entity\Debts\CreditPayments;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\FormBuilderInterface;

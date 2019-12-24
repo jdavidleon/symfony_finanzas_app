@@ -44,16 +44,18 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ]
             ]);
 
-        $qb = $this->addPayedMonthConditional($qb, $month);
+        $this->addPayedMonthConditional($qb, $month);
 
         return $qb
             ->getQuery()
             ->getResult();
     }
 
-    public function getByOwner(User $owner, $month = null)
+    public function getActivesByOwner(User $owner, $month = null)
     {
         $qb = $this->createQueryBuilder('ccc')
+            ->select('ccc, payments')
+            ->join('ccc.payments', 'payments')
             ->join('ccc.creditCard', 'creditCard')
             ->join('ccc.creditCardUser', 'creditCardUser')
             ->join('creditCard.owner', 'owner')
@@ -68,7 +70,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ]
             ]);
 
-        $qb = $this->addPayedMonthConditional($qb, $month);
+        $this->addPayedMonthConditional($qb, $month);
 
         return $qb
             ->getQuery()
@@ -82,7 +84,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
      * @param null $month
      * @return CreditCardConsume[]
      */
-    public function getByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function getActivesByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
     {
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
@@ -102,19 +104,23 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ->setParameter('card', $card);
         }
 
-        $qb = $this->addPayedMonthConditional($qb, $month);
+        $this->addPayedMonthConditional($qb, $month);
 
         return $qb->getQuery()
             ->getResult()
             ;
     }
 
+    /**
+     * @param CreditCard $card
+     * @param CreditCardUser $cardUser
+     * @return CreditCardConsume[]
+     */
     public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser)
     {
         return $this->createQueryBuilder('ccc')
             ->where('ccc.creditCardUser = :user')
             ->andWhere('ccc.creditCard = :card')
-            ->andWhere('ccc.creditCardUser = :user')
             ->andWhere('ccc.deletedAt IS NULL')
             ->andWhere('ccc.status IN (:statuses)')
             ->setParameters([
@@ -151,11 +157,12 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $month
+     * Todo: Esto cuando se usaría???
      * @param QueryBuilder $qb
-     * @return QueryBuilder
+     * @param string $month
+     * @return void
      */
-    private function addPayedMonthConditional(QueryBuilder $qb, string $month = null): QueryBuilder
+    private function addPayedMonthConditional(QueryBuilder $qb, string $month = null)
     {
         if ( null != $month ) {
             $qb
@@ -175,7 +182,6 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 )
                 ->setParameter('month', $month);
         }
-        return $qb;
     }
 
 }

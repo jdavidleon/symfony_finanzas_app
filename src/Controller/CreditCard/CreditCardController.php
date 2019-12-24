@@ -15,6 +15,7 @@ use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Form\Credit\CreditCardType;
 use App\Repository\CreditCard\CreditCardRepository;
+use App\Service\CreditCard\ConsumeResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +41,7 @@ class CreditCardController extends AbstractController
         foreach ($creditCards as $card){
             foreach ($card->getCreditCardConsumes() as $consume){
                 foreach ($consume->getPayments() as $payment){
-                    dump($payment->getAmount());
+                    dump($payment->getTotalAmount());
                 }
             }
         }
@@ -82,22 +83,26 @@ class CreditCardController extends AbstractController
      * @Route("/card/{card}", name="credit_card_detail")
      *
      * @param CreditCard $card
-     * @param CreditCardConsumeExtractor $consumeExtractor
+     * @param ConsumeResolver $consumeResolver
      * @return string
+     * @throws \Exception
      */
-    public function creditCardDetail(CreditCard $card, CreditCardConsumeExtractor $consumeExtractor)
+    public function creditCardDetail(CreditCard $card, ConsumeResolver $consumeResolver)
     {
-        $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
+        $creditCardUserRepo = $this->getDoctrine()->getRepository(CreditCardUser::class);
 
-        $cardUsers = $repo->getByCreditCard($card);
+        $cardUsers = $creditCardUserRepo->getByCreditCard($card);
 
         $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
         $consumesByCard = $consumeRepo->getByCreditCard($card);
 
+        $totalToPayOfCard = $consumeResolver->resolveTotalDebtOfConsumesArray($consumesByCard);
+
         return $this->render('credit/credit_card_detail.html.twig',[
             'card' => $card,
             'card_users' => $cardUsers,
-            'card_consumes' => $consumesByCard
+            'card_consumes' => $consumesByCard,
+            'total_to_pay_of_card' => $totalToPayOfCard
         ]);
     }
 }

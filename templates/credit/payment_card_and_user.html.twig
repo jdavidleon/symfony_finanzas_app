@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pago de cuota de usuario{% endblock %}
+
+{% block body %}
+
+    <table>
+        <th colspan="6">Por Deudor</th>
+        <tr>
+            <th>Tarjeta</th>
+            <th>Descripción</th>
+            <th>Fecha de Consumo</th>
+            <th>Valor del Préstamo</th>
+            <th>Deuda Actual</th>
+            <th>Cuota</th>
+            <th>Abono a Capital</th>
+            <th>Interes</th>
+            <th>Valor a pagar</th>
+        </tr>
+        {% for consume in consumes %}
+            <tr>
+                <td>{{ consume.creditCard.franchise }}</td>
+                <td>{{ consume.description }}</td>
+                <td>{{ consume.consumeAt|date('y-m-d') }}</td>
+                <td>$ {{ consume.amount|number_format(2) }}</td>
+                <td>$ {{ actualDebtByConsume(consume)|number_format(2) }}</td>
+                <td>{{ actualDueToPayByConsume(consume) }}</td>
+                <td>$ {{ nextCapitalAmountByConsume(consume)|number_format(2) }}</td>
+                <td>$ {{ nextInteresAmountByConsume(consume)|number_format(2) }}</td>
+                <td>$ {{ nextPaymentAmountByConsume(consume)|number_format(2) }}</td>
+                <td><a target="_blank" href="{{ path('consume_detail', {'consume': consume.id}) }}">Detalles</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button type="submit">Pay!</button>
+    {{ form_end(form) }}
+
+{% endblock %}

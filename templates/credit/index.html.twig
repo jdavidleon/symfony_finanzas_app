@@ -28,6 +28,10 @@
             <td>Total</td>
             <td colspan="3">{{ totalByOwner }}</td>
         </tr>
+        <tr>
+            <td colspan="2">Deuda total de las tarjetas:</td>
+            <td colspan="2">$ {{ total_debt|number_format(2) }}</td>
+        </tr>
     </table>
     ===============================
     <table>
