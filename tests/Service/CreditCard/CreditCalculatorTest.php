@@ -4,22 +4,13 @@
 namespace App\Tests\Service\CreditCard;
 
 
+use App\Model\Payment\ConsumePaymentResume;
 use App\Service\CreditCard\CreditCalculator;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
 class CreditCalculatorTest extends TestCase
 {
-
-    /**
-     * @var CreditCalculator
-     */
-    private static $calculator;
-
-    public static function setUpBeforeClass(): void
-    {
-        self::$calculator = new CreditCalculator();
-    }
 
     /**
      * @param float $debt
@@ -31,7 +22,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testActualConsumeDebt(float $debt, float $payed, float $expected, string $message)
     {
-        $actualDebt = self::$calculator->calculateActualCreditCardConsumeDebt($debt, $payed);
+        $actualDebt = CreditCalculator::calculateActualCreditCardConsumeDebt($debt, $payed);
 
         self::assertEquals($expected, $actualDebt, $message);
     }
@@ -56,7 +47,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testCalculateCapitalAmount(float $actualDebt, int $pendingDues, float $expected, string $message)
     {
-        $capital = self::$calculator->calculateCapitalAmount($actualDebt, $pendingDues);
+        $capital = CreditCalculator::calculateCapitalAmount($actualDebt, $pendingDues);
 
         self::assertSame($expected, $capital, $message);
     }
@@ -100,26 +91,43 @@ class CreditCalculatorTest extends TestCase
 
     public function testNextPaymentAmount()
     {
-        $payment = self::$calculator->calculateNextPaymentAmount(2000, 250);
-        $payment2 = self::$calculator->calculateNextPaymentAmount(1500, 0);
+        $payment = CreditCalculator::calculateNextPaymentAmount(2000, 250);
+        $payment2 = CreditCalculator::calculateNextPaymentAmount(1500, 0);
 
-        self::assertSame(2250, $payment);
-        self::assertSame(1500, $payment2);
+        self::assertEquals(2250, $payment);
+        self::assertEquals(1500, $payment2);
     }
 
     public function testCalculatePendingDues()
     {
-        $dues = self::$calculator->calculateNumberOfPendingDues(20, 10);
+        $dues = CreditCalculator::calculateNumberOfPendingDues(20, 10);
 
         self::assertSame(10, $dues);
     }
 
-    public function testActualDebtToPay()
+    /**
+     * @param int $totalDues
+     * @param int $payedDues
+     *
+     * @param int $expected
+     * @param string $message
+     * @dataProvider getActualDueToPayProvider
+     */
+    public function testGetNextDebtToPay(int $totalDues, int $payedDues, ?int $expected, string $message)
     {
-        $due = self::$calculator->calculateNextDueToPay(10,
-            self::$calculator->calculateNumberOfPendingDues(10, 1));
+        $due = CreditCalculator::calculateNextDueToPay($totalDues,
+            CreditCalculator::calculateNumberOfPendingDues($totalDues, $payedDues));
 
-        self::assertSame(2, $due);
+        self::assertSame($expected, $due, $message);
+    }
+
+    public function getActualDueToPayProvider()
+    {
+        return [
+            [10, 1, 2, 'Normal next month'],
+            [20, 20, null, 'Without pending dues'],
+            [15, 17, null, 'PayedDues > TotalDues'],
+        ];
     }
 
     /**
@@ -127,7 +135,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testPendingPaymentsResume()
     {
-        $resume = self::$calculator->calculatePendingPaymentsResume(
+        $resume = CreditCalculator::calculatePendingPaymentsResume(
             3000,
             2.5,
             8,
@@ -137,27 +145,24 @@ class CreditCalculatorTest extends TestCase
         );
 
         $resumeExpected = [
-            [
-                'number_due' => 6,
-                'capital_amount' => 1000,
-                'interest' => 75,
-                'total_to_pay' => 1075,
-                'payment_month' => '2019-01'
-            ],
-            [
-                'number_due' => 7,
-                'capital_amount' => 1000,
-                'interest' => 50,
-                'total_to_pay' => 1050,
-                'payment_month' => '2019-02'
-            ],
-            [
-                'number_due' => 8,
-                'capital_amount' => 1000,
-                'interest' => 25,
-                'total_to_pay' => 1025,
-                'payment_month' => '2019-03'
-            ],
+            new ConsumePaymentResume(
+                6,
+                1000,
+                75,
+                '2019-01'
+            ),
+            new ConsumePaymentResume(
+                7,
+                1000,
+                50,
+                '2019-02'
+            ),
+            new ConsumePaymentResume(
+                8,
+                1000,
+                25,
+                '2019-03'
+            ),
         ];
 
         self::assertEquals($resumeExpected, $resume);
@@ -168,8 +173,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testPendingLastPaymentsResume()
     {
-
-        $resume = self::$calculator->calculatePendingPaymentsResume(
+        $resume = CreditCalculator::calculatePendingPaymentsResume(
             2000,
             3,
             4,
@@ -183,13 +187,12 @@ class CreditCalculatorTest extends TestCase
         }
 
         $resumeExpected = [
-            [
-                'number_due' => 4,
-                'capital_amount' => 2000,
-                'interest' => 60.0,
-                'total_to_pay' => 2060,
-                'payment_month' => $date->format('Y-m'),
-            ],
+            new ConsumePaymentResume(
+                4,
+                2000,
+                60.0,
+                $date->format('Y-m')
+            )
         ];
 
         self::assertEquals($resumeExpected, $resume);
@@ -200,16 +203,40 @@ class CreditCalculatorTest extends TestCase
      */
     public function testPendingPaymentsResumeWithoutPendingDues()
     {
-        $resume = self::$calculator->calculatePendingPaymentsResume(
+        $resume = CreditCalculator::calculatePendingPaymentsResume(
             3000,
             2.2,
             5,
             5
         );
-        $resume2 = self::$calculator->calculatePendingPaymentsResume(
+        $resume2 = CreditCalculator::calculatePendingPaymentsResume(
             3000,
             2.2,
             4,
+            7
+        );
+
+        self::assertEquals([], $resume);
+        self::assertEquals([], $resume2);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testPendingPaymentsResumeWhenPayedDuesIsGreaterThanOrEqualToEndDue()
+    {
+        $resume = CreditCalculator::calculatePendingPaymentsResume(
+            3000,
+            2.2,
+            15,
+            9,
+            6
+        );
+        $resume2 = CreditCalculator::calculatePendingPaymentsResume(
+            3000,
+            2.2,
+            14,
+            7,
             7
         );
 
@@ -227,7 +254,7 @@ class CreditCalculatorTest extends TestCase
      */
     public function testCalculateNextPaymentMonth(?string $date, ?string $expected, string $message)
     {
-        $nextPaymentMonth = self::$calculator->calculateNextPaymentDate($date);
+        $nextPaymentMonth = CreditCalculator::calculateNextPaymentDate($date);
 
         if (null == $date){
             $expected = date('Y-m');
@@ -261,7 +288,7 @@ class CreditCalculatorTest extends TestCase
     public function testCalculateNextPaymentMonthExceptions(?string $date)
     {
         $this->expectException(Exception::class);
-        self::$calculator->calculateNextPaymentDate($date);
+        CreditCalculator::calculateNextPaymentDate($date);
     }
 
     public function getNextPaymentMonthExceptionsCases()
@@ -274,95 +301,17 @@ class CreditCalculatorTest extends TestCase
     }
 
     /**
-     * @param string|null $date
-     * @param string $expected
-     * @param string $message
-     * @throws Exception
-     *
-     * @dataProvider getReverseMonthCases
-     */
-    public function testReverseMonth(?string $date, ?string $expected, string $message)
-    {
-        $month = self::$calculator->reverseMonth($date);
-
-        self::assertSame($expected, $month, $message);
-    }
-
-    public function getReverseMonthCases()
-    {
-        return [
-            ['2019-04', '2019-03', 'reverse month'],
-            ['2019-12', '2019-11', 'December'],
-            ['2019-01', '2018-12', 'January'],
-        ];
-    }
-
-    /**
-     * @param string|null $date
-     * @param string $expected
-     * @param string $message
-     * @throws Exception
-     *
-     * @dataProvider getIncreaseMonthCases
-     */
-    public function testIncreaseMonth(?string $date, ?string $expected, string $message)
-    {
-        $month = self::$calculator->increaseMonth($date);
-
-        self::assertSame($expected, $month, $message);
-    }
-
-    public function getIncreaseMonthCases()
-    {
-        return [
-            ['2019-05', '2019-06', 'increase month'],
-            ['2019-12', '2020-01', 'December'],
-            ['2019-01', '2019-02', 'January'],
-        ];
-    }
-
-    /**
-     * @param array $dates
-     * @param string $expected
-     * @param string $message
-     *
-     * @dataProvider getCalculateMajorMonthCases
-     */
-    public function testCalculateMajorMonth(array $dates, string $expected, string $message)
-    {
-        $month = self::$calculator->calculateMajorMonth($dates);
-
-        self::assertSame($expected, $month, $message);
-    }
-
-    public function getCalculateMajorMonthCases()
-    {
-        return [
-            [
-                ['2019-04', '2020-04', '2019-11'],
-                '2020-04',
-                'Major Month'
-            ],
-            [
-                ['2019-11', '2019-12', '2020-01'],
-                '2020-01',
-                'Major Month'
-            ],
-        ];
-    }
-
-    /**
+     * @param $totalDues
      * @param $lastPayedDue
      * @param $lastMonthPayed
      * @param $nextPaymentMonth
      * @param $expected
      *
      * @dataProvider getCalculateActualDueToPayProvider
-     * @throws Exception
      */
-    public function testCalculateActualDueToPay($lastPayedDue, $lastMonthPayed, $nextPaymentMonth, $expected)
+    public function testCalculateActualDueToPay($totalDues, $lastPayedDue, $lastMonthPayed, $nextPaymentMonth, $expected)
     {
-        $actualDueToPay = self::$calculator->calculateActualDueToPay($lastPayedDue, $lastMonthPayed, $nextPaymentMonth);
+        $actualDueToPay = CreditCalculator::calculateActualDueToPay($totalDues, $lastPayedDue, $lastMonthPayed, $nextPaymentMonth);
 
         self::assertSame($expected, $actualDueToPay);
     }
@@ -370,10 +319,15 @@ class CreditCalculatorTest extends TestCase
     public function getCalculateActualDueToPayProvider()
     {
         return [
-            [2, '2019-04', '2019-09', 7],
-            [0, '2019-11', '2020-03', 4],
-            [7, '2019-05', '2019-06', 8],
-            [1, '2019-05', '2019-05', 1],
+            [20 , 2, '2019-04', '2019-09', 7],
+            [20 , 0, '2019-11', '2020-03', 4],
+            [20 , 7, '2019-05', '2019-06', 8],
+            [20 , 1, '2019-05', '2019-05', 1],
+            [20 , 0, '2020-01', '2019-12', 0],
+            [19 , 2, '2018-01', '2020-12', 19],
+            [2 , 0, '2019-06', '2019-07', 1],
+            [3 , 0, '2019-04', '2019-07', 3],
+            // [12, '2020-01', '2019-12', 11], /*Todo: Tiene sentido este caso???*/
         ];
     }
 }

@@ -137,4 +137,9 @@ class CreditCard
 
         return $this;
     }
+
+    public function __toString()
+    {
+        return sprintf('%s (%s)', $this->franchise, $this->number);
+    }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Entity\CreditCard;
 
+use App\Service\CreditCard\CreditCalculator;
+use App\Service\DateHelper;
+use App\Util\DebtInterface;
 use App\Util\TimestampAbleEntity;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -12,7 +15,7 @@ use Exception;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardConsumeRepository")
  */
-class CreditCardConsume
+class CreditCardConsume implements DebtInterface
 {
     const STATUS_CREATED = 0;
     const STATUS_PAYING = 1;
@@ -68,7 +71,7 @@ class CreditCardConsume
     private $code;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="smallint")
      */
     private $status;
 
@@ -86,7 +89,8 @@ class CreditCardConsume
     private $creditCard;
 
     /**
-     * @ORM\OneToMany(targetEntity="CreditCardPayment", mappedBy="creditConsume")
+     * @var CreditCardPayment[]
+     * @ORM\OneToMany(targetEntity="CreditCardPayment", mappedBy="creditConsume", cascade={"persist"})
      */
     private $payments;
 
@@ -172,12 +176,15 @@ class CreditCardConsume
         return $this;
     }
 
-    public function getStatus(): ?bool
+    /**
+     * @return int|null
+     */
+    public function getStatus(): ?int
     {
         return $this->status;
     }
 
-    public function setStatus(bool $status): self
+    public function setStatus($status): self
     {
         $this->status = $status;
 
@@ -218,17 +225,14 @@ class CreditCardConsume
 
     public function addPayment(CreditCardPayment $payment): self
     {
-        $this->addAmountPayed($payment->getAmount());
-
-        if ($payment->isLegalDue()) {
-            $this->addDuePayed();
-        }
-
-        $this->changeStatusToPayed();
-
         if (!$this->payments->contains($payment)) {
             $this->payments[] = $payment;
-            $payment->setCreditConsume($this);
+
+            $this->addAmountPayed($payment->getCapitalAmount());
+
+            if ($payment->isLegalDue()) {
+                $this->addDuePayed();
+            }
         }
 
         return $this;
@@ -263,7 +267,7 @@ class CreditCardConsume
         $this->description = $description;
     }
 
-    public function activate()
+    public function activatePayment()
     {
         $this->status = self::STATUS_PAYING;
     }
@@ -306,6 +310,8 @@ class CreditCardConsume
     {
         $this->amountPayed += $amountPayed;
 
+        $this->setStatusAsPayed();
+
         return $this;
     }
 
@@ -314,12 +320,53 @@ class CreditCardConsume
         return $this->payments->count() > 0;
     }
 
-    public function changeStatusToPayed(): self
+    /**
+     * Todo: ver como mejorar esto
+     * This method check if the payments is up to date with the actual payment month
+     *
+     * @throws Exception
+     */
+    public function isPaymentUpToDate(): bool
     {
-        if ($this->amount - $this->amountPayed <= 0) {
-            $this->status = self::STATUS_PAYED;
+        $dates = [];
+        foreach ($this->payments as $payment){
+            if (null != $payment->getMonthPayed()) {
+                $dates[] = $payment->getMonthPayed();
+            }
         }
 
-        return $this;
+        if (empty($dates)){
+            $dates[] = $this->getMonthFirstPay();
+        }
+
+        $lastPaymentMonth = DateHelper::calculateMajorMonth($dates);
+        $nextPaymentMonth = CreditCalculator::calculateNextPaymentDate();
+
+        if ($lastPaymentMonth == $nextPaymentMonth) {
+            return true;
+        }
+
+        $majorMonth = DateHelper::calculateMajorMonth([
+            $lastPaymentMonth,
+            $nextPaymentMonth
+        ]);
+
+        if ($majorMonth == $lastPaymentMonth){
+            return true;
+        }
+
+        return false;
+    }
+
+    public function setStatusAsPayed()
+    {
+        if ($this->isConsumePayed()) {
+            $this->setStatus(self::STATUS_PAYED);
+        }
+    }
+
+    public function isConsumePayed()
+    {
+        return round($this->amountPayed, 0) >= round($this->amount, 0);
     }
 }

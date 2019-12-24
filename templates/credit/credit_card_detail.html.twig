@@ -5,6 +5,7 @@
 {% block body %}
 
     <table>
+        <th colspan="6">Por Deudor</th>
         <tr>
             <th>ID</th>
             <th>Deudor</th>
@@ -18,12 +19,19 @@
                 <td>{{ user.alias }}</td>
                 <td>$ {{ totalByCardUser(user, card)|number_format(2) }}</td>
                 <td><a href="">Detalles</a></td>
-                <td><a href="">Pagar</a></td>
+                <td><a href="{{ path('payment_by_card_and_user', {'card': card.id, 'user': user.id}) }}">Pagar</a></td>
             </tr>
         {% endfor %}
+        <tr>
+            <td colspan="2">Deuda total de la tarjeta:</td>
+            <td colspan="2">$ {{ total_to_pay_of_card|number_format(2) }}</td>
+        </tr>
     </table>
 
     <table>
+        <tr>
+            <th colspan="6">Por Consumo</th>
+        </tr>
         <tr>
             <th>ID</th>
             <th>Card Consume Code</th>

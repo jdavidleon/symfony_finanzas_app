@@ -7,6 +7,7 @@ use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Extractor\CreditCard\CreditCardExtractor;
 use App\Form\Credit\CreditConsumeType;
+use App\Service\CreditCard\ConsumeResolver;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -26,22 +27,30 @@ class CreditController extends AbstractController
      * @Route("/list", name="credit_list")
      * @param CreditCardConsumeProvider $consumeProvider
      * @param CreditCardExtractor $cardExtractor
+     * @param ConsumeResolver $consumeResolver
      * @return Response
+     * @throws Exception
      */
-    public function index(CreditCardConsumeProvider $consumeProvider, CreditCardExtractor $cardExtractor)
-    {
-        $creditCardConsumes = $consumeProvider->getByOwner( $this->getUser() );
-        $creditCards = $cardExtractor->extractByOwner( $this->getUser() );
-        $consumesCreated = $consumeProvider->getCreatedConsumeListByOwner( $this->getUser() );
+    public function index(
+        CreditCardConsumeProvider $consumeProvider,
+        CreditCardExtractor $cardExtractor,
+        ConsumeResolver $consumeResolver
+    ) {
+        $creditCardConsumes = $consumeProvider->getByOwner($this->getUser());
+        $creditCards = $cardExtractor->extractByOwner($this->getUser());
+        $consumesCreated = $consumeProvider->getCreatedConsumeListByOwner($this->getUser());
 
-        $repo = $this->getDoctrine()->getRepository(CreditCardUser::class);
-        $cardUsers = $repo->getByOwner( $this->getUser(), true );
+        $creditCardUserRepo = $this->getDoctrine()->getRepository(CreditCardUser::class);
+        $cardUsers = $creditCardUserRepo->getByOwner($this->getUser(), true);
+
+        $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($creditCardConsumes);
 
         return $this->render('credit/index.html.twig', [
             'credit_cards' => $creditCards,
             'consumes' => $creditCardConsumes,
             'card_users' => $cardUsers,
-            'consumes_created' => $consumesCreated
+            'consumes_created' => $consumesCreated,
+            'total_debt' => $totalDebt
         ]);
     }
 
@@ -61,8 +70,7 @@ class CreditController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ( $form->isSubmitted() && $form->isValid() )
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->persist($creditConsume);
             $em->flush();
@@ -84,9 +92,9 @@ class CreditController extends AbstractController
     public function creditCardDetail(CreditCardConsumeExtractor $creditCardConsumeExtractor, $creditCard)
     {
         $repo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
-        $creditCardDebts = $repo->findByCreditCard( $creditCard );
+        $creditCardDebts = $repo->findByCreditCard($creditCard);
 
-        $debtsByUser = $creditCardConsumeExtractor->extractActualDebt( $creditCardDebts );
+        $debtsByUser = $creditCardConsumeExtractor->extractActualDebt($creditCardDebts);
 
         dump($debtsByUser); die;
 

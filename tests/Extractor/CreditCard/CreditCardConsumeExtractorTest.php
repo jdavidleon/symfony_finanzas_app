@@ -9,8 +9,9 @@ use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
-use App\Extractor\CreditCard\CardConsumeResume;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
+use App\Model\CreditCard\CardConsumeResume;
+use App\Model\Payment\ConsumePaymentResume;
 use App\Repository\CreditCard\CreditCardPaymentRepository;
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\CreditCard\CreditCardConsumeProvider;
@@ -19,6 +20,7 @@ use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
 use ReflectionProperty;
 
 class CreditCardConsumeExtractorTest extends TestCase
@@ -38,6 +40,9 @@ class CreditCardConsumeExtractorTest extends TestCase
 
     private $cardConsumeProvider;
 
+    /**
+     * @var CreditCardConsume|ObjectProphecy
+     */
     private $creditCardConsumeMock;
 
     /**
@@ -209,7 +214,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         return [
             [1000, 2, 10, 0, 3, 54, '3 pending dues'],
             [2000, 1.8, 10, 1, 10, 180, '9 pending dues'],
-            [157400, 2.25, 8, 5, 7, 5902.5, '2 pending dues'],
+            [157400, 2.25, 8, 5, 7, 5903, '2 pending dues'],
             [452450, 1.52, 20, 8, 8, 0, 'Not pending dues'],
             [1000, 10, 10, 1, 1, 0, 'Not pending dues'],
             [0, 1.5, 10, 6, 8, 0, 'Without debt'],
@@ -254,15 +259,14 @@ class CreditCardConsumeExtractorTest extends TestCase
             $creditCardConsume
         );
 
-        $expected = [
-            'number_due' => 10,
-            'capital_amount' => (float)200,
-            'interest' => (float)4,
-            'total_to_pay' => (float)204,
-            'payment_month' => $firstMonth->format('Y-m'),
-        ];
+        $expected = new ConsumePaymentResume(
+            10,
+            200,
+            4,
+            $firstMonth->format('Y-m')
+        );
 
-        self::assertSame([$expected], $pendingPayments);
+        self::assertEquals([$expected], $pendingPayments);
     }
 
     /**
@@ -508,19 +512,17 @@ class CreditCardConsumeExtractorTest extends TestCase
     public function testExtractNextPaymentMonthOfConsumeWhenHasPayments()
     {
         $this->creditCardConsume->setMonthFirstPay('2019-01');
-        $payment = new CreditCardPayment();
+        $payment = new CreditCardPayment($this->creditCardConsume);
+        $payment->setMonthPayed('2019-04');
         $this->creditCardConsume->addPayment($payment);
 
-        $payment2 = new CreditCardPayment();
+        $payment2 = new CreditCardPayment($this->creditCardConsume);
+        $payment2->setMonthPayed('2019-05');
         $this->creditCardConsume->addPayment($payment2);
 
-        $this->paymentsRepository
-            ->getMonthListByConsume($this->creditCardConsume)
-            ->willReturn([
-                ['monthPayed' => '2019-04'],
-                ['monthPayed' => '2019-05'],
-                ['monthPayed' => '2019-06'],
-            ]);
+        $payment3 = new CreditCardPayment($this->creditCardConsume);
+        $payment3->setMonthPayed('2019-06');
+        $this->creditCardConsume->addPayment($payment3);
 
         $nextPaymentMonth = $this->consumeExtractor->extractNextPaymentMonth($this->creditCardConsume);
 
@@ -532,21 +534,43 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractLastPaymentMonthWhenHasPayments()
     {
-        $this->creditCardConsume->addPayment(new CreditCardPayment());
-        $this->creditCardConsume->addPayment(new CreditCardPayment());
-
-        $this->paymentsRepository
-            ->getMonthListByConsume($this->creditCardConsume)
-            ->willReturn([
-                ['monthPayed' => '2020-11'],
-                ['monthPayed' => '2020-12'],
-                ['monthPayed' => '2021-01'],
-            ])
-        ;
+        $payment1 = new CreditCardPayment($this->creditCardConsume);
+        $payment1->setMonthPayed('2020-11');
+        $this->creditCardConsume->addPayment($payment1);
+        $payment2 = new CreditCardPayment($this->creditCardConsume);
+        $payment2->setMonthPayed('2020-12');
+        $this->creditCardConsume->addPayment($payment2);
+        $payment3 = new CreditCardPayment($this->creditCardConsume);
+        $payment3->setMonthPayed('2021-01');
+        $this->creditCardConsume->addPayment($payment3);
 
         $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
 
         self::assertSame('2021-01', $lastPaymentMonth);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractLastPaymentMonthWhenHasPaymentsButAreNotLegal()
+    {
+        $this->creditCardConsume->setMonthFirstPay('2018-09');
+        $payment1 = new CreditCardPayment($this->creditCardConsume);
+        $payment1->setLegalDue(false);
+        $this->creditCardConsume->addPayment($payment1);
+        $payment2 = new CreditCardPayment($this->creditCardConsume);
+        $payment2->setLegalDue(false);
+        $this->creditCardConsume->addPayment($payment2);
+
+        $this->paymentsRepository
+            ->getMonthListByConsume($this->creditCardConsume)
+            ->willReturn([])
+        ;
+
+        $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
+
+        self::assertSame('2018-08', $lastPaymentMonth);
     }
 
 
@@ -560,6 +584,78 @@ class CreditCardConsumeExtractorTest extends TestCase
         $lastPaymentMonth = $this->consumeExtractor->extractLastPaymentMonth($this->creditCardConsume);
 
         self::assertSame('2018-02', $lastPaymentMonth);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractActualDueToPayWhenDebtIsUpToDate()
+    {
+        /**
+         * @var CreditCardConsumeExtractor|MockObject $consumeExtractorMock
+         */
+        $consumeExtractorMock = $this->getMockBuilder(CreditCardConsumeExtractor::class)
+            ->setConstructorArgs([
+                    $this->cardConsumeProvider->reveal(),
+                    $this->paymentsRepository->reveal()
+                ]
+            )
+            ->setMethods(['extractLastPaymentMonth'])
+            ->getMock();
+
+        /** @var MockObject|CreditCardConsume $consumeMock */
+        $consumeMock = $this->createPartialMock(CreditCardConsume::class, [
+            'getDuesPayed'
+        ]);
+        $consumeMock->setDues(15);
+
+        $consumeMock->method('getDuesPayed')->willReturn(5);
+
+        $date = new \DateTime();
+        if ($date->format('d') < 15) {
+            $date->modify('-1 month');
+        }
+        $consumeExtractorMock->method('extractLastPaymentMonth')->willReturn($date->format('Y-m'));
+
+        $due = $consumeExtractorMock->extractActualDueToPay($consumeMock);
+
+        self::assertEquals(6, $due);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractActualDueToPayWhenLastDueMonthIsBeforeActualMonthToPay()
+    {
+        /**
+         * @var CreditCardConsumeExtractor|MockObject $consumeExtractorMock
+         */
+        $consumeExtractorMock = $this->getMockBuilder(CreditCardConsumeExtractor::class)
+            ->setConstructorArgs([
+                    $this->cardConsumeProvider->reveal(),
+                    $this->paymentsRepository->reveal()
+                ]
+            )
+            ->setMethods(['extractLastPaymentMonth'])
+            ->getMock();
+
+        /** @var MockObject|CreditCardConsume $consumeMock */
+        $consumeMock = $this->createPartialMock(CreditCardConsume::class, [
+            'getDuesPayed'
+        ]);
+        $consumeMock->setDues(8);
+
+        $consumeMock->method('getDuesPayed')->willReturn(4);
+
+        $date = new \DateTime();
+        $date->modify('-10 month');
+
+        $consumeExtractorMock->method('extractLastPaymentMonth')->willReturn($date->format('Y-m'));
+
+        $due = $consumeExtractorMock->extractActualDueToPay($consumeMock);
+
+        self::assertEquals(8, $due);
     }
 
     /**
@@ -588,7 +684,18 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     private function setIdByReflection($object, $value)
     {
-        $reflector = new ReflectionProperty($object, 'id');
+        $this->setAttByReflection($object, 'id', $value);
+    }
+
+    /**
+     * @param $object
+     * @param $att
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function setAttByReflection($object, $att, $value)
+    {
+        $reflector = new ReflectionProperty($object, $att);
         $reflector->setAccessible(true);
         $reflector->setValue($object, $value);
     }

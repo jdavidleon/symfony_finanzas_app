@@ -23,6 +23,11 @@
                 <td><a href="{{ path('pay_consume', {'cardConsume' : consume.cardConsume.id}) }}">Pagar</a></td>
             </tr>
         {% endfor %}
+            <tr>
+                <td colspan="6">
+                   $ {{ total_debt|number_format(2) }}
+                </td>
+            </tr>
     </table>
 
     <table>
