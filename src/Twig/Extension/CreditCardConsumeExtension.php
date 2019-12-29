@@ -107,11 +107,11 @@ class CreditCardConsumeExtension extends AbstractExtension
     /**
      * @param CreditCardUser $cardUser
      * @param CreditCard|null $card
-     * @param null $month
+     * @param bool $month
      * @return float
      * @throws Exception
      */
-    public function totalByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function totalByCardUser(CreditCardUser $cardUser, CreditCard $card = null, bool $month = false)
     {
         return $this->consumeExtractor->extractTotalToPayByCardUser($cardUser, $card, $month);
     }
