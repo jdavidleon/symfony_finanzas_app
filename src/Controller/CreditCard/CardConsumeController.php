@@ -122,6 +122,8 @@ class CardConsumeController extends AbstractController
             'total_to_pay' => $consumeExtractor->extractNextPaymentAmount($cardConsume)
         ]);
 
+        $totalDebt = $consumeExtractor->extractActualDebt($cardConsume) + $consumeExtractor->extractNextInterestAmount($cardConsume);
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
@@ -135,7 +137,8 @@ class CardConsumeController extends AbstractController
         }
 
         return $this->render('credit/new_card_payment.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'total_to_pay' => $totalDebt
         ]);
     }
 

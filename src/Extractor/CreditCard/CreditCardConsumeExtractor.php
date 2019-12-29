@@ -340,7 +340,7 @@ class CreditCardConsumeExtractor
         $dates = [];
         foreach ($cardConsume->getPayments() as $payment)
         {
-            if ($payment->isLegalDue()) {
+            if ($payment->isLegalDue() && null == $payment->getDeletedAt()) {
                 $dates[] = $payment->getMonthPayed();
             }
         }
