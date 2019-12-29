@@ -40,8 +40,17 @@ class CreditCardConsumeProvider
         return $this->cardConsumeRepository->getByCreditCard( $card, $month );
     }
 
-    public function getByCardUser(CreditCardUser $user, CreditCard $card = null, $month = null)
+    /**
+     * @param CreditCardUser $user
+     * @param CreditCard|null $card
+     * @param bool $excludeAlreadyPayedAtDate
+     * @return CreditCardConsume[]
+     * @throws Exception
+     */
+    public function getByCardUser(CreditCardUser $user, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false)
     {
+        $month = $this->resolveExclusionMonth($excludeAlreadyPayedAtDate);
+
         return $this->cardConsumeRepository->getActivesByCardUser($user, $card, $month);
     }
 
@@ -59,9 +68,19 @@ class CreditCardConsumeProvider
      */
     public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser, bool $excludeAlreadyPayedAtDate = false)
     {
-        $month = $excludeAlreadyPayedAtDate ? CreditCalculator::calculateNextPaymentDate() : null;
+        $month = $this->resolveExclusionMonth($excludeAlreadyPayedAtDate);
 
         return $this->cardConsumeRepository->getByCardAndUser($card, $cardUser, $month);
+    }
+
+    /**
+     * @param bool $excludeAlreadyPayedAtDate
+     * @return string|null
+     * @throws Exception
+     */
+    private function resolveExclusionMonth(bool $excludeAlreadyPayedAtDate)
+    {
+        return $excludeAlreadyPayedAtDate ? CreditCalculator::calculateNextPaymentDate() : null;
     }
 
 }

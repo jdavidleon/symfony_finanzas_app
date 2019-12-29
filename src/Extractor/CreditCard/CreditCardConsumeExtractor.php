@@ -181,13 +181,13 @@ class CreditCardConsumeExtractor
     /**
      * @param CreditCardUser $cardUser
      * @param CreditCard|null $card
-     * @param null $month
+     * @param bool $excludeAlreadyPayedAtDate
      * @return float
      * @throws Exception
      */
-    public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null): float
+    public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false): float
     {
-        $consumes = $this->consumeProvider->getByCardUser($cardUser, $card, $month);
+        $consumes = $this->consumeProvider->getByCardUser($cardUser, $card, $excludeAlreadyPayedAtDate);
         return $this->sumConsumes($consumes);
     }
 
