@@ -70,8 +70,7 @@ class PaymentHandler
             throw new ExcedeAmountDebtException();
         }
 
-        $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
-        foreach ($pendingPayments as $payment)
+        foreach ($this->getPendingPayments($consume) as $payment)
         {
             if ($payedValue >= $payment->getTotalToPay()) {
                 $this->addPendingPaymentsFromArrayPayments($consume, [$payment]);
@@ -97,9 +96,7 @@ class PaymentHandler
         $consumeRepo = $this->entityManager->getRepository(CreditCardConsume::class);
         
         foreach ($consumeRepo->getActivesByCardUser($user) as $consume) {
-            $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
-
-            $this->addPendingPaymentsFromArrayPayments($consume, $pendingPayments);
+            $this->addPendingPaymentsFromArrayPayments($consume, $this->getPendingPayments($consume));
             $this->entityManager->persist($consume);
         }
         
@@ -118,9 +115,7 @@ class PaymentHandler
         $consumeRepo = $this->entityManager->getRepository(CreditCardConsume::class);
 
         foreach ($consumeRepo->getByCardAndUser($creditCard, $user) as $consume) {
-            $pendingPayments = $this->consumeExtractor->extractPendingPaymentsByConsume($consume, true);
-
-            $this->addPendingPaymentsFromArrayPayments($consume, $pendingPayments);
+            $this->addPendingPaymentsFromArrayPayments($consume, $this->getPendingPayments($consume));
             $this->entityManager->persist($consume);
         }
 
@@ -187,9 +182,7 @@ class PaymentHandler
         bool $legalDue = true
     ): CreditCardPayment
     {
-        $creditCardPayment = new CreditCardPaymentFactory();
-
-        return $creditCardPayment->create(
+        return $this->cardPaymentFactory->create(
             $consume,
             $payedValue,
             $capitalAmount,
@@ -198,5 +191,16 @@ class PaymentHandler
             $monthPayed,
             $legalDue
         );
+    }
+
+    /**
+     * @param CreditCardConsume $consume
+     * @param bool $atDate
+     * @return ConsumePaymentResume[]|array
+     * @throws Exception
+     */
+    private function getPendingPayments(CreditCardConsume $consume, bool $atDate = true)
+    {
+        return $this->consumeExtractor->extractPendingPaymentsByConsume($consume, $atDate);
     }
 }

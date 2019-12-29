@@ -5,9 +5,11 @@ namespace App\Service\CreditCard;
 
 
 use App\Entity\CreditCard\CreditCard;
+use App\Entity\CreditCard\CreditCardConsume;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
+use Exception;
 
 class CreditCardConsumeProvider
 {
@@ -46,6 +48,20 @@ class CreditCardConsumeProvider
     public function getCreatedConsumeListByOwner(User $owner)
     {
         return $this->cardConsumeRepository->findCreatedConsumeListByOwner($owner);
+    }
+
+    /**
+     * @param CreditCard $card
+     * @param CreditCardUser $cardUser
+     * @param bool $excludeAlreadyPayedAtDate
+     * @return CreditCardConsume[]
+     * @throws Exception
+     */
+    public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser, bool $excludeAlreadyPayedAtDate = false)
+    {
+        $month = $excludeAlreadyPayedAtDate ? CreditCalculator::calculateNextPaymentDate() : null;
+
+        return $this->cardConsumeRepository->getByCardAndUser($card, $cardUser, $month);
     }
 
 }

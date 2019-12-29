@@ -6,6 +6,7 @@ use App\Util\TimestampAbleEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * Todo: Como se van a revertir pagos??? Con respecto a la relación con el balance del creditCardConsume
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardPaymentRepository")
  */
 class CreditCardPayment

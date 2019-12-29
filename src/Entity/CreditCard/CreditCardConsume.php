@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use phpDocumentor\Reflection\Types\This;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditCard\CreditCardConsumeRepository")
@@ -261,10 +262,13 @@ class CreditCardConsume implements DebtInterface
 
     /**
      * @param mixed $description
+     * @return CreditCardConsume
      */
-    public function setDescription($description): void
+    public function setDescription($description): self
     {
         $this->description = $description;
+
+        return $this;
     }
 
     public function activatePayment()
@@ -310,7 +314,7 @@ class CreditCardConsume implements DebtInterface
     {
         $this->amountPayed += $amountPayed;
 
-        $this->setStatusAsPayed();
+        $this->setStatusPayedIfApply();
 
         return $this;
     }
@@ -330,7 +334,7 @@ class CreditCardConsume implements DebtInterface
     {
         $dates = [];
         foreach ($this->payments as $payment){
-            if (null != $payment->getMonthPayed()) {
+            if (null != $payment->getMonthPayed() && null == $payment->getDeletedAt()) {
                 $dates[] = $payment->getMonthPayed();
             }
         }
@@ -351,18 +355,16 @@ class CreditCardConsume implements DebtInterface
             $nextPaymentMonth
         ]);
 
-        if ($majorMonth == $lastPaymentMonth){
-            return true;
-        }
-
-        return false;
+        return $majorMonth == $lastPaymentMonth;
     }
 
-    public function setStatusAsPayed()
+    public function setStatusPayedIfApply()
     {
         if ($this->isConsumePayed()) {
             $this->setStatus(self::STATUS_PAYED);
         }
+
+        return $this;
     }
 
     public function isConsumePayed()

@@ -44,7 +44,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ]
             ]);
 
-        $this->addPayedMonthConditional($qb, $month);
+        $this->addExclusionMonthConditional($qb, $month);
 
         return $qb
             ->getQuery()
@@ -70,7 +70,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ]
             ]);
 
-        $this->addPayedMonthConditional($qb, $month);
+        $this->addExclusionMonthConditional($qb, $month);
 
         return $qb
             ->getQuery()
@@ -104,7 +104,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                 ->setParameter('card', $card);
         }
 
-        $this->addPayedMonthConditional($qb, $month);
+        $this->addExclusionMonthConditional($qb, $month);
 
         return $qb->getQuery()
             ->getResult()
@@ -114,11 +114,12 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     /**
      * @param CreditCard $card
      * @param CreditCardUser $cardUser
+     * @param string|null $exclusionMonth
      * @return CreditCardConsume[]
      */
-    public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser)
+    public function getByCardAndUser(CreditCard $card, CreditCardUser $cardUser, ?string $exclusionMonth = null)
     {
-        return $this->createQueryBuilder('ccc')
+        $qb = $this->createQueryBuilder('ccc')
             ->where('ccc.creditCardUser = :user')
             ->andWhere('ccc.creditCard = :card')
             ->andWhere('ccc.deletedAt IS NULL')
@@ -130,7 +131,11 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                     CreditCardConsume::STATUS_PAYING,
                     CreditCardConsume::STATUS_MORA,
                 ],
-            ])
+            ]);
+
+        $this->addExclusionMonthConditional($qb, $exclusionMonth);
+
+        return $qb
             ->getQuery()
             ->getResult()
             ;
@@ -157,14 +162,14 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
     }
 
     /**
-     * Todo: Esto cuando se usaría???
+     * Este método permite excluir los consumos que ya tengan un pago hecho en un mes indicado
      * @param QueryBuilder $qb
-     * @param string $month
+     * @param string|null $month
      * @return void
      */
-    private function addPayedMonthConditional(QueryBuilder $qb, string $month = null)
+    private function addExclusionMonthConditional(QueryBuilder $qb, ?string $month = null)
     {
-        if ( null != $month ) {
+        if (null != $month) {
             $qb
                 ->andWhere(
                     $qb->expr()->not(

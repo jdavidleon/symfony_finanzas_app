@@ -36,18 +36,18 @@ class CardConsumeController extends AbstractController
      */
     public function activateConsumeAction(CreditCardConsume $consume, CreditCalculator $calculator)
     {
-        try{
-            if  ($consume->getStatus() == CreditCardConsume::STATUS_CREATED){
+        try {
+            if ($consume->getStatus() == CreditCardConsume::STATUS_CREATED) {
                 $consume->activatePayment();
                 $consume->setMonthFirstPay($calculator->calculateNextPaymentDate());
-            }else{
+            } else {
                 $consume->setStatus(CreditCardConsume::STATUS_CREATED);
             }
             $em = $this->getDoctrine()->getManager();
             $em->persist($consume);
             $em->flush();
-        }catch (Exception $e){
-
+        } catch (Exception $e) {
+            // Todo: Y acá q???
         }
 
         return $this->redirectToRoute('credit_list');
@@ -68,8 +68,7 @@ class CardConsumeController extends AbstractController
         CreditCardConsumeProvider $consumeProvider,
         CreditCardConsumeExtractor $consumeExtractor,
         ConsumeResolver $consumeResolver
-    )
-    {
+    ) {
         $consumesByUser = $consumeProvider->getByCardUser($cardUser);
         $consumes = $consumeExtractor->extractConsumeResume($consumesByUser);
 
@@ -118,14 +117,13 @@ class CardConsumeController extends AbstractController
         CreditCardConsumeExtractor $consumeExtractor,
         PaymentHandler $handlePayment,
         Request $request
-    )
-    {
+    ) {
         $form = $this->createForm(CreditPaymentType::class, null, [
             'total_to_pay' => $consumeExtractor->extractNextPaymentAmount($cardConsume)
         ]);
 
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $handlePayment->processPaymentWithSpecificAmount($cardConsume, $form->get('amount')->getData());
                 $this->addFlash('success', 'Pago realizado con Éxito');
@@ -147,15 +145,21 @@ class CardConsumeController extends AbstractController
      * @param CreditCard $card
      * @param CreditCardUser $user
      * @param PaymentHandler $paymentsHandler
+     * @param CreditCardConsumeProvider $consumeProvider
      * @param Request $request
      * @return Response
+     * @throws Exception
      */
-    public function basicPaymentOfCardAndUser(CreditCard $card, CreditCardUser $user, PaymentHandler $paymentsHandler, Request $request)
-    {
-        $consumeRepo = $this->getDoctrine()->getRepository(CreditCardConsume::class);
-        $consumes = $consumeRepo->getByCardAndUser($card, $user);
+    public function basicPaymentOfCardAndUser(
+        CreditCard $card,
+        CreditCardUser $user,
+        PaymentHandler $paymentsHandler,
+        CreditCardConsumeProvider $consumeProvider,
+        Request $request
+    ) {
+        $consumes = $consumeProvider->getByCardAndUser($card, $user, true);
 
-        $form = $this->createForm(BasicPaymentType::class,null, [
+        $form = $this->createForm(BasicPaymentType::class, null, [
             'card' => $card,
             'card_user' => $user,
         ]);

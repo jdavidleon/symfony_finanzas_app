@@ -193,10 +193,10 @@ class CreditCardConsumeExtractor
 
     /**
      * @param User $owner
-     * @return float|int|null
+     * @return float|null
      * @throws Exception
      */
-    public function extractTotalToPayByOwner(User $owner)
+    public function extractTotalToPayByOwner(User $owner): ?float
     {
         $consumes = $this->consumeProvider->getByOwner($owner, $this->extractNextPaymentMonth());
         return $this->sumConsumes($consumes);
@@ -331,7 +331,11 @@ class CreditCardConsumeExtractor
         );
     }
 
-    private function extractListOfMonthPayedByConsume(CreditCardConsume $cardConsume)
+    /**
+     * @param CreditCardConsume $cardConsume
+     * @return array
+     */
+    private function extractListOfMonthPayedByConsume(CreditCardConsume $cardConsume): array
     {
         $dates = [];
         foreach ($cardConsume->getPayments() as $payment)
