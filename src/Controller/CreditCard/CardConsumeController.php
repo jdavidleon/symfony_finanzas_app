@@ -140,7 +140,7 @@ class CardConsumeController extends AbstractController
     }
 
     /**
-     * @Route("basic_payment/{card}/{user}", name="payment_by_card_and_user")
+     * @Route("/basic_payment/{card}/{user}", name="payment_by_card_and_user")
      *
      * @param CreditCard $card
      * @param CreditCardUser $user
