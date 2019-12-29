@@ -140,10 +140,10 @@ class CreditCalculator
 
     /**
      * @param string|null $lastPayedMonth should be type 'Y-m'
-     * @return string|void
+     * @return string
      * @throws Exception
      */
-    public static function calculateNextPaymentDate(?string $lastPayedMonth = null): ?string
+    public static function calculateNextPaymentDate(?string $lastPayedMonth = null): string
     {
         if (null != $lastPayedMonth){
             return DateHelper::increaseMonth($lastPayedMonth);
