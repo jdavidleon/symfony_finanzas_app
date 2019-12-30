@@ -217,11 +217,18 @@ class CreditCardConsume implements DebtInterface
     }
 
     /**
+     * @param bool $includeRemoved
      * @return Collection|CreditCardPayment[]
      */
-    public function getPayments(): Collection
+    public function getPayments(bool $includeRemoved = false): Collection
     {
-        return $this->payments;
+        if ($includeRemoved) {
+            return $this->payments;
+        }
+
+        return $this->payments->filter(function (CreditCardPayment $payment) {
+            return null == $payment->getDeletedAt();
+        });
     }
 
     public function addPayment(CreditCardPayment $payment): self

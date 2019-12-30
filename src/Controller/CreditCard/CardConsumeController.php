@@ -133,6 +133,8 @@ class CardConsumeController extends AbstractController
                 $this->addFlash('error', $exception->getMessage());
             } catch (ExcedeAmountDebtException $exception) {
                 $this->addFlash('error', $exception->getMessage());
+            } catch (\Exception $exception) {
+                $this->addFlash('error', $exception->getMessage());
             }
         }
 
