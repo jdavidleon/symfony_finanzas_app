@@ -363,11 +363,13 @@ class CreditCardConsumeExtractorTest extends TestCase
             $this->creditCardConsume,
             $consume2,
         ];
+        $creditCardUser = new CreditCardUser();
+        $creditCard = new CreditCard();
         $this->cardConsumeProvider
             ->getByCardUser(
-                Argument::type(CreditCardUser::class),
-                Argument::type(CreditCard::class),
-                '2019-08'
+                $creditCardUser,
+                $creditCard,
+                true
             )
             ->shouldBeCalled()
             ->willReturn($return);
@@ -383,7 +385,7 @@ class CreditCardConsumeExtractorTest extends TestCase
             )
             ->willReturnOnConsecutiveCalls(3, 3, 1, 1);
 
-        $totalToPay = $this->consumeExtractor->extractTotalToPayByCardUser(new CreditCardUser(), new CreditCard(), '2019-08');
+        $totalToPay = $this->consumeExtractor->extractTotalToPayByCardUser($creditCardUser, $creditCard, '2019-08');
 
         self::assertEquals(36840, $totalToPay);
     }

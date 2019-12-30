@@ -18,5 +18,5 @@
     {{ form_row(form.amount) }}
     <button type="submit">Pay!</button>
     {{ form_end(form) }}
-
+    <p>Pago Total {{ total_to_pay|number_format(2) }}</p>
 {% endblock %}
