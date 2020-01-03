@@ -73,10 +73,12 @@ class CardConsumeController extends AbstractController
         $consumes = $consumeExtractor->extractConsumeResume($consumesByUser);
 
         $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($consumesByUser);
+        $totalInterest = $consumeResolver->resolveTotalInterestToPayByConsumesArray($consumesByUser);
 
         return $this->render('credit/card_user.html.twig', [
             'consumes' => $consumes,
-            'total_debt' => $totalDebt
+            'total_debt' => $totalDebt,
+            'total_interest' => $totalInterest,
         ]);
     }
 

@@ -30,7 +30,7 @@ class ConsumeResolver
     }
 
     /**
-     * @param CreditCardUser[] $consumes
+     * @param CreditCardConsume[] $consumes
      * @return float
      * @throws Exception
      */
@@ -52,5 +52,18 @@ class ConsumeResolver
         return $totalPayment;
     }
 
+    /**
+     * @param CreditCardConsume[] $consumes
+     * @return float|int
+     * @throws Exception
+     */
+    public function resolveTotalInterestToPayByConsumesArray(array $consumes): float
+    {
+        $interestToPay = 0;
+        foreach ($consumes as $consume) {
+            $interestToPay += $this->consumeExtractor->extractNextInterestAmount($consume);
+        }
 
+        return $interestToPay;
+    }
 }

@@ -8,8 +8,10 @@
         <tr>
             <th>ID</th>
             <th>Tarjeta</th>
-            <th>Deuda</th>
+            <th>Descripción</th>
             <th>Próximo pago</th>
+            <th>Interest a pagar</th>
+            <th>Cuotas Pendientes</th>
             <th>Pendiente por pagar</th>
             <th>Acción</th>
         </tr>
@@ -19,15 +21,22 @@
                 <td>{{ consume.cardConsume.creditCard.franchise }}</td>
                 <td>{{ consume.cardConsume.description }}</td>
                 <td>$ {{ consume.nextPaymentAmount|number_format(2) }}</td>
+                <td>$ {{ consume.nextInterestAmount|number_format(2) }}</td>
+                <td>{{ consume.pendingDues }}</td>
                 <td>$ {{ consume.pendingAmount|number_format(2) }}</td>
                 <td><a href="{{ path('pay_consume', {'cardConsume' : consume.cardConsume.id}) }}">Pagar</a></td>
             </tr>
         {% endfor %}
-            <tr>
-                <td colspan="6">
-                   $ {{ total_debt|number_format(2) }}
-                </td>
-            </tr>
+        <tr>
+            <td colspan="6">
+                Total Que se debe: $ {{ total_debt|number_format(2) }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+               Este mes vas a pagar $ {{ total_interest|number_format(2) }} en intereses.
+            </td>
+        </tr>
     </table>
 
     <table>
