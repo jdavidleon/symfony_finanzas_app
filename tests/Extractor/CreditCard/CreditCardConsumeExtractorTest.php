@@ -270,6 +270,50 @@ class CreditCardConsumeExtractorTest extends TestCase
     }
 
     /**
+     * @throws Exception
+     */
+    public function testExtractPendingPaymentsByConsumeSinceFirstDue()
+    {
+        $creditCardConsume = $this->creditCardConsumeObject(1);
+
+        $creditCardConsume->setAmount(5000);
+        $creditCardConsume->addAmountPayed(2500);
+        $creditCardConsume->setDues(2);
+        $creditCardConsume->setInterest(2);
+        $firstMonth = new DateTime();
+        $firstMonth->modify('-1 Month');
+        $monthFirstPay = $firstMonth->format('Y-m');
+        $creditCardConsume->setMonthFirstPay($monthFirstPay);
+
+        $pendingPayments = $this->consumeExtractor->extractPaymentListByConsume(
+            $creditCardConsume
+        );
+
+        $pay1 = new ConsumePaymentResume(
+            1,
+            2500,
+            100,
+            $firstMonth->format('Y-m')
+        );
+
+        $secondMonth = $firstMonth->modify('+1 month');
+
+        $pay2 = new ConsumePaymentResume(
+            2,
+            2500,
+            50,
+            $secondMonth->format('Y-m')
+        );
+
+        $expected = [
+            $pay1,
+            $pay2,
+        ];
+
+        self::assertEquals($expected, $pendingPayments);
+    }
+
+    /**
      *
      * @dataProvider getActualDueProvider
      * @param int $dues
@@ -703,18 +747,18 @@ class CreditCardConsumeExtractorTest extends TestCase
     }
 
     /**
-     * @param int $dues
+     * @param int $duesPayed
      * @return CreditCardConsume
      * @throws Exception
      */
-    private function creditCardConsumeObject(int $dues = 2): CreditCardConsume
+    private function creditCardConsumeObject(int $duesPayed = 2): CreditCardConsume
     {
         $creditCardConsume = new CreditCardConsume();
         $creditCardConsume->setAmount(2000);
         $creditCardConsume->setDues(10);
 
-        if (0 < $dues) {
-            foreach (range(1, $dues) as $due){
+        if (0 < $duesPayed) {
+            foreach (range(1, $duesPayed) as $due){
                 $creditCardConsume->addDuePayed();
             }
         }

@@ -41,10 +41,15 @@ class ConsumePaymentResume
      * @var bool
      */
     private $payed;
+    /**
+     * @var float
+     */
+    private $actualDebt;
 
     /**
      * ConsumePaymentResume constructor.
      * @param int $dueNumber
+     * @param float $actualDebt
      * @param float $capitalAmount
      * @param float $interest
      * @param string $paymentMonth
@@ -52,12 +57,14 @@ class ConsumePaymentResume
      */
     public function __construct(
         int $dueNumber,
+        float $actualDebt,
         float $capitalAmount,
         float $interest,
         string $paymentMonth,
         bool $payed = false
     ) {
         $this->dueNumber = $dueNumber;
+        $this->actualDebt = $actualDebt;
         $this->capitalAmount = $capitalAmount;
         $this->interest = $interest;
         $this->totalToPay = $capitalAmount + $interest;
@@ -71,6 +78,14 @@ class ConsumePaymentResume
     public function getDueNumber(): int
     {
         return $this->dueNumber;
+    }
+
+    /**
+     * @return float
+     */
+    public function getActualDebt(): float
+    {
+        return $this->actualDebt;
     }
 
     /**

@@ -153,6 +153,23 @@ class CreditCardConsumeExtractor
     }
 
     /**
+     * @param CreditCardConsume $cardConsume
+     * @return ConsumePaymentResume[]|array
+     * @throws Exception
+     */
+    public function extractPaymentListByConsume(CreditCardConsume $cardConsume)
+    {
+        return CreditCalculator::calculatePendingPaymentsResume(
+            $cardConsume->getAmount(),
+            $cardConsume->getInterest(),
+            $cardConsume->getDues(),
+            0,
+            null,
+            DateHelper::reverseMonth($cardConsume->getMonthFirstPay())
+        );
+    }
+
+    /**
      * This method return the next due to pay of a consume, if all payments did not make it yet.
      *
      * @param CreditCardConsume $creditCardConsume
