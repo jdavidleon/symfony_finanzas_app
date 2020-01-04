@@ -5,6 +5,7 @@ namespace App\Model\Payment;
 
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\DateHelper;
+use phpDocumentor\Reflection\Types\This;
 
 class ConsumePaymentResume
 {
@@ -126,10 +127,6 @@ class ConsumePaymentResume
      */
     public function getStatus(): string
     {
-        if ($this->status){
-            return $this->status;
-        }
-
         if ($this->payed) {
             $this->status = self::STATUS_PAYED;
         }else{
@@ -144,5 +141,12 @@ class ConsumePaymentResume
         }
 
         return $this->status;
+    }
+
+    public function setAsPayed(): self
+    {
+        $this->payed = true;
+
+        return $this;
     }
 }

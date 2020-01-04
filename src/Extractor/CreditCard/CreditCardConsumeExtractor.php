@@ -153,13 +153,14 @@ class CreditCardConsumeExtractor
     }
 
     /**
+     * Todo: Este método no me devuelve el resumen basado en los pagos ya realizados hay que arreglar esto
      * @param CreditCardConsume $cardConsume
-     * @return ConsumePaymentResume[]|array
+     * @return ConsumePaymentResume[]
      * @throws Exception
      */
-    public function extractPaymentListByConsume(CreditCardConsume $cardConsume)
+    public function extractPaymentListByConsume(CreditCardConsume $cardConsume): array
     {
-        return CreditCalculator::calculatePendingPaymentsResume(
+        $payments = CreditCalculator::calculatePendingPaymentsResume(
             $cardConsume->getAmount(),
             $cardConsume->getInterest(),
             $cardConsume->getDues(),
@@ -167,6 +168,15 @@ class CreditCardConsumeExtractor
             null,
             DateHelper::reverseMonth($cardConsume->getMonthFirstPay())
         );
+
+        $monthsPayed = $this->extractListOfMonthPayedByConsume($cardConsume);
+        foreach ($payments as $payment) {
+            if (in_array($payment->getPaymentMonth(), $monthsPayed)) {
+                $payment->setAsPayed();
+            }
+        }
+
+        return $payments;
     }
 
     /**
