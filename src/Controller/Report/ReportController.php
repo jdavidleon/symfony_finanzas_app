@@ -20,18 +20,18 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReportController extends AbstractController
 {
     /**
-     * @Route("/default/{cardUser}")
+     * @Route("/resume/carduser/{cardUser}", name="resume_by_card_user")
      * @param CreditCardUser $cardUser
      * @param ReportGenerator $reportGenerator
      * @return BinaryFileResponse
      * @throws \Exception
      */
-    public function DefaultController(CreditCardUser $cardUser, ReportGenerator $reportGenerator)
+    public function cardUserResumeConsumes(CreditCardUser $cardUser, ReportGenerator $reportGenerator)
     {
-        $fileName = sprintf('Deuda_%s.xlsx', $cardUser->getFullName());
+        $fileName = sprintf('Deuda_%s_%s.xlsx', $cardUser->getFullName(), date('Y-M-d'));
         $temp_file = tempnam(sys_get_temp_dir(), $fileName);
 
-        $reportGenerator->generateByCardUser($cardUser, $temp_file);
+        $reportGenerator->generateResumeByCardUser($cardUser, $temp_file);
         return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_ATTACHMENT);
     }
 }

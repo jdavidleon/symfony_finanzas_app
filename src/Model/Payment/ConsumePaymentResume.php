@@ -5,6 +5,7 @@ namespace App\Model\Payment;
 
 use App\Service\CreditCard\CreditCalculator;
 use App\Service\DateHelper;
+use DateTimeInterface;
 use phpDocumentor\Reflection\Types\This;
 
 class ConsumePaymentResume
@@ -46,23 +47,29 @@ class ConsumePaymentResume
      * @var float
      */
     private $actualDebt;
+    /**
+     * @var string
+     */
+    private $payedAt;
 
     /**
      * ConsumePaymentResume constructor.
-     * @param int $dueNumber
+     * @param int|null $dueNumber
      * @param float $actualDebt
      * @param float $capitalAmount
      * @param float $interest
-     * @param string $paymentMonth
+     * @param string|null $paymentMonth
      * @param bool $payed
+     * @param DateTimeInterface|null $payedAt
      */
     public function __construct(
-        int $dueNumber,
+        ?int $dueNumber,
         float $actualDebt,
         float $capitalAmount,
         float $interest,
-        string $paymentMonth,
-        bool $payed = false
+        ?string $paymentMonth,
+        bool $payed = false,
+        ?DateTimeInterface $payedAt = null
     ) {
         $this->dueNumber = $dueNumber;
         $this->actualDebt = $actualDebt;
@@ -71,12 +78,13 @@ class ConsumePaymentResume
         $this->totalToPay = $capitalAmount + $interest;
         $this->paymentMonth = $paymentMonth;
         $this->payed = $payed;
+        $this->payedAt = $payedAt;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getDueNumber(): int
+    public function getDueNumber(): ?int
     {
         return $this->dueNumber;
     }
@@ -114,9 +122,9 @@ class ConsumePaymentResume
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPaymentMonth(): string
+    public function getPaymentMonth(): ?string
     {
         return $this->paymentMonth;
     }
@@ -127,6 +135,10 @@ class ConsumePaymentResume
      */
     public function getStatus(): string
     {
+        if ($this->status) {
+            return $this->status;
+        }
+
         if ($this->payed) {
             $this->status = self::STATUS_PAYED;
         }else{
@@ -143,10 +155,11 @@ class ConsumePaymentResume
         return $this->status;
     }
 
-    public function setAsPayed(): self
+    /**
+     * @return DateTimeInterface|null
+     */
+    public function getPayedAt(): ?DateTimeInterface
     {
-        $this->payed = true;
-
-        return $this;
+        return $this->payedAt;
     }
 }

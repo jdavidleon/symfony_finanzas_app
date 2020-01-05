@@ -131,10 +131,13 @@ class CreditCardPayment
 
     /**
      * @param bool $legalDue
+     * @return CreditCardPayment
      */
-    public function setLegalDue(bool $legalDue): void
+    public function setLegalDue(bool $legalDue): self
     {
         $this->legalDue = $legalDue;
+
+        return $this;
     }
 
     /**
@@ -146,11 +149,14 @@ class CreditCardPayment
     }
 
     /**
-     * @param mixed $monthPayed
+     * @param string|null $monthPayed
+     * @return CreditCardPayment
      */
-    public function setMonthPayed($monthPayed): void
+    public function setMonthPayed(?string $monthPayed): self
     {
         $this->monthPayed = $monthPayed;
+
+        return $this;
     }
 
     /**
@@ -162,11 +168,14 @@ class CreditCardPayment
     }
 
     /**
-     * @param mixed $realCapitalAmount
+     * @param float|null $realCapitalAmount
+     * @return CreditCardPayment
      */
-    public function setRealCapitalAmount($realCapitalAmount): void
+    public function setRealCapitalAmount(?float $realCapitalAmount): self
     {
         $this->realCapitalAmount = $realCapitalAmount;
+
+        return $this;
     }
 
     /**
@@ -178,10 +187,13 @@ class CreditCardPayment
     }
 
     /**
-     * @param mixed $due
+     * @param int|null $due
+     * @return CreditCardPayment
      */
-    public function setDue($due): void
+    public function setDue(?int $due): self
     {
         $this->due = $due;
+
+        return $this;
     }
 }

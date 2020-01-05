@@ -41,7 +41,7 @@ class ReportGenerator
      * @param $temp_file
      * @throws Exception
      */
-    public function generateByCardUser(CreditCardUser $cardUser, $temp_file)
+    public function generateResumeByCardUser(CreditCardUser $cardUser, $temp_file)
     {
         $consumes = $this->cardConsumeProvider->getByCardUser($cardUser);
 

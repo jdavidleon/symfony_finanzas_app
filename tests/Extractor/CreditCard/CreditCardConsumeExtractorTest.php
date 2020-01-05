@@ -262,6 +262,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         $expected = new ConsumePaymentResume(
             10,
             200,
+            200,
             4,
             $firstMonth->format('Y-m')
         );
@@ -274,10 +275,8 @@ class CreditCardConsumeExtractorTest extends TestCase
      */
     public function testExtractPendingPaymentsByConsumeSinceFirstDue()
     {
-        $creditCardConsume = $this->creditCardConsumeObject(1);
-
+        $creditCardConsume = $this->creditCardConsumeObject(0);
         $creditCardConsume->setAmount(5000);
-        $creditCardConsume->addAmountPayed(2500);
         $creditCardConsume->setDues(2);
         $creditCardConsume->setInterest(2);
         $firstMonth = new DateTime();
@@ -285,21 +284,39 @@ class CreditCardConsumeExtractorTest extends TestCase
         $monthFirstPay = $firstMonth->format('Y-m');
         $creditCardConsume->setMonthFirstPay($monthFirstPay);
 
-        $pendingPayments = $this->consumeExtractor->extractPaymentListByConsume(
+        $createdAt = new \DateTimeImmutable();
+        $payment = new CreditCardPayment($creditCardConsume);
+        $payment
+            ->setCapitalAmount(2500)
+            ->setRealCapitalAmount(2500)
+            ->setInterestAmount(100)
+            ->setTotalAmount(2600)
+            ->setDue(1)
+            ->setMonthPayed($monthFirstPay)
+            ->setLegalDue(true)
+            ->setCreatedAt($createdAt);
+
+        $creditCardConsume->addPayment($payment);
+
+        $pendingPayments = $this->consumeExtractor->extractPaymentListResumeByConsume(
             $creditCardConsume
         );
 
         $pay1 = new ConsumePaymentResume(
             1,
+            5000,
             2500,
             100,
-            $firstMonth->format('Y-m')
+            $firstMonth->format('Y-m'),
+            true,
+            $createdAt
         );
 
         $secondMonth = $firstMonth->modify('+1 month');
 
         $pay2 = new ConsumePaymentResume(
             2,
+            2500,
             2500,
             50,
             $secondMonth->format('Y-m')
