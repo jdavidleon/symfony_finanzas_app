@@ -9,7 +9,7 @@ class CreditCardPaymentFactory implements PaymentInterface
 {
     public function create(
         CreditCardConsume $cardConsume,
-        float $amount,
+        float $totalAmount,
         float $capitalAmount,
         float $realCapitalAmount,
         float $interestAmount,
@@ -19,7 +19,7 @@ class CreditCardPaymentFactory implements PaymentInterface
     {
         $payment = new CreditCardPayment($cardConsume);
         $payment->setDue($legalDue ? $cardConsume->getDuesPayed() + 1: null);
-        $payment->setTotalAmount($amount);
+        $payment->setTotalAmount($totalAmount);
         $payment->setCapitalAmount($capitalAmount);
         $payment->setRealCapitalAmount($realCapitalAmount);
         $payment->setInterestAmount($interestAmount);
