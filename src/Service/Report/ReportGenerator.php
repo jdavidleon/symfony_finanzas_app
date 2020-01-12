@@ -43,7 +43,7 @@ class ReportGenerator
      */
     public function generateResumeByCardUser(CreditCardUser $cardUser, $temp_file)
     {
-        $consumes = $this->cardConsumeProvider->getByCardUser($cardUser);
+        $consumes = $this->cardConsumeProvider->getAllByCardUser($cardUser);
 
         $this->resumeReportGenerator->generateByConsumesArray($consumes, $temp_file);
     }

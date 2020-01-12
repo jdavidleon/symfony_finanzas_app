@@ -214,7 +214,7 @@ class CreditCardConsumeExtractor
      */
     public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false): float
     {
-        $consumes = $this->consumeProvider->getByCardUser($cardUser, $card, $excludeAlreadyPayedAtDate);
+        $consumes = $this->consumeProvider->getActivesByCardUser($cardUser, $card, $excludeAlreadyPayedAtDate);
         return $this->sumConsumes($consumes);
     }
 

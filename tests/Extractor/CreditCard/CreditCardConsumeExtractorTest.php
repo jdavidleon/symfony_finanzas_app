@@ -427,7 +427,7 @@ class CreditCardConsumeExtractorTest extends TestCase
         $creditCardUser = new CreditCardUser();
         $creditCard = new CreditCard();
         $this->cardConsumeProvider
-            ->getByCardUser(
+            ->getActivesByCardUser(
                 $creditCardUser,
                 $creditCard,
                 true
