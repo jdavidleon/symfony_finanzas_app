@@ -10,27 +10,28 @@ namespace App\Util;
 
 
 use DateTime;
+use DateTimeInterface;
 use InvalidArgumentException;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 trait TimestampAbleEntity
 {
     /**
-     * @var DateTime
+     * @var DateTimeInterface
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime", nullable=false)
      */
     protected $createdAt;
 
     /**
-     * @var DateTime
+     * @var DateTimeInterface
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $updatedAt;
 
     /**
-     * @var DateTime
+     * @var DateTimeInterface
      * @ORM\Column(type="datetime", nullable=true)
      */
     protected $deletedAt;
@@ -43,10 +44,10 @@ trait TimestampAbleEntity
     /**
      * Sets createdAt.
      *
-     * @param  DateTime $createdAt
+     * @param  DateTimeInterface $createdAt
      * @return $this
      */
-    public function setCreatedAt(DateTime $createdAt)
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -56,7 +57,7 @@ trait TimestampAbleEntity
     /**
      * Returns createdAt.
      *
-     * @return DateTime
+     * @return DateTimeInterface
      */
     public function getCreatedAt()
     {
@@ -76,26 +77,29 @@ trait TimestampAbleEntity
     /**
      * Returns updatedAt.
      *
-     * @return DateTime
+     * @return DateTimeInterface
      */
-    public function getUpdatedAt()
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
 
     /**
-     * @return DateTime|null
+     * @return DateTimeInterface|null
      */
-    public function getDeletedAt(): ?DateTime
+    public function getDeletedAt(): ?DateTimeInterface
     {
         return $this->deletedAt;
     }
 
     /**
-     * @param DateTime $deletedAt
+     * @param DateTimeInterface $deletedAt
+     * @return TimestampAbleEntity
      */
-    public function setDeletedAt(DateTime $deletedAt): void
+    public function setDeletedAt(DateTimeInterface $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+
+        return $this;
     }
 }

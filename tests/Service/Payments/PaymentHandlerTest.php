@@ -37,13 +37,13 @@ class PaymentHandlerTest extends TestCase
     {
         $this->consumeExtractor = $this->prophesize(CreditCardConsumeExtractor::class);
         $this->em = $this->prophesize(EntityManager::class);
-        $this->paymentFactory = $this->prophesize(CreditCardPaymentFactory::class);
+        $this->paymentFactory = new CreditCardPaymentFactory();
         $this->consumeResolver = $this->prophesize(ConsumeResolver::class);
         $this->paymentHandler = new PaymentHandler(
             $this->consumeExtractor->reveal(),
             $this->consumeResolver->reveal(),
             $this->em->reveal(),
-            $this->paymentFactory->reveal()
+            $this->paymentFactory
         );
     }
 
@@ -75,6 +75,7 @@ class PaymentHandlerTest extends TestCase
 
         $this->paymentHandler->processPaymentWithSpecificAmount($consume, 5000);
     }
+
     /**
      * @throws Exception
      */
@@ -107,9 +108,9 @@ class PaymentHandlerTest extends TestCase
     public function testProcessPaymentWithSpecificAmountIfThereArePendingPayments()
     {
         $consume = $this->consumeObject(1000, 2, 10, '2019-01');
-        $due1 = $this->createConsumePaymentResume(1,100,20,'2019-01');
-        $due2 = $this->createConsumePaymentResume(2,100,18,'2019-02');
-        $due3 = $this->createConsumePaymentResume(3,100,14,'2019-03');
+        $due1 = $this->createConsumePaymentResume(1, 1000, 100, 20, '2019-01');
+        $due2 = $this->createConsumePaymentResume(2, 900, 100, 18, '2019-02');
+        $due3 = $this->createConsumePaymentResume(3, 800, 100, 14, '2019-03');
 
         $dues = [
             $due1,
@@ -139,8 +140,8 @@ class PaymentHandlerTest extends TestCase
     public function testProcessPaymentWithSpecificAmountWhitPayedValueMajorToActualPaymentAndMinorToActualDebt()
     {
         $consume = $this->consumeObject(2000000, 2.5, 4, '2020-12');
-        $due1 = $this->createConsumePaymentResume(1,500000,50000,'2020-12');
-        $due2 = $this->createConsumePaymentResume(2,500000,37500,'2021-01');
+        $due1 = $this->createConsumePaymentResume(1, 2000000, 500000, 50000, '2020-12');
+        $due2 = $this->createConsumePaymentResume(2, 1500000, 500000, 37500, '2021-01');
 
         $dues = [
             $due1,
@@ -177,7 +178,7 @@ class PaymentHandlerTest extends TestCase
     public function testProcessPaymentWithSpecificAmountWhenPayTotalDebtAmount()
     {
         $consume = $this->consumeObject(50000, 2.5, 5, '2020-01');
-        $due1 = $this->createConsumePaymentResume(1, 10000, 1250, '2020-02');
+        $due1 = $this->createConsumePaymentResume(1, 50000, 10000, 1250, '2020-02');
 
         $dues = [
             $due1,
@@ -230,14 +231,14 @@ class PaymentHandlerTest extends TestCase
         $user = new CreditCardUser();
 
         $consume1 = $this->consumeObject(45000, 2.3, 8, '2019-10');
-        $due1 = $this->createConsumePaymentResume(1, 5625, 1035, '2019-10');
-        $due2 = $this->createConsumePaymentResume(2, 5625, 906, '2019-11');
+        $due1 = $this->createConsumePaymentResume(1, 45000, 5625, 1035, '2019-10');
+        $due2 = $this->createConsumePaymentResume(2, 39375, 5625, 906, '2019-11');
         $dues1 = [$due1, $due2];
 
         $consume2 = $this->consumeObject(780000, 1.9, 5, '2019-09');
-        $due3 = $this->createConsumePaymentResume(1, 156000, 14820, '2019-09');
-        $due4 = $this->createConsumePaymentResume(2, 156000, 12856, '2019-10');
-        $due5 = $this->createConsumePaymentResume(3, 156000, 8892, '2019-11');
+        $due3 = $this->createConsumePaymentResume(1, 780000, 156000, 14820, '2019-09');
+        $due4 = $this->createConsumePaymentResume(2, 624000, 156000, 12856, '2019-10');
+        $due5 = $this->createConsumePaymentResume(3, 468000, 156000, 8892, '2019-11');
         $dues2 = [$due3, $due4, $due5];
 
         $consumes = [$consume1, $consume2];
@@ -282,6 +283,7 @@ class PaymentHandlerTest extends TestCase
 
     /**
      * @param $dueNumber
+     * @param $actualDebt
      * @param $capitalAmount
      * @param $interest
      * @param $monthPayed
@@ -289,12 +291,14 @@ class PaymentHandlerTest extends TestCase
      */
     private function createConsumePaymentResume(
         $dueNumber,
+        $actualDebt,
         $capitalAmount,
         $interest,
         $monthPayed
     ): ConsumePaymentResume {
         return new ConsumePaymentResume(
             $dueNumber,
+            $actualDebt,
             $capitalAmount,
             $interest,
             $monthPayed

@@ -42,7 +42,8 @@
             <th>ID</th>
             <th>Usuario</th>
             <th>Valor a Pagar</th>
-            <th>Accion</th>
+            <th>Acción</th>
+            <th>Reporte</th>
         </tr>
         {% for user in card_users %}
             <tr>
@@ -50,6 +51,7 @@
                 <td>{{ user.alias }}</td>
                 <td>{{ totalByCardUser(user, null, payMonth)|number_format(2) }}</td>
                 <td><a href="{{ path('consume_user', {'cardUser': user.id}) }}">Detalles</a></td>
+                <td><a href="{{ path('resume_by_card_user', {'cardUser': user.id}) }}">Generar</a></td>
             </tr>
         {% endfor %}
         <tr>
