@@ -76,7 +76,7 @@ class ConsumesResumeReportGenerator
      */
     private function setTableHeader(Worksheet $sheet, CreditCardConsume $consume)
     {
-        $sheet->setTitle(ucwords($consume->getDescription()));
+        $sheet->setTitle(substr(ucwords($consume->getDescription()), 0, 25));
 
         $sheet->getStyle('A:I')->getAlignment()->setHorizontal('center');
         $sheet->mergeCells('A1:I1');
