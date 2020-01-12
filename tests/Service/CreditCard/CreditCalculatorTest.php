@@ -147,18 +147,21 @@ class CreditCalculatorTest extends TestCase
         $resumeExpected = [
             new ConsumePaymentResume(
                 6,
+                3000,
                 1000,
                 75,
                 '2019-01'
             ),
             new ConsumePaymentResume(
                 7,
+                2000,
                 1000,
                 50,
                 '2019-02'
             ),
             new ConsumePaymentResume(
                 8,
+                1000,
                 1000,
                 25,
                 '2019-03'
@@ -189,6 +192,7 @@ class CreditCalculatorTest extends TestCase
         $resumeExpected = [
             new ConsumePaymentResume(
                 4,
+                2000,
                 2000,
                 60.0,
                 $date->format('Y-m')

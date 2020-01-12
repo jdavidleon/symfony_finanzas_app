@@ -153,6 +153,33 @@ class CreditCardConsumeExtractor
     }
 
     /**
+     * Este método retorna el resumen de pagos de una deuda incluyendo pagos realizados y pagos futuros
+     *
+     * @param CreditCardConsume $cardConsume
+     * @return ConsumePaymentResume[]
+     * @throws Exception
+     */
+    public function extractPaymentListResumeByConsume(CreditCardConsume $cardConsume): array
+    {
+        $actualDebt = $cardConsume->getAmount();
+        $payments = [];
+        foreach ($cardConsume->getPayments() as $payment) {
+            $payments[] = new ConsumePaymentResume(
+                $payment->getDue(),
+                $actualDebt,
+                $payment->getCapitalAmount(),
+                $payment->getInterestAmount(),
+                $payment->getMonthPayed(),
+                true,
+                $payment->getCreatedAt()
+            );
+            $actualDebt -= $payment->getCapitalAmount();
+        }
+
+        return array_merge($payments, $this->extractPendingPaymentsByConsume($cardConsume));
+    }
+
+    /**
      * This method return the next due to pay of a consume, if all payments did not make it yet.
      *
      * @param CreditCardConsume $creditCardConsume

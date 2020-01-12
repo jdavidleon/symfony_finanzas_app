@@ -128,6 +128,7 @@ class CreditCalculator
             $paymentMonth = self::calculateNextPaymentDate($paymentMonth);
             $duesToPay[] = new ConsumePaymentResume(
                 $due,
+                $actualDebt,
                 $capitalMonthlyAmount,
                 $interestToPay,
                 $paymentMonth

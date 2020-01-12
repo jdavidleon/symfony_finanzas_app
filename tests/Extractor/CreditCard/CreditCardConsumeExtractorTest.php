@@ -262,11 +262,72 @@ class CreditCardConsumeExtractorTest extends TestCase
         $expected = new ConsumePaymentResume(
             10,
             200,
+            200,
             4,
             $firstMonth->format('Y-m')
         );
 
         self::assertEquals([$expected], $pendingPayments);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExtractPendingPaymentsByConsumeSinceFirstDue()
+    {
+        $creditCardConsume = $this->creditCardConsumeObject(0);
+        $creditCardConsume->setAmount(5000);
+        $creditCardConsume->setDues(2);
+        $creditCardConsume->setInterest(2);
+        $firstMonth = new DateTime();
+        $firstMonth->modify('-1 Month');
+        $monthFirstPay = $firstMonth->format('Y-m');
+        $creditCardConsume->setMonthFirstPay($monthFirstPay);
+
+        $createdAt = new \DateTimeImmutable();
+        $payment = new CreditCardPayment($creditCardConsume);
+        $payment
+            ->setCapitalAmount(2500)
+            ->setRealCapitalAmount(2500)
+            ->setInterestAmount(100)
+            ->setTotalAmount(2600)
+            ->setDue(1)
+            ->setMonthPayed($monthFirstPay)
+            ->setLegalDue(true)
+            ->setCreatedAt($createdAt);
+
+        $creditCardConsume->addPayment($payment);
+
+        $pendingPayments = $this->consumeExtractor->extractPaymentListResumeByConsume(
+            $creditCardConsume
+        );
+
+        $pay1 = new ConsumePaymentResume(
+            1,
+            5000,
+            2500,
+            100,
+            $firstMonth->format('Y-m'),
+            true,
+            $createdAt
+        );
+
+        $secondMonth = $firstMonth->modify('+1 month');
+
+        $pay2 = new ConsumePaymentResume(
+            2,
+            2500,
+            2500,
+            50,
+            $secondMonth->format('Y-m')
+        );
+
+        $expected = [
+            $pay1,
+            $pay2,
+        ];
+
+        self::assertEquals($expected, $pendingPayments);
     }
 
     /**
@@ -703,18 +764,18 @@ class CreditCardConsumeExtractorTest extends TestCase
     }
 
     /**
-     * @param int $dues
+     * @param int $duesPayed
      * @return CreditCardConsume
      * @throws Exception
      */
-    private function creditCardConsumeObject(int $dues = 2): CreditCardConsume
+    private function creditCardConsumeObject(int $duesPayed = 2): CreditCardConsume
     {
         $creditCardConsume = new CreditCardConsume();
         $creditCardConsume->setAmount(2000);
         $creditCardConsume->setDues(10);
 
-        if (0 < $dues) {
-            foreach (range(1, $dues) as $due){
+        if (0 < $duesPayed) {
+            foreach (range(1, $duesPayed) as $due){
                 $creditCardConsume->addDuePayed();
             }
         }
