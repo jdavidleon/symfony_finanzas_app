@@ -69,7 +69,7 @@ class CardConsumeController extends AbstractController
         CreditCardConsumeExtractor $consumeExtractor,
         ConsumeResolver $consumeResolver
     ) {
-        $consumesByUser = $consumeProvider->getByCardUser($cardUser);
+        $consumesByUser = $consumeProvider->getActivesByCardUser($cardUser);
         $consumes = $consumeExtractor->extractConsumeResume($consumesByUser);
 
         $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($consumesByUser);

@@ -74,8 +74,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
 
         return $qb
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
 
     /**
@@ -84,21 +83,34 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
      * @param null $month
      * @return CreditCardConsume[]
      */
-    public function getActivesByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function getActivesByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null): array
     {
+        return $this->getByCardUser($cardUser, $card, $month, true);
+    }
+
+    /**
+     * @param CreditCardUser $cardUser
+     * @param CreditCard|null $card
+     * @param string|null $month
+     * @param bool $onlyActives
+     * @return CreditCardConsume[]
+     */
+    public function getByCardUser(
+        CreditCardUser $cardUser,
+        CreditCard $card = null,
+        ?string $month = null,
+        bool $onlyActives = false
+    ): array {
         $qb = $this->createQueryBuilder('ccc')
             ->andWhere('ccc.creditCardUser = :card_user')
             ->andWhere('ccc.deletedAt IS NULL')
-            ->andWhere('ccc.status IN (:paying)')
             ->setParameters([
                 'card_user' => $cardUser,
-                'paying' => [
-                    CreditCardConsume::STATUS_PAYING,
-                    CreditCardConsume::STATUS_MORA
-                ]
             ]);
 
-        if ( null != $card ){
+        $this->addActiveConsumesStatement($qb, $onlyActives);
+
+        if (null != $card) {
             $qb
                 ->andWhere('ccc.creditCard = :card')
                 ->setParameter('card', $card);
@@ -107,8 +119,8 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
         $this->addExclusionMonthConditional($qb, $month);
 
         return $qb->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
+
     }
 
     /**
@@ -137,8 +149,7 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
 
         return $qb
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
 
     /**
@@ -186,6 +197,22 @@ class CreditCardConsumeRepository extends ServiceEntityRepository
                     )
                 )
                 ->setParameter('month', $month);
+        }
+    }
+
+    /**
+     * @param QueryBuilder $qb
+     * @param bool $onlyActives
+     */
+    private function addActiveConsumesStatement(QueryBuilder $qb, bool $onlyActives = false): void
+    {
+        if ($onlyActives) {
+            $qb
+                ->andWhere('ccc.status IN (:active_statuses)')
+                ->setParameter('active_statuses', [
+                    CreditCardConsume::STATUS_PAYING,
+                    CreditCardConsume::STATUS_MORA
+                ]);
         }
     }
 

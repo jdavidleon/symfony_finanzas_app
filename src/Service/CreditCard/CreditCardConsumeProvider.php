@@ -47,12 +47,27 @@ class CreditCardConsumeProvider
      * @return CreditCardConsume[]
      * @throws Exception
      */
-    public function getByCardUser(CreditCardUser $user, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false)
+    public function getActivesByCardUser(CreditCardUser $user, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false)
     {
         $month = $this->resolveExclusionMonth($excludeAlreadyPayedAtDate);
 
         return $this->cardConsumeRepository->getActivesByCardUser($user, $card, $month);
     }
+
+    /**
+     * @param CreditCardUser $user
+     * @param CreditCard|null $card
+     * @param bool $excludeAlreadyPayedAtDate
+     * @return CreditCardConsume[]|array
+     * @throws Exception
+     */
+    public function getAllByCardUser(CreditCardUser $user, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false): array
+    {
+        $month = $this->resolveExclusionMonth($excludeAlreadyPayedAtDate);
+
+        return $this->cardConsumeRepository->getByCardUser($user, $card, $month);
+    }
+
 
     public function getCreatedConsumeListByOwner(User $owner)
     {
