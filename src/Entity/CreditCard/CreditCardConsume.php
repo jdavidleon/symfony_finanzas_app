@@ -20,7 +20,7 @@ class CreditCardConsume implements DebtInterface
 {
     const STATUS_CREATED = 0;
     const STATUS_PAYING = 1;
-    const STATUS_MORA = 2;
+    const STATUS_MORA = 2; // Todo: esto no esta aplicando
     const STATUS_PAYED = 3;
 
     /**

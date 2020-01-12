@@ -28,9 +28,11 @@
     "symfony/validator": "4.3.*",
     "symfony/web-link": "4.3.*",
     "symfony/yaml": "4.3.*",
-    "ext-http": "*"
+    "twig/extra-bundle": "^3.0",
+    "twig/intl-extra": "^3.0"
   },
   "require-dev": {
+    "sensiolabs/security-checker": "^6.0",
     "symfony/debug-pack": "*",
     "symfony/maker-bundle": "^1.0",
     "symfony/profiler-pack": "*",
@@ -64,7 +66,8 @@
   "scripts": {
     "auto-scripts": {
       "cache:clear": "symfony-cmd",
-      "assets:install %PUBLIC_DIR%": "symfony-cmd"
+      "assets:install %PUBLIC_DIR%": "symfony-cmd",
+      "security-checker security:check": "script"
     },
     "post-install-cmd": [
       "@auto-scripts"

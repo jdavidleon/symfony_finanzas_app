@@ -140,6 +140,18 @@
             "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
         }
     },
+    "sensiolabs/security-checker": {
+        "version": "4.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.0",
+            "ref": "160c9b600564faa1224e8f387d49ef13ceb8b793"
+        },
+        "files": [
+            "./config/packages/security_checker.yaml"
+        ]
+    },
     "stof/doctrine-extensions-bundle": {
         "version": "1.2",
         "recipe": {
@@ -436,6 +448,12 @@
     },
     "symfony/yaml": {
         "version": "v3.4.19"
+    },
+    "twig/extra-bundle": {
+        "version": "v3.0.1"
+    },
+    "twig/intl-extra": {
+        "version": "v3.0.1"
     },
     "twig/twig": {
         "version": "v2.5.0"
