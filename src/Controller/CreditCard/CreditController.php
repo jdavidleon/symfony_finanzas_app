@@ -76,7 +76,7 @@ class CreditController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Crédito agregado');
-            $this->redirectToRoute('credit_new');
+            return $this->redirectToRoute('credit_new');
         }
 
         return $this->render('credit/new.html.twig', [
