@@ -73,10 +73,12 @@ class CardConsumeController extends AbstractController
         $consumes = $consumeExtractor->extractConsumeResume($consumesByUser);
 
         $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($consumesByUser);
+        $totalInterest = $consumeResolver->resolveTotalInterestToPayByConsumesArray($consumesByUser);
 
         return $this->render('credit/card_user.html.twig', [
             'consumes' => $consumes,
-            'total_debt' => $totalDebt
+            'total_debt' => $totalDebt,
+            'total_interest' => $totalInterest,
         ]);
     }
 
@@ -122,6 +124,8 @@ class CardConsumeController extends AbstractController
             'total_to_pay' => $consumeExtractor->extractNextPaymentAmount($cardConsume)
         ]);
 
+        $totalDebt = $consumeExtractor->extractActualDebt($cardConsume) + $consumeExtractor->extractNextInterestAmount($cardConsume);
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             try {
@@ -131,16 +135,19 @@ class CardConsumeController extends AbstractController
                 $this->addFlash('error', $exception->getMessage());
             } catch (ExcedeAmountDebtException $exception) {
                 $this->addFlash('error', $exception->getMessage());
+            } catch (\Exception $exception) {
+                $this->addFlash('error', $exception->getMessage());
             }
         }
 
         return $this->render('credit/new_card_payment.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'total_to_pay' => $totalDebt
         ]);
     }
 
     /**
-     * @Route("basic_payment/{card}/{user}", name="payment_by_card_and_user")
+     * @Route("/basic_payment/{card}/{user}", name="payment_by_card_and_user")
      *
      * @param CreditCard $card
      * @param CreditCardUser $user

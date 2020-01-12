@@ -22,8 +22,7 @@ class CreditCardConsumeExtension extends AbstractExtension
 
     public function __construct(
         CreditCardConsumeExtractor $consumeExtractor
-    )
-    {
+    ) {
         $this->consumeExtractor = $consumeExtractor;
     }
 
@@ -102,17 +101,17 @@ class CreditCardConsumeExtension extends AbstractExtension
      */
     public function totalByCreditCard(CreditCard $card, $month = null)
     {
-        return $this->consumeExtractor->extractTotalToPayByCreditCard( $card, $month );
+        return $this->consumeExtractor->extractTotalToPayByCreditCard($card, $month);
     }
 
     /**
      * @param CreditCardUser $cardUser
      * @param CreditCard|null $card
-     * @param null $month
+     * @param bool $month
      * @return float
      * @throws Exception
      */
-    public function totalByCardUser(CreditCardUser $cardUser, CreditCard $card = null, $month = null)
+    public function totalByCardUser(CreditCardUser $cardUser, CreditCard $card = null, bool $month = false)
     {
         return $this->consumeExtractor->extractTotalToPayByCardUser($cardUser, $card, $month);
     }
