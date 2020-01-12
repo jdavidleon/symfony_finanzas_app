@@ -138,6 +138,8 @@ class CardConsumeController extends AbstractController
             } catch (\Exception $exception) {
                 $this->addFlash('error', $exception->getMessage());
             }
+
+            return $this->redirectToRoute('pay_consume', ['cardConsume' => $cardConsume->getId()]);
         }
 
         return $this->render('credit/new_card_payment.html.twig', [
