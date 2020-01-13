@@ -32,11 +32,14 @@
     "twig/intl-extra": "^3.0"
   },
   "require-dev": {
+    "easycorp/easy-log-handler": "^1.0.7",
     "sensiolabs/security-checker": "^6.0",
-    "symfony/debug-pack": "*",
+    "symfony/debug-bundle": "*",
     "symfony/maker-bundle": "^1.0",
+    "symfony/monolog-bundle": "^3.0",
     "symfony/profiler-pack": "*",
     "symfony/test-pack": "*",
+    "symfony/var-dumper": "*",
     "symfony/web-server-bundle": "4.3.*"
   },
   "config": {
