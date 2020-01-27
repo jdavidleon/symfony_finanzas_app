@@ -1,0 +1,8 @@
+monolog:
+    channel: ['card_consume']
+    handlers:
+        card_consume:
+            type: stream
+            path: "%kernel.logs_dir%/card_consume.log"
+            level: debug
+            channels: ["card_consume"]
