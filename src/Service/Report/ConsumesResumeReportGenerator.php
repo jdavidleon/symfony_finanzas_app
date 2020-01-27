@@ -20,19 +20,21 @@ class ConsumesResumeReportGenerator
      */
     private $consumeExtractor;
 
-    private $actualPaymentMonth;
-
     private $consolidated = [];
+    /**
+     * @var Spreadsheet
+     */
+    private $spreadsheet;
 
     /**
      * ConsumesResumeReportGenerator constructor.
+     * @param Spreadsheet $spreadsheet
      * @param CreditCardConsumeExtractor $consumeExtractor
-     * @throws \Exception
      */
-    public function __construct(CreditCardConsumeExtractor $consumeExtractor)
+    public function __construct(Spreadsheet $spreadsheet, CreditCardConsumeExtractor $consumeExtractor)
     {
+        $this->spreadsheet = $spreadsheet;
         $this->consumeExtractor = $consumeExtractor;
-        $this->actualPaymentMonth = $this->consumeExtractor->extractNextPaymentMonth();
     }
 
     /**
@@ -44,28 +46,27 @@ class ConsumesResumeReportGenerator
      */
     public function generateByConsumesArray(array $consumes, $temp_file)
     {
-        $spreadsheet = new Spreadsheet();
         $activeSheet = 0;
         foreach ($consumes as $consume) {
             if (!$consume InstanceOf CreditCardConsume) {
                 continue;
             }
 
-            $sheet = $spreadsheet->setActiveSheetIndex($activeSheet);
+            $sheet = $this->spreadsheet->setActiveSheetIndex($activeSheet);
 
             $this->setTableHeader($sheet, $consume);
 
             $payments = $this->consumeExtractor->extractPaymentListResumeByConsume($consume);
             $this->addPaymentsToSheet($sheet, $payments);
 
-            $spreadsheet->createSheet();
+            $this->spreadsheet->createSheet();
             $activeSheet++;
         }
 
-        $sheet = $spreadsheet->setActiveSheetIndex($activeSheet);
+        $sheet = $this->spreadsheet->setActiveSheetIndex($activeSheet);
         $this->addConsolidatedSheet($sheet);
 
-        $writer = new Xlsx($spreadsheet);
+        $writer = new Xlsx($this->spreadsheet);
         $writer->save($temp_file);
     }
 
@@ -119,14 +120,14 @@ class ConsumesResumeReportGenerator
         $row = 4;
         foreach ($payments as $payment) {
             $this->setMoneyValue($sheet, 'A' . $row, $payment->getPaymentMonth());
-            $payedAt = $payment->getPayedAt() ? $payment->getPayedAt()->format('Y-m-d'): 'N/A';
+            $payedAt = $payment->getPayedAt() ? $payment->getPayedAt()->format('Y-m-d') : 'N/A';
             $sheet->setCellValue('B' . $row, $payedAt);
             $sheet->setCellValue('C' . $row, $payment->getDueNumber());
             $this->setMoneyValue($sheet, 'D' . $row, $payment->getActualDebt());
             $this->setMoneyValue($sheet, 'E' . $row, $payment->getInterest());
             $this->setMoneyValue($sheet, 'F' . $row, $payment->getCapitalAmount());
-            $sheet->setCellValue('G' . $row,
-                0); // Todo: Esto debe cambiar cuando se agreguen cargos adicionales al consumo
+            // Todo: Esto debe cambiar cuando se agreguen cargos adicionales al consumo. G.$row
+            $sheet->setCellValue('G' . $row,0);
             $this->setMoneyValue($sheet, 'H' . $row, $payment->getTotalToPay());
             $sheet->setCellValue('I' . $row, strtoupper($payment->getStatus()));
 
@@ -149,6 +150,7 @@ class ConsumesResumeReportGenerator
     /**
      * @param Worksheet $sheet
      * @throws Exception
+     * @throws \Exception
      */
     private function addConsolidatedSheet(Worksheet $sheet)
     {
@@ -169,7 +171,7 @@ class ConsumesResumeReportGenerator
             $sheet->setCellValue('C' . $row, 0);
             $this->setMoneyValue($sheet, 'D' . $row, $amount);
 
-            if ($month == $this->actualPaymentMonth) {
+            if ($month == $this->consumeExtractor->extractNextPaymentMonth()) {
                 $sheet->getStyle('A' . $row . ':D' . $row)->getFill()
                     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('f6f925');
