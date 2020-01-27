@@ -7,14 +7,9 @@ namespace App\Service\Report;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ReportGenerator
 {
-    /**
-     * @var Spreadsheet
-     */
-    private $spreadsheet;
     /**
      * @var CreditCardConsumeProvider
      */
@@ -31,7 +26,6 @@ class ReportGenerator
      */
     public function __construct(ConsumesResumeReportGenerator $resumeReportGenerator, CreditCardConsumeProvider $cardConsumeProvider)
     {
-        $this->spreadsheet = new Spreadsheet();
         $this->cardConsumeProvider = $cardConsumeProvider;
         $this->resumeReportGenerator = $resumeReportGenerator;
     }
