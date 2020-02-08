@@ -36,7 +36,8 @@ class CreditCardConsumeExtractor
     public function __construct(
         CreditCardConsumeProvider $consumeProvider,
         CreditCardPaymentRepository $paymentsRepository
-    ) {
+    )
+    {
         $this->consumeProvider = $consumeProvider;
         $this->paymentsRepository = $paymentsRepository;
     }
@@ -108,7 +109,7 @@ class CreditCardConsumeExtractor
             $actualDebt,
             $this->extractPendingDues($creditCardConsume)
         );
-        foreach (range($duesPayed + 1, $actualDueToPay) as $item) {
+        foreach (range($duesPayed + 1, $actualDueToPay) as $item){
             $interest += CreditCalculator::calculateInterestAmount(
                 $actualDebt,
                 $creditCardConsume->getInterest()
@@ -146,7 +147,7 @@ class CreditCardConsumeExtractor
             $creditCardConsume->getInterest(),
             $creditCardConsume->getDues(),
             $creditCardConsume->getDuesPayed(),
-            $atDate ? $this->extractActualDueToPay($creditCardConsume) : null,
+            $atDate ? $this->extractActualDueToPay($creditCardConsume): null,
             $this->extractLastPaymentMonth($creditCardConsume)
         );
     }
@@ -211,11 +212,8 @@ class CreditCardConsumeExtractor
      * @return float
      * @throws Exception
      */
-    public function extractTotalToPayByCardUser(
-        CreditCardUser $cardUser,
-        CreditCard $card = null,
-        bool $excludeAlreadyPayedAtDate = false
-    ): float {
+    public function extractTotalToPayByCardUser(CreditCardUser $cardUser, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false): float
+    {
         $consumes = $this->consumeProvider->getActivesByCardUser($cardUser, $card, $excludeAlreadyPayedAtDate);
         return $this->sumConsumes($consumes);
     }
@@ -240,7 +238,7 @@ class CreditCardConsumeExtractor
     {
         $arrayConsumes = [];
 
-        foreach ($cardConsumes as $consume) {
+        foreach ($cardConsumes as $consume){
             $arrayConsumes[] = $this->resume($consume);
         }
 
@@ -313,12 +311,12 @@ class CreditCardConsumeExtractor
     public function extractNextPaymentMonth(?CreditCardConsume $cardConsume = null): string
     {
         if ($cardConsume instanceof CreditCardConsume) {
-            if (!$cardConsume->hasPayments()) {
+            if (!$cardConsume->hasPayments()){
                 return $cardConsume->getMonthFirstPay();
-            } else {
+            }else {
                 $date = $this->getCalculateMajorMonth($cardConsume);
             }
-        } else {
+        }else {
             $date = null;
         }
 
@@ -332,14 +330,17 @@ class CreditCardConsumeExtractor
      */
     public function extractLastPaymentMonth(CreditCardConsume $cardConsume): string
     {
+        if ($cardConsume->isConsumeStatusCreated()){
+            return CreditCalculator::calculateNextPaymentDate();
+        }
+
+        /** esta en null por si los pagos que tienen no son legal due */
         $calculateMajorMonth = null;
-        if ($cardConsume->hasPayments()) {
+        if ($cardConsume->hasPayments()){
             $calculateMajorMonth = $this->getCalculateMajorMonth($cardConsume);
         }
-        // TODO: de quien es esta responsabilidad???
-        return $calculateMajorMonth ??
-            $cardConsume->getMonthFirstPay() ? DateHelper::reverseMonth($cardConsume->getMonthFirstPay()) : CreditCalculator::calculateNextPaymentDate();
 
+        return $calculateMajorMonth ?? DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
     }
 
     /**
@@ -368,7 +369,8 @@ class CreditCardConsumeExtractor
     private function extractListOfMonthPayedByConsume(CreditCardConsume $cardConsume): array
     {
         $dates = [];
-        foreach ($cardConsume->getPayments() as $payment) {
+        foreach ($cardConsume->getPayments() as $payment)
+        {
             if ($payment->isLegalDue() && null == $payment->getDeletedAt()) {
                 $dates[] = $payment->getMonthPayed();
             }
