@@ -4,5 +4,5 @@ monolog:
         card_consume:
             type: stream
             path: "%kernel.logs_dir%/card_consume.log"
-            level: debug
+            level: error
             channels: ["card_consume"]

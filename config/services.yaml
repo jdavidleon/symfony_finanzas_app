@@ -31,8 +31,10 @@ services:
     # please note that last definitions always *replace* previous ones
 
     App\EventListener\ConsumeChangeNotifier:
-        arguments:
-            $logger: '@monolog.logger.card_consume'
+        calls:
+            - method: setLogger
+              arguments:
+                  - '@monolog.logger.card_consume'
         tags:
             -
                 name: 'doctrine.orm.entity_listener'

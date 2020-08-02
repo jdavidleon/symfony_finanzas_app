@@ -39,6 +39,31 @@ class DateHelper
     }
 
     /**
+     * @param string $first
+     * @param string $second
+     * @return int
+     * @throws Exception
+     */
+    public static function calculateDatesDifferenceMonths(string $first, string $second): int
+    {
+        $start = self::convertToDateTime($first);
+        $end = self::convertToDateTime($second);
+        $diff = $start->diff($end);
+
+        return (int)($diff->format('%y') * 12) + (int)($diff->format('%m'));
+    }
+
+//    public static function isTheMajorDate(string $dateToEvaluate, array $comparisonDateList)
+//    {
+//        if (in_array($dateToEvaluate, $comparisonDateList)) {
+//            return true;
+//        }
+//
+//        array_push($comparisonDateList, $dateToEvaluate);
+//        return self::calculateMajorMonth($comparisonDateList) == $dateToEvaluate;
+//    }
+
+    /**
      * @param array $dates ['Y-m']
      * @return string
      */
@@ -72,7 +97,7 @@ class DateHelper
      */
     public static function yearMonthToFullDateFormat(string $yearMonth, int $day = 1): string
     {
-        $day = (string)$day < 10 ? '0'.$day : $day;
+        $day = (string)$day < 10 ? '0' . $day : $day;
         $date = sprintf('%s-%s', $yearMonth, $day);
 
         self::isDateFormatValid($date);
@@ -89,11 +114,11 @@ class DateHelper
     private static function isDateFormatValid(string $date): bool
     {
         $valores = explode('-', $date);
-        if(count($valores) == 3 && checkdate($valores[1], $valores[2], $valores[0])){
+        if (count($valores) == 3 && checkdate($valores[1], $valores[2], $valores[0])) {
             return true;
         }
 
-        throw new InvalidDateTimeFormat('Invalid Date Format, expected Y-m-d and received '.$date);
+        throw new InvalidDateTimeFormat('Invalid Date Format, expected Y-m-d and received ' . $date);
     }
 
 }

@@ -27,7 +27,7 @@ class CreditCardConsumeExtractor
      * @var CreditCardConsumeProvider
      */
     private $consumeProvider;
-    
+
     /**
      * @var CreditCardPaymentRepository
      */
@@ -330,13 +330,17 @@ class CreditCardConsumeExtractor
      */
     public function extractLastPaymentMonth(CreditCardConsume $cardConsume): string
     {
+        if ($cardConsume->isConsumeStatusCreated()){
+            return CreditCalculator::calculateNextPaymentDate();
+        }
+
+        /** esta en null por si los pagos que tienen no son legal due */
         $calculateMajorMonth = null;
         if ($cardConsume->hasPayments()){
             $calculateMajorMonth = $this->getCalculateMajorMonth($cardConsume);
         }
 
         return $calculateMajorMonth ?? DateHelper::reverseMonth($cardConsume->getMonthFirstPay());
-
     }
 
     /**

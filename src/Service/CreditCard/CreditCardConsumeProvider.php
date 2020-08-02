@@ -6,9 +6,11 @@ namespace App\Service\CreditCard;
 
 use App\Entity\CreditCard\CreditCard;
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Entity\CreditCard\CreditCardPayment;
 use App\Entity\CreditCard\CreditCardUser;
 use App\Entity\Security\User;
 use App\Repository\CreditCard\CreditCardConsumeRepository;
+use App\Service\DateHelper;
 use Exception;
 
 class CreditCardConsumeProvider
@@ -63,9 +65,19 @@ class CreditCardConsumeProvider
      */
     public function getAllByCardUser(CreditCardUser $user, CreditCard $card = null, bool $excludeAlreadyPayedAtDate = false): array
     {
-        $month = $this->resolveExclusionMonth($excludeAlreadyPayedAtDate);
+        $consumes = $this->cardConsumeRepository->getByCardUser($user, $card);
 
-        return $this->cardConsumeRepository->getByCardUser($user, $card, $month);
+        if ($excludeAlreadyPayedAtDate) {
+            $filteredConsumes = [];
+            foreach ($consumes as $consume) {
+                if (!$consume->isConsumePayed() || $this->isRecentlyPayed($consume)) {
+                    $filteredConsumes[] = $consume;
+                    continue;
+                }
+            }
+            return $filteredConsumes;
+        }
+        return $consumes;
     }
 
 
@@ -96,6 +108,25 @@ class CreditCardConsumeProvider
     private function resolveExclusionMonth(bool $excludeAlreadyPayedAtDate)
     {
         return $excludeAlreadyPayedAtDate ? CreditCalculator::calculateNextPaymentDate() : null;
+    }
+
+    /**
+     * @param CreditCardConsume $consume
+     * @return bool
+     * @throws Exception
+     */
+    private function isRecentlyPayed(CreditCardConsume $consume): bool
+    {
+        $dates = array_map([$this, 'extractMonthsOfPayments'], $consume->getPayments()->toArray());
+
+        $lastPaymentDate = DateHelper::calculateMajorMonth($dates);
+        return 1 >= DateHelper::calculateDatesDifferenceMonths($lastPaymentDate,
+            CreditCalculator::calculateNextPaymentDate());
+    }
+
+    private function extractMonthsOfPayments(CreditCardPayment $payment): string
+    {
+        return $payment->getMonthPayed() ?? $payment->getCreatedAt()->format('Y-m');
     }
 
 }

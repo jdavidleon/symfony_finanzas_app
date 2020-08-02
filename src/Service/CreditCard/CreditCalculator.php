@@ -112,7 +112,7 @@ class CreditCalculator
         ?string $lastPayedMonth = null
     ): array
     {
-        if (($totalDues <= $payedDues) || (null !== $endDue && $payedDues >= $endDue)){
+        if (($totalDues <= $payedDues) || (null !== $endDue && $payedDues >= $endDue) || 0 == $actualDebt){
             return [];
         }
 

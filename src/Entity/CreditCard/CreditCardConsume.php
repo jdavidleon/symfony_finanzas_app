@@ -378,4 +378,9 @@ class CreditCardConsume implements DebtInterface
     {
         return round($this->amountPayed, 0) >= round($this->amount, 0);
     }
+
+    public function isConsumeStatusCreated()
+    {
+        return self::STATUS_CREATED == $this->getStatus();
+    }
 }

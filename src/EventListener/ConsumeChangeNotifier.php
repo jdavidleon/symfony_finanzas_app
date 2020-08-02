@@ -5,17 +5,15 @@ namespace App\EventListener;
 
 
 use App\Entity\CreditCard\CreditCardConsume;
+use App\Util\LoggerTrait;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Exception;
-use Psr\Log\LoggerInterface;
+use Monolog\Logger;
 use Swift_Mailer;
 
 class ConsumeChangeNotifier
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    use LoggerTrait;
 
     private $message = 'Monto total pago no corresponde al valor registrado en la lista de pagos';
     /**
@@ -23,9 +21,8 @@ class ConsumeChangeNotifier
      */
     private $mailer;
 
-    public function __construct(LoggerInterface $logger, Swift_Mailer $mailer)
+    public function __construct(Swift_Mailer $mailer)
     {
-        $this->logger = $logger;
         $this->mailer = $mailer;
     }
 
@@ -42,11 +39,11 @@ class ConsumeChangeNotifier
         }
 
         if (round($cardConsume->getAmountPayed(), 0) != round($amountInPayments, 0)) {
-            $this->logger->alert($this->message, [
+            $this->addLog( Logger::CRITICAL, $this->message, [
                 'consume' => $cardConsume->getId(),
                 'amount_payed' => $cardConsume->getAmountPayed(),
                 'amount_in_payments' => $amountInPayments,
-                'payment_error' => $cardConsume->getPayments()->last()->getId()
+                'payment_id' => $cardConsume->getPayments()->last()->getId()
             ]);
 
             $this->sendEmailNotification($cardConsume, $amountInPayments);
