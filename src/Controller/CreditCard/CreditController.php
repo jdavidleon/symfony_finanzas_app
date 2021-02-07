@@ -7,6 +7,7 @@ use App\Entity\CreditCard\CreditCardUser;
 use App\Extractor\CreditCard\CreditCardConsumeExtractor;
 use App\Extractor\CreditCard\CreditCardExtractor;
 use App\Form\Credit\CreditConsumeType;
+use App\Repository\CreditCard\CreditCardUserRepository;
 use App\Service\CreditCard\ConsumeResolver;
 use App\Service\CreditCard\CreditCardConsumeProvider;
 use Exception;
@@ -35,13 +36,14 @@ class CreditController extends AbstractController
         CreditCardConsumeProvider $consumeProvider,
         CreditCardExtractor $cardExtractor,
         ConsumeResolver $consumeResolver
-    ) {
+    ): Response
+    {
         $creditCardConsumes = $consumeProvider->getByOwner($this->getUser());
         $creditCards = $cardExtractor->extractByOwner($this->getUser());
         $consumesCreated = $consumeProvider->getCreatedConsumeListByOwner($this->getUser());
 
         $creditCardUserRepo = $this->getDoctrine()->getRepository(CreditCardUser::class);
-        $cardUsers = $creditCardUserRepo->getByOwner($this->getUser(), true);
+        $cardUsers = $this->getActivesCardUserList($creditCardUserRepo, $consumeProvider, $consumeResolver);
 
         $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($creditCardConsumes);
 
@@ -106,6 +108,26 @@ class CreditController extends AbstractController
      */
     public function establishPayDateConsume(CreditCardConsume $consumeId)
     {
+
+    }
+
+    /**
+     * @param CreditCardUserRepository $creditCardUserRepo
+     * @param CreditCardConsumeProvider $consumeProvider
+     * @param ConsumeResolver $consumeResolver
+     * @return CreditCardUser[]|array
+     * @throws Exception
+     */
+    private function getActivesCardUserList(CreditCardUserRepository $creditCardUserRepo, CreditCardConsumeProvider $consumeProvider, ConsumeResolver $consumeResolver): array
+    {
+        return array_filter(
+            $creditCardUserRepo->getByOwner($this->getUser(), true),
+            function (CreditCardUser $cardUser) use ($consumeProvider, $consumeResolver) {
+                $consumesByUser = $consumeProvider->getActivesByCardUser($cardUser);
+                $totalDebt = $consumeResolver->resolveTotalDebtOfConsumesArray($consumesByUser);
+                return 0 < $totalDebt;
+            }
+        );
 
     }
 
