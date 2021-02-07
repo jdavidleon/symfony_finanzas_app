@@ -137,12 +137,15 @@ class ConsumesResumeReportGenerator
                     ->getStartColor()->setARGB('7ff779');
             }
             $row++;
-
-            if (!isset($this->consolidated[$payment->getPaymentMonth()])) {
+            if (!isset($this->consolidated[$payment->getPaymentMonth()]) && null != $payment->getPaymentMonth()) {
                 $this->consolidated[$payment->getPaymentMonth()] = 0;
             }
 
-            $this->consolidated[$payment->getPaymentMonth()] += $payment->getTotalToPay();
+            if (null != $payment->getPaymentMonth()) {
+                $this->consolidated[$payment->getPaymentMonth()] += $payment->getTotalToPay();
+            }else {
+                $this->consolidated[$payment->getPayedAt()->format('Y-m')] += $payment->getTotalToPay();
+            }
         }
         $this->setTableBorders($sheet, 'A1:I' . --$row);
     }
